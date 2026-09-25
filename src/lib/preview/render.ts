@@ -1,8 +1,9 @@
 import MarkdownIt from "markdown-it";
+import taskLists from "markdown-it-task-lists";
 
 // Raw HTML stays off: the preview runs in a webview with access to Tauri IPC,
 // so a document must never be able to inject scripts or elements.
-const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
+const md = new MarkdownIt({ html: false, linkify: true, typographer: true }).use(taskLists);
 
 /** Tag each rendered block with its source line so editor and preview positions can be matched. */
 md.core.ruler.push("source_lines", (state) => {
