@@ -1,0 +1,23 @@
+/* macOS: SF Pro chrome, system accent, inline traffic lights (Overlay title bar). */
+:root[data-os="mac"] {
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  --ui-size: 13px;
+  --radius-control: 6px;
+  --control-height: 22px;
+  --titlebar-height: 28px;
+  --accent: -apple-system-control-accent; /* WebKit-only; follows System Settings */
+  --focus-ring: color-mix(in srgb, #0a84ff 50%, transparent);
+}
+
+/* Thin overlay scrollbars, as macOS draws them. */
+:root[data-os="mac"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+:root[data-os="mac"] ::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text) 25%, transparent);
+  border-radius: 4px;
+}
+:root[data-os="mac"] ::-webkit-scrollbar-track {
+  background: transparent;
+}

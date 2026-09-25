@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# SvelteKit / Vite output
+/build/
+/.svelte-kit/
+/package/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Rust / Tauri build output
+/src-tauri/target/
+# Capability schemas are regenerated on every build.
+# (src-tauri/gen/android and gen/apple, created by `tauri android|ios init`,
+# are meant to be committed; they carry their own .gitignore files.)
+/src-tauri/gen/schemas/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Signing keys and certificates — never commit these
+*.p8
+*.p12
+*.pem
+*.key
+*.keystore
+*.jks
+*.mobileprovision
+*.provisionprofile
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editors (keep the shared VS Code recommendations/settings from the scaffold)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db

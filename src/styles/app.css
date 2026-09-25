@@ -1,0 +1,94 @@
+@import "tailwindcss";
+@import "./tokens.mac.css";
+@import "./tokens.windows.css";
+
+@font-face {
+  font-family: "Classic Mono";
+  src: url("/fonts/ClassicMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Classic Mono";
+  src: url("/fonts/ClassicMono-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Classic Mono";
+  src: url("/fonts/ClassicMono-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Classic Mono";
+  src: url("/fonts/ClassicMono-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* Expose platform tokens to Tailwind utilities (bg-surface, text-muted, rounded-control…). */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-chrome: var(--chrome);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --font-ui: var(--font-ui);
+  --font-writing: var(--font-writing);
+  --radius-control: var(--radius-control);
+}
+
+/* Shared defaults; each platform file overrides what differs. */
+:root {
+  --font-writing: "Classic Mono", ui-monospace, monospace;
+  --writing-size: 18px;
+  --writing-line-height: 1.6;
+  --measure: 66ch;
+  --titlebar-height: 0px;
+
+  --surface: #f9f9f8;
+  --chrome: #f9f9f8;
+  --text: #1a1a1a;
+  --text-muted: #9a9a9a;
+  --markup: #b8b8b8;
+  --selection: rgb(0 122 255 / 0.2);
+  --caret: #19a0e6;
+  --accent: #0a84ff;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #1a1a1a;
+    --chrome: #1a1a1a;
+    --text: #cfcfcf;
+    --text-muted: #6e6e6e;
+    --markup: #585858;
+    --selection: rgb(10 132 255 / 0.3);
+  }
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* App chrome behaves like native UI: no text selection, default cursor. */
+.chrome {
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring, var(--accent));
+  outline-offset: 1px;
+}
