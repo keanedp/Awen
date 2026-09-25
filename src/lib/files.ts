@@ -20,7 +20,21 @@ export function pickSaveLocation(suggestedName: string): Promise<string | null> 
   return save({ defaultPath: suggestedName, filters });
 }
 
+export function pickExportLocation(suggestedName: string): Promise<string | null> {
+  return save({ defaultPath: suggestedName, filters: [{ name: "HTML", extensions: ["html"] }] });
+}
+
+/** Prints the current page through the system print dialog (which also offers PDF). */
+export function printPage(): Promise<void> {
+  return invoke("print_page");
+}
+
 export function fileName(path: string | null): string {
   if (!path) return "Untitled";
   return path.split(/[\\/]/).pop() ?? path;
+}
+
+/** The file name without its extension, e.g. "Notes.md" → "Notes". */
+export function baseName(path: string | null): string {
+  return fileName(path).replace(/\.[^.]+$/, "");
 }

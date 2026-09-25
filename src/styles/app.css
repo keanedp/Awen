@@ -93,3 +93,22 @@ body {
   outline: 2px solid var(--focus-ring, var(--accent));
   outline-offset: 1px;
 }
+
+/* Printing swaps the app for a rendered copy of the document (see +page.svelte). */
+.print-root {
+  display: none;
+}
+@media print {
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+    background: #fff;
+  }
+  .app-root {
+    display: none !important;
+  }
+  .print-root {
+    display: block;
+  }
+}

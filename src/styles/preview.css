@@ -126,3 +126,30 @@
 .preview .task-list-item:has(> .task-list-item-checkbox:checked) {
   color: var(--text-muted);
 }
+
+/* Paper: black on white, full page width, no screen-only spacing. */
+@media print {
+  .preview {
+    --text: #000;
+    --text-muted: #555;
+    --markup: #bbb;
+    --accent: #0a4fa0;
+    max-width: none;
+    padding: 0;
+    font-size: 11pt;
+    color: var(--text);
+  }
+  .preview :is(h1, h2, h3, h4, h5, h6) {
+    break-after: avoid;
+  }
+  .preview :is(pre, blockquote, table, img, li) {
+    break-inside: avoid;
+  }
+  .preview pre {
+    white-space: pre-wrap;
+  }
+  .preview .task-list-item-checkbox {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

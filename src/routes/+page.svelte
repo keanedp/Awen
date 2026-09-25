@@ -1,15 +1,19 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { EditorView } from "@codemirror/view";
   import { redo, undo } from "@codemirror/commands";
   import { listen } from "@tauri-apps/api/event";
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import { message } from "@tauri-apps/plugin-dialog";
   import { createState, documentText } from "$lib/editor/setup";
+  import { exportHtml } from "$lib/export/html";
   import {
+    baseName,
     fileName,
+    pickExportLocation,
     pickFileToOpen,
     pickSaveLocation,
+    printPage,
     readDocument,
     writeDocument,
   } from "$lib/files";
@@ -27,6 +31,7 @@
   let previewHtml = $state("");
   let previewLine = $state(0);
   let preview = $state<Preview>();
+  let printHtml = $state("");
 
   let host: HTMLElement;
   let view: EditorView;
@@ -58,7 +63,7 @@
     if (!previewing) {
       const top = view.lineBlockAtHeight(view.scrollDOM.scrollTop);
       previewLine = view.state.doc.lineAt(top.from).number - 1;
-      previewHtml = renderMarkdown(documentText(view));
+      previewHtml = renderMarkdown(documentText(view), { sourceLines: true });
       previewing = true;
       return;
     }
@@ -124,11 +129,33 @@
     }
   }
 
+  async function exportAsHtml() {
+    const target = await pickExportLocation(`${baseName(path)}.html`);
+    if (!target) return;
+    try {
+      await writeDocument(target, await exportHtml(documentText(view), baseName(path)));
+    } catch (err) {
+      await showError(err);
+    }
+  }
+
+  async function print() {
+    printHtml = renderMarkdown(documentText(view));
+    await tick();
+    try {
+      await printPage();
+    } catch (err) {
+      await showError(err);
+    }
+  }
+
   const actions: Record<string, () => unknown> = {
     new: newDocument,
     open: openDocument,
     save,
     save_as: saveAs,
+    export_html: exportAsHtml,
+    print,
     // Closing the only window quits the app; onCloseRequested handles unsaved changes.
     close: () => appWindow.close(),
     quit: () => appWindow.close(),
@@ -175,7 +202,7 @@
   });
 </script>
 
-<div class="flex h-full flex-col bg-surface">
+<div class="app-root flex h-full flex-col bg-surface">
   {#if os === "mac"}
     <header
       class="chrome font-ui text-muted flex shrink-0 items-center justify-center"
@@ -193,4 +220,8 @@
       <Preview bind:this={preview} html={previewHtml} line={previewLine} onexit={togglePreview} />
     </div>
   {/if}
+</div>
+
+<div class="print-root" aria-hidden="true">
+  <article class="preview">{@html printHtml}</article>
 </div>

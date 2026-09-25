@@ -12,6 +12,11 @@ fn write_document(path: String, contents: String) -> Result<(), String> {
     std::fs::write(&path, contents).map_err(|e| format!("Could not save {path}: {e}"))
 }
 
+#[tauri::command]
+fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
+    window.print().map_err(|e| format!("Could not print: {e}"))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -25,7 +30,11 @@ pub fn run() {
                 let _ = app.emit("menu", id);
             }
         })
-        .invoke_handler(tauri::generate_handler![read_document, write_document])
+        .invoke_handler(tauri::generate_handler![
+            read_document,
+            write_document,
+            print_page
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

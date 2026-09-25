@@ -3,13 +3,22 @@ use tauri::{AppHandle, Runtime};
 
 /// Menu item ids that are forwarded to the frontend as `menu` events.
 pub const FORWARDED: &[&str] = &[
-    "new", "open", "save", "save_as", "close", "quit", "undo", "redo", "preview",
+    "new",
+    "open",
+    "save",
+    "save_as",
+    "close",
+    "quit",
+    "undo",
+    "redo",
+    "preview",
+    "export_html",
+    "print",
 ];
 
 pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
-    let item = |id: &str, text: &str, accel: &str| {
-        MenuItem::with_id(app, id, text, true, Some(accel))
-    };
+    let item =
+        |id: &str, text: &str, accel: &str| MenuItem::with_id(app, id, text, true, Some(accel));
 
     let file = Submenu::with_items(
         app,
@@ -21,6 +30,9 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             &PredefinedMenuItem::separator(app)?,
             &item("save", "Save", "CmdOrCtrl+S")?,
             &item("save_as", "Save As…", "CmdOrCtrl+Shift+S")?,
+            &PredefinedMenuItem::separator(app)?,
+            &item("export_html", "Export as HTML…", "CmdOrCtrl+Shift+E")?,
+            &item("print", "Print…", "CmdOrCtrl+P")?,
             &PredefinedMenuItem::separator(app)?,
             &item("close", "Close", "CmdOrCtrl+W")?,
             // On macOS, Quit lives in the app menu instead.
