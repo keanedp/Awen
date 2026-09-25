@@ -3,7 +3,7 @@ use tauri::{AppHandle, Runtime};
 
 /// Menu item ids that are forwarded to the frontend as `menu` events.
 pub const FORWARDED: &[&str] = &[
-    "new", "open", "save", "save_as", "close", "quit", "undo", "redo",
+    "new", "open", "save", "save_as", "close", "quit", "undo", "redo", "preview",
 ];
 
 pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
@@ -52,7 +52,11 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         app,
         "View",
         true,
-        &[&PredefinedMenuItem::fullscreen(app, None)?],
+        &[
+            &item("preview", "Preview", "CmdOrCtrl+R")?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::fullscreen(app, None)?,
+        ],
     )?;
 
     let window = Submenu::with_items(

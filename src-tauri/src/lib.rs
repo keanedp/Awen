@@ -16,6 +16,7 @@ fn write_document(path: String, contents: String) -> Result<(), String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .menu(menu::build)
         .on_menu_event(|app, event| {

@@ -14,12 +14,19 @@
     writeDocument,
   } from "$lib/files";
   import { applyPlatform, type OS } from "$lib/platform";
+  import Preview from "$lib/preview/Preview.svelte";
+  import { renderMarkdown } from "$lib/preview/render";
 
   let os = $state<OS>("mac");
   let path = $state<string | null>(null);
   let dirty = $state(false);
   let savedText = "";
   let busy = false;
+
+  let previewing = $state(false);
+  let previewHtml = $state("");
+  let previewLine = $state(0);
+  let preview = $state<Preview>();
 
   let host: HTMLElement;
   let view: EditorView;
@@ -42,6 +49,24 @@
     savedText = text;
     path = newPath;
     dirty = false;
+    previewing = false;
+    view.focus();
+  }
+
+  /** Swaps between editor and rendered preview, keeping the reading position. */
+  function togglePreview() {
+    if (!previewing) {
+      const top = view.lineBlockAtHeight(view.scrollDOM.scrollTop);
+      previewLine = view.state.doc.lineAt(top.from).number - 1;
+      previewHtml = renderMarkdown(documentText(view));
+      previewing = true;
+      return;
+    }
+    const line = Math.min((preview?.topLine() ?? 0) + 1, view.state.doc.lines);
+    previewing = false;
+    view.dispatch({
+      effects: EditorView.scrollIntoView(view.state.doc.line(line).from, { y: "start" }),
+    });
     view.focus();
   }
 
@@ -107,8 +132,9 @@
     // Closing the only window quits the app; onCloseRequested handles unsaved changes.
     close: () => appWindow.close(),
     quit: () => appWindow.close(),
-    undo: () => undo(view),
-    redo: () => redo(view),
+    undo: () => previewing || undo(view),
+    redo: () => previewing || redo(view),
+    preview: togglePreview,
   };
 
   onMount(() => {
@@ -125,7 +151,9 @@
     const unlisten = [
       listen<string>("menu", async ({ payload }) => {
         // Editing commands must stay responsive; file commands shouldn't overlap.
-        if (payload === "undo" || payload === "redo") return actions[payload]();
+        if (payload === "undo" || payload === "redo" || payload === "preview") {
+          return actions[payload]();
+        }
         if (busy) return;
         busy = true;
         try {
@@ -159,5 +187,10 @@
       </span>
     </header>
   {/if}
-  <main class="min-h-0 flex-1" bind:this={host}></main>
+  <main class="min-h-0 flex-1" class:hidden={previewing} bind:this={host}></main>
+  {#if previewing}
+    <div class="min-h-0 flex-1">
+      <Preview bind:this={preview} html={previewHtml} line={previewLine} onexit={togglePreview} />
+    </div>
+  {/if}
 </div>

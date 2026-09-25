@@ -22,8 +22,10 @@
     "@lezer/highlight": "^1.2.3",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.7.3",
+    "@tauri-apps/plugin-opener": "^2.5.5",
     "@tauri-apps/plugin-window-state": "^2.4.1",
-    "codemirror": "^6.0.2"
+    "codemirror": "^6.0.2",
+    "markdown-it": "^15.0.2"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.10",
@@ -31,6 +33,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/cli": "^2",
+    "@types/markdown-it": "^14.2.0",
     "svelte": "^5.56.3",
     "svelte-check": "^4.6.0",
     "tailwindcss": "^4.3.3",

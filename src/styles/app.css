@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./preview.css";
 @import "./tokens.mac.css";
 @import "./tokens.windows.css";
 
