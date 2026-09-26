@@ -2,6 +2,13 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Title bar toolbar; custom title bar on Windows
+- Preview gets a play button in the title bar, like focused editors. The button, shortcut and menu item all call the same `togglePreview()`. View → Preview is a `CheckMenuItem`, synced from the frontend's state.
+- **Windows:** turns off native decorations (`tauri.windows.conf.json`) and draws its own title bar with Segoe Fluent Icons caption buttons, since the native title bar has no room for app buttons.
+  - This loses the Windows 11 Snap Layouts flyout on hovering maximize (tracked as W-037).
+  - `tauri-plugin-decorum` would provide it, but was rejected: no release since 2024-09.
+- **macOS:** keeps the Overlay title bar; the button sits in our existing header.
+
 ## 2026-09-25: AGENTS.md is the shared instruction file
 `AGENTS.md` and `docs/agents/` serve as memory for Claude Code and Codex alike. Each `CLAUDE.md` contains only `@AGENTS.md`. Symlinks were rejected because the project must also be checked out on Windows.
 

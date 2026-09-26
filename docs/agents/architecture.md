@@ -65,6 +65,13 @@ Details:
 - `app.css` defines the shared tokens and light/dark defaults. `tokens.mac.css` and `tokens.windows.css` override them per OS: UI font, sizes, radii, accent, surfaces, scrollbars.
 - Tailwind v4 exposes the tokens as utilities through `@theme inline` (`bg-surface`, `text-muted`, `font-ui`, `font-writing`, `rounded-control`).
 - The writing font is Classic Mono (`static/fonts/`, SIL OFL; keep `LICENSE.md` beside it).
-- **macOS window:** `titleBarStyle: "Overlay"` + `hiddenTitle` puts the traffic lights inline. `+page.svelte` draws a draggable header (`data-tauri-drag-region`) showing "name — Edited".
-- **Windows:** keeps the native title bar, with title `*name - Writer`.
+- **Title bar:** `src/lib/ui/TitleBar.svelte`, used by `+page.svelte`.
+  - **macOS:** `titleBarStyle: "Overlay"` + `hiddenTitle` puts the traffic lights inline over our draggable header, which shows "name — Edited" centered and toolbar buttons at the trailing edge.
+  - **Windows:** `decorations: false` (in `tauri.windows.conf.json`). `TitleBar` draws the whole bar: title `*name - Writer`, toolbar buttons, then minimize/maximize/close using Segoe Fluent Icons glyphs. It tracks maximized/focused state to swap the restore icon and dim when inactive.
+  - Linux keeps native decorations and has no toolbar yet.
+  - `appWindow.setTitle()` still runs on every OS, so the taskbar/Dock and Window menu stay right.
+- **Toolbar buttons:** `src/lib/ui/ToolbarButton.svelte`, sized by `--toolbar-button-*` tokens.
+  - They cancel `mousedown` so they never steal focus from the editor.
+  - Toggle buttons pass `pressed`.
+  - A toolbar toggle that also has a menu item should use a `CheckMenuItem`, synced from frontend state the way Preview is (`set_preview_checked`).
 - **Planned:** Bits UI headless components wrapped in `src/lib/ui/`, themed by the tokens. Konsta UI on mobile.

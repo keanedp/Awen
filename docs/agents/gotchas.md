@@ -19,6 +19,10 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 - Accessibility warnings from svelte-check: prefer a document-level listener (e.g. the `.chrome` context-menu blocker) over handlers on non-interactive elements.
 
 ## Tauri / native
+- `tauri.<platform>.conf.json` is merged with JSON Merge Patch, so **arrays are replaced, not merged**. `tauri.windows.conf.json` must repeat the whole `app.windows[0]` object, not just the changed key. Keep both files' window settings in step.
+- `data-tauri-drag-region` only starts a drag when the clicked element itself carries the attribute. Buttons inside the title bar are therefore not drag handles, but any text or icon *wrappers* that should drag need the attribute too, or `pointer-events: none`, as the title text has.
+- `Menu::get(id)` only searches top-level items. To reach a nested item later (e.g. the View → Preview checkmark), keep its handle in managed state (`menu::PreviewMenuItem`).
+- Windows custom title bar: HTML caption buttons don't trigger the Snap Layouts flyout (W-037). Win+Z and dragging to screen edges still work.
 - A native menu accelerator consumes the key before the webview sees it. Any shortcut CodeMirror must handle has to be a custom menu item that calls into the editor, as undo/redo do.
 - Tauri app-defined commands need no capability entry. Plugin APIs do: add them to `src-tauri/capabilities/default.json`, e.g. `opener:default` and `dialog:default`.
 - **macOS PDF export, not yet confirmed by running it.** WKWebView print operations can render blank pages unless run with `runOperationModalForWindow…` and the print view's frame set. `export.rs` does both. If PDFs come out blank or as one long page, look here first.

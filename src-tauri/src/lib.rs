@@ -18,6 +18,15 @@ fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
     window.print().map_err(|e| format!("Could not print: {e}"))
 }
 
+/// The frontend owns preview state; this keeps the menu checkmark in step with it.
+#[tauri::command]
+fn set_preview_checked(
+    item: tauri::State<'_, menu::PreviewMenuItem<tauri::Wry>>,
+    checked: bool,
+) -> Result<(), String> {
+    item.0.set_checked(checked).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -35,6 +44,7 @@ pub fn run() {
             read_document,
             write_document,
             print_page,
+            set_preview_checked,
             export::choose_export,
             export::export_pdf
         ])

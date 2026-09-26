@@ -5,6 +5,9 @@
   --radius-control: 6px;
   --control-height: 22px;
   --titlebar-height: 28px;
+  --toolbar-button-width: 28px;
+  --toolbar-button-height: 22px;
+  --toolbar-icon-size: 13px;
   --accent: -apple-system-control-accent; /* WebKit-only; follows System Settings */
   --focus-ring: color-mix(in srgb, #0a84ff 50%, transparent);
 }

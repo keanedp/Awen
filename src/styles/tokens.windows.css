@@ -4,7 +4,10 @@
   --ui-size: 14px;
   --radius-control: 4px;
   --control-height: 32px;
-  --titlebar-height: 0px;
+  --titlebar-height: 32px; /* custom title bar (decorations off, see tauri.windows.conf.json) */
+  --toolbar-button-width: 40px;
+  --toolbar-button-height: 28px;
+  --toolbar-icon-size: 14px;
   --accent: #0f6cbd;
   --focus-ring: #000000;
   --surface: #fafafa;

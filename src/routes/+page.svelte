@@ -20,7 +20,9 @@
     writeDocument,
   } from "$lib/files";
   import { applyPlatform, type OS } from "$lib/platform";
+  import { setPreviewChecked } from "$lib/menu";
   import Preview from "$lib/preview/Preview.svelte";
+  import TitleBar from "$lib/ui/TitleBar.svelte";
   import { renderMarkdown } from "$lib/preview/render";
 
   let os = $state<OS>("mac");
@@ -46,6 +48,11 @@
     const title =
       os === "windows" ? `${dirty ? "*" : ""}${name} - Writer` : `${name}${dirty ? " — Edited" : ""}`;
     appWindow.setTitle(title);
+  });
+
+  // The native menu toggles its own checkmark on click; always restate ours.
+  $effect(() => {
+    setPreviewChecked(previewing);
   });
 
   function onChange(v: EditorView) {
@@ -215,17 +222,7 @@
 </script>
 
 <div class="app-root flex h-full flex-col bg-surface">
-  {#if os === "mac"}
-    <header
-      class="chrome font-ui text-muted flex shrink-0 items-center justify-center"
-      style="height: var(--titlebar-height); font-size: var(--ui-size)"
-      data-tauri-drag-region
-    >
-      <span class="pointer-events-none truncate px-20">
-        {name}{#if dirty}<span class="opacity-70"> — Edited</span>{/if}
-      </span>
-    </header>
-  {/if}
+  <TitleBar {os} {name} {dirty} {previewing} onTogglePreview={togglePreview} />
   <main class="min-h-0 flex-1" class:hidden={previewing} bind:this={host}></main>
   {#if previewing}
     <div class="min-h-0 flex-1">

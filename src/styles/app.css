@@ -47,6 +47,9 @@
   --writing-line-height: 1.6;
   --measure: 66ch;
   --titlebar-height: 0px;
+  --toolbar-button-width: 28px;
+  --toolbar-button-height: 24px;
+  --toolbar-icon-size: 14px;
 
   --surface: #f9f9f8;
   --chrome: #f9f9f8;

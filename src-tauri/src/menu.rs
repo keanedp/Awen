@@ -1,20 +1,14 @@
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
-use tauri::{AppHandle, Runtime};
+use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu};
+use tauri::{AppHandle, Manager, Runtime};
 
 /// Menu item ids that are forwarded to the frontend as `menu` events.
 pub const FORWARDED: &[&str] = &[
-    "new",
-    "open",
-    "save",
-    "save_as",
-    "close",
-    "quit",
-    "undo",
-    "redo",
-    "preview",
-    "export",
-    "print",
+    "new", "open", "save", "save_as", "close", "quit", "undo", "redo", "preview", "export", "print",
 ];
+
+/// View → Preview, kept so the frontend can sync its checkmark
+/// (`Menu::get` only searches top-level items).
+pub struct PreviewMenuItem<R: Runtime>(pub CheckMenuItem<R>);
 
 pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let item =
@@ -60,12 +54,16 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         ],
     )?;
 
+    let preview =
+        CheckMenuItem::with_id(app, "preview", "Preview", true, false, Some("CmdOrCtrl+R"))?;
+    app.manage(PreviewMenuItem(preview.clone()));
+
     let view = Submenu::with_items(
         app,
         "View",
         true,
         &[
-            &item("preview", "Preview", "CmdOrCtrl+R")?,
+            &preview,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::fullscreen(app, None)?,
         ],

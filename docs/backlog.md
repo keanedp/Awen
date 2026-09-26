@@ -23,7 +23,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-036**
+Next free ID: **W-038**
 
 ---
 
@@ -68,6 +68,22 @@ As a writer, I want to swap to a rendered preview and back with one shortcut, so
 - [x] Preview opens at the part of the document I was on, and returns to where I scrolled
 - [x] Undo history, cursor and selection survive the toggle
 - [x] Links open in the default browser; the app never navigates away
+
+### W-036 Toggle preview from the title bar
+Status: Needs verification · Platforms: macOS, Windows
+As a writer, I want a play button in the window header, like focused editors, so I can switch to preview without remembering the shortcut.
+- [x] Play button at the trailing edge of the title bar; tooltip shows the shortcut
+- [x] Button, Cmd/Ctrl+R, View → Preview and Esc all stay in sync: the button shows pressed and the menu item shows a checkmark
+- [x] Clicking the button doesn't take focus or the caret from the editor
+- [x] Windows: custom title bar with title, preview button and native-looking minimize/maximize/close
+- [ ] Verified by clicking through on macOS
+- [ ] Verified on Windows (title bar drag, double-click maximize, edge resize, caption buttons, close prompt)
+
+### W-037 Snap Layouts on the custom Windows title bar
+Status: Todo · Platforms: Windows
+As a Windows 11 user, I want hovering the maximize button to show Snap Layouts, like other apps.
+- [ ] Snap Layouts flyout appears when hovering maximize (needs native hit-testing of that button region)
+- [ ] Custom title bar otherwise unchanged
 
 ### W-011 See task lists as checkboxes
 Status: Done · Platforms: macOS, Windows
