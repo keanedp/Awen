@@ -42,6 +42,15 @@ function detectLineSeparator(text: string): string {
   return text.includes("\r\n") ? "\r\n" : "\n";
 }
 
+/**
+ * With a line separator set, CodeMirror only splits inserted text on that
+ * separator, so pasted or dropped text with other endings would leave stray
+ * "\r" or "\n" inside lines. Convert it to the file's own.
+ */
+const matchLineBreaks = EditorView.clipboardInputFilter.of((text, state) =>
+  text.replace(/\r\n?|\n/g, state.lineBreak),
+);
+
 /** Holds the read-only state of a locked document. */
 const lock = new Compartment();
 
@@ -71,6 +80,7 @@ export function createState(
         cut: (e, view) => (blocked(e, view), false),
       }),
       EditorState.lineSeparator.of(detectLineSeparator(doc)),
+      matchLineBreaks,
       history(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
       find(onLockedEdit),

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { EditorView } from "@codemirror/view";
 import { createState, documentText } from "./setup";
 
 const open = (text: string) => ({ state: createState(text, () => {}, () => {}) });
@@ -19,17 +20,21 @@ describe("line endings", () => {
     expect(documentText({ state })).toBe("One\r\nAdded\r\nTwo\r\n");
   });
 
-  // W-050: with lineSeparator set, CodeMirror only splits pasted text on the
-  // file's own separator. Swap `test.fails` for `test` once that's fixed.
-  test.fails("pasted LF text takes the file's CRLF endings", () => {
-    const { state } = open("One\r\n");
-    const pasted = state.update({ changes: { from: state.doc.length, insert: state.toText("Two\nThree\n") } }).state;
-    expect(documentText({ state: pasted })).toBe("One\r\nTwo\r\nThree\r\n");
-  });
+  /** The text after pasting or dropping `text` at the end, through the editor's clipboard filters. */
+  function paste(text: string, into: string): string {
+    const { state } = open(into);
+    const input = state.facet(EditorView.clipboardInputFilter).reduce((t, filter) => filter(t, state), text);
+    return documentText({ state: state.update({ changes: { from: state.doc.length, insert: input } }).state });
+  }
 
-  test.fails("pasted CRLF text takes the file's LF endings", () => {
-    const { state } = open("One\n");
-    const pasted = state.update({ changes: { from: state.doc.length, insert: state.toText("Two\r\nThree\r\n") } }).state;
-    expect(documentText({ state: pasted })).toBe("One\nTwo\nThree\n");
+  test.each([
+    ["LF into CRLF", "Two\nThree\n", "One\r\n", "One\r\nTwo\r\nThree\r\n"],
+    ["CRLF into LF", "Two\r\nThree\r\n", "One\n", "One\nTwo\nThree\n"],
+    ["old Mac CR into LF", "Two\rThree", "One\n", "One\nTwo\nThree"],
+    ["mixed into CRLF", "a\nb\r\nc\rd", "One\r\n", "One\r\na\r\nb\r\nc\r\nd"],
+    ["CRLF into CRLF", "Two\r\n", "One\r\n", "One\r\nTwo\r\n"],
+    ["LF into LF", "Two\n", "One\n", "One\nTwo\n"],
+  ])("pasting %s takes the file's line endings", (_, text, into, result) => {
+    expect(paste(text, into)).toBe(result);
   });
 });
