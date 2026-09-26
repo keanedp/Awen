@@ -1,3 +1,4 @@
+mod export;
 mod menu;
 
 use tauri::Emitter;
@@ -33,7 +34,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             read_document,
             write_document,
-            print_page
+            print_page,
+            export::choose_export,
+            export::export_pdf
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

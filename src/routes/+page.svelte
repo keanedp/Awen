@@ -8,9 +8,11 @@
   import { createState, documentText } from "$lib/editor/setup";
   import { exportHtml } from "$lib/export/html";
   import {
+    type ExportFormat,
     baseName,
+    exportPdf,
     fileName,
-    pickExportLocation,
+    pickExportTarget,
     pickFileToOpen,
     pickSaveLocation,
     printPage,
@@ -32,6 +34,7 @@
   let previewLine = $state(0);
   let preview = $state<Preview>();
   let printHtml = $state("");
+  let exportFormat: ExportFormat = "html";
 
   let host: HTMLElement;
   let view: EditorView;
@@ -129,11 +132,20 @@
     }
   }
 
-  async function exportAsHtml() {
-    const target = await pickExportLocation(`${baseName(path)}.html`);
+  async function exportDocument() {
+    const target = await pickExportTarget(path, exportFormat);
     if (!target) return;
+    exportFormat = target.format;
+    const text = documentText(view);
     try {
-      await writeDocument(target, await exportHtml(documentText(view), baseName(path)));
+      if (target.format === "pdf") {
+        // The PDF is printed from the page, so render the print copy first.
+        printHtml = renderMarkdown(text);
+        await tick();
+        await exportPdf(target.path);
+      } else {
+        await writeDocument(target.path, await exportHtml(text, baseName(path)));
+      }
     } catch (err) {
       await showError(err);
     }
@@ -154,7 +166,7 @@
     open: openDocument,
     save,
     save_as: saveAs,
-    export_html: exportAsHtml,
+    export: exportDocument,
     print,
     // Closing the only window quits the app; onCloseRequested handles unsaved changes.
     close: () => appWindow.close(),

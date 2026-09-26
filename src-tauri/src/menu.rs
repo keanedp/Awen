@@ -12,7 +12,7 @@ pub const FORWARDED: &[&str] = &[
     "undo",
     "redo",
     "preview",
-    "export_html",
+    "export",
     "print",
 ];
 
@@ -31,7 +31,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             &item("save", "Save", "CmdOrCtrl+S")?,
             &item("save_as", "Save As…", "CmdOrCtrl+Shift+S")?,
             &PredefinedMenuItem::separator(app)?,
-            &item("export_html", "Export as HTML…", "CmdOrCtrl+Shift+E")?,
+            &item("export", "Export…", "CmdOrCtrl+Shift+E")?,
             &item("print", "Print…", "CmdOrCtrl+P")?,
             &PredefinedMenuItem::separator(app)?,
             &item("close", "Close", "CmdOrCtrl+W")?,
