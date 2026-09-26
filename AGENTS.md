@@ -7,71 +7,44 @@ Writer is a focused Markdown editor in the style of focused editors, built with 
 ## Commands
 
 - `make dev` (`npm run tauri dev`): run the app with hot reload.
-- `make build` (`npm run tauri build`): release bundle (`.app` + `.dmg` on macOS, in `src-tauri/target/release/bundle/`). If DMG bundling fails, a previous build's Writer is usually still running from a mounted `/Volumes/dmg.*` volume. Quit it, then `hdiutil detach` the volume.
-- `npm run check`: svelte-check (TypeScript + Svelte). Must report 0 errors/warnings.
+- `make build` (`npm run tauri build`): release bundle (`.app` + `.dmg` on macOS, in `src-tauri/target/release/bundle/`).
+- `npm run check`: svelte-check. Must report 0 errors/warnings.
 - `npm run build`: frontend-only static build (fast sanity check).
-- `cd src-tauri && cargo clippy` / `cargo fmt`: Rust lint/format. Keep clippy warning-free.
+- `cd src-tauri && cargo clippy` / `cargo fmt`: keep clippy warning-free.
 
-There is no test suite. Verify changes with `npm run check`, `cargo clippy`, and by running the app.
+There is no test suite. Verify with `npm run check`, `cargo clippy`, and by running the app.
 
-The Windows-only Rust code (`#[cfg(windows)]`) cannot be compiled on this Mac (no rustup/cross targets). Treat it as unverified.
+## Map
 
-## Architecture
+- `src/routes/+page.svelte`: nearly all app logic (document state, file actions, preview, export, print).
+- `src/lib/`: `editor/` (CodeMirror), `preview/` (markdown-it render + preview view), `export/`, `files.ts` (Tauri command wrappers), `platform.ts`.
+- `src/styles/`: `app.css` + per-OS token files + `preview.css` (preview, print and export typography).
+- `src-tauri/`: Rust side (menus, commands, native export/PDF). See `src-tauri/AGENTS.md`.
 
-**Frontend is a static SPA** (adapter-static, `ssr = false`). Almost all app logic is in `src/routes/+page.svelte`:
-- document state: path, dirty flag, saved text
-- file actions and unsaved-changes prompts
-- preview toggling, export and print
+## Rules that are easy to break
 
-**Native menus drive the app.** `src-tauri/src/menu.rs` builds the menus. Clicking an item whose id is in `FORWARDED` emits a `menu` event (payload = id) to the frontend. `+page.svelte` dispatches it through its `actions` map.
-- To add a command, add the menu item + id in `menu.rs`, then add a handler in `actions`.
-- File actions are serialized by a `busy` guard; undo/redo/preview bypass it.
-- Undo/redo are custom menu items (not `PredefinedMenuItem`) because native accelerators would swallow Cmd+Z before CodeMirror sees it.
-- macOS puts Quit in the app menu; other OSes put Exit in File. Close/Quit go through `onCloseRequested`, which prompts about unsaved changes.
+- Native menu items drive the app: add the id in `src-tauri/src/menu.rs` (`FORWARDED`) **and** a handler in the `actions` map in `+page.svelte`.
+- Read document text with `documentText()`, never `doc.toString()`. It preserves the file's original line endings.
+- markdown-it stays `html: false`. Rendered content runs in a webview with IPC access.
+- Style with the CSS tokens (`var(--surface)`, `bg-surface`, …), not hard-coded colours, so per-OS themes and dark mode keep working.
+- Mark app chrome with the `.chrome` class (no selection, no web context menu).
 
-**Rust commands** (`src-tauri/src/lib.rs`, `export.rs`) are thin:
-- `read_document` / `write_document`
-- `print_page`
-- `choose_export`: a native NSSavePanel sheet with an "Export To" format popup on macOS; on other OSes it errors, and the frontend uses the dialog plugin's "Save as type" filters instead.
-- `export_pdf`: prints the current webview page to a PDF. macOS uses a WKWebView print operation with `NSPrintSaveJob`; Windows uses WebView2 `PrintToPdf`.
+## Knowledge base: read when relevant
 
-Frontend wrappers live in `src/lib/files.ts`. New Tauri permissions go in `src-tauri/capabilities/default.json`.
+- `docs/agents/architecture.md`: how the pieces connect: menu → event → action, editor, preview, print/PDF/HTML export, theming. Read before changing any of those flows.
+- `docs/agents/decisions.md`: dated log of design decisions and why. Read before reversing or reworking a past choice.
+- `docs/agents/gotchas.md`: environment quirks and failures already hit. **Skim before running builds, installing packages, or touching platform code.**
+- `src-tauri/AGENTS.md`: Rust/native specifics.
 
-**Editor** (`src/lib/editor/`):
-- `setup.ts` builds a fresh `EditorState` per document. `+page.svelte` replaces the state on open/new rather than recreating the view.
-- Original line endings are preserved: `EditorState.lineSeparator` is detected from the file, and text is read back with `documentText()` (`state.sliceDoc()`). Always use that rather than `doc.toString()` when saving/exporting.
-- `markdownStyling.ts` dims Markdown syntax marks and hangs `#` heading marks into the left margin.
+## Keeping this knowledge current
 
-**Rendering** (`src/lib/preview/render.ts`) is the single markdown-it instance used by preview, print, and export.
-- `html: false` is deliberate: rendered content runs in a webview with IPC access, so raw HTML must never be enabled.
-- `{ sourceLines: true }` adds `data-line` attributes, used only by the in-app preview to keep the scroll position when toggling.
-- The task-list plugin is `markdown-it-task-lists`. `@hedgedoc/markdown-it-task-lists` is incompatible with markdown-it 14. Its types are in `markdown-it-task-lists.d.ts`.
-
-**Preview is replace-style** (like focused editors). `Preview.svelte` swaps in for the editor. The `EditorView` stays mounted but hidden, so undo history/selection survive.
-- Links never navigate the webview: http(s)/mailto open via the opener plugin.
-
-**Print and PDF share one mechanism.**
-- `+page.svelte` renders the document into a hidden `.print-root` element.
-- `@media print` rules in `app.css` hide `.app-root` and show only that copy.
-- `preview.css` holds the paper typography.
-- PDF export renders `.print-root` first, then calls `export_pdf`.
-
-**HTML export** (`src/lib/export/html.ts`) produces one self-contained file:
-- It inlines `preview.css` (`?raw`), its own light/dark colour tokens, and the Classic Mono fonts as base64 data URLs.
-- The fonts are fetched from `/fonts` at export time.
-
-## Platform theming
-
-- `src/lib/platform.ts` sets `<html data-os="mac|windows|linux">`.
-- `src/styles/tokens.mac.css` / `tokens.windows.css` override the shared CSS custom properties in `app.css` (fonts, sizes, radii, accent, surfaces, scrollbars) per OS. Tailwind v4 utilities map to these tokens via `@theme inline` (`bg-surface`, `text-muted`, `font-ui`, …).
-- Style with tokens, not hard-coded colours. Light/dark comes from `prefers-color-scheme` in the token files.
-- The macOS window uses `titleBarStyle: "Overlay"` + `hiddenTitle`, so traffic lights sit inline. `+page.svelte` draws its own draggable title header on mac only (`data-tauri-drag-region`). Windows uses the native title bar, and the window title follows each OS's convention (`*name - Writer` vs `name — Edited`).
-- Elements with the `.chrome` class behave like native UI: no text selection, default cursor, no web context menu.
-- UI components are planned as headless Bits UI wrapped in `src/lib/ui/`, themed by the token files; Konsta UI for mobile. Vibrancy/Mica is deferred because it needs `macOSPrivateApi` (blocks the Mac App Store).
-
-## Conventions
-
-- Svelte 5 runes only (`$state`, `$derived`, `$effect`, `$props`).
-- Bundled fonts (`static/fonts/`, SIL OFL) must keep their `LICENSE.md` alongside.
-- `Inspiration/` holds UI reference screenshots (e.g. `export.png` for the export sheet).
-- GNU sed is aliased as `sed` on this machine: use `sed -i`, not `sed -i ''`. `grep` is ugrep.
+These docs are the shared memory for every agent working here. They are committed and reviewed like code.
+- When you learn something non-obvious (a gotcha, a decision and its reason, a structural change), record it in the same change you make:
+  - decisions go in `decisions.md`, dated;
+  - traps and quirks go in `gotchas.md`;
+  - how things fit together goes in `architecture.md`;
+  - area-specific notes go in the nearest `AGENTS.md`.
+- Update or delete entries that have become wrong. A stale note is worse than none.
+- Don't record what the code, `git log`, or a quick search already shows. Record the *why* and the non-obvious.
+- Keep this file short (Codex truncates large instruction files). Put detail in `docs/agents/`.
+- A new folder that needs its own notes gets an `AGENTS.md`, plus a `CLAUDE.md` containing only `@AGENTS.md` so Claude Code loads it too.

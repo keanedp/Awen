@@ -1,0 +1,70 @@
+# Architecture
+
+How the parts of Writer connect. File-level detail is discoverable from the code; this covers the flows that span several files.
+
+## Shape of the app
+
+- **Frontend: a static SPA.** It uses SvelteKit with adapter-static and `ssr = false` (`src/routes/+layout.ts`). One route, `src/routes/+page.svelte`, owns:
+  - the document state: `path`, `dirty`, `savedText`;
+  - file actions and the unsaved-changes prompt;
+  - preview toggling, export and print.
+- **Backend: thin Rust commands** plus native menus and platform code. Frontend wrappers for every command live in `src/lib/files.ts`.
+
+## Menu → event → action
+
+1. `src-tauri/src/menu.rs` builds the native menus.
+2. When a menu item whose id is in `FORWARDED` is clicked, `lib.rs` emits a `menu` event with the id as its payload.
+3. `+page.svelte` listens for it and dispatches through its `actions` map.
+
+Details:
+- File actions are serialized by a `busy` flag. Undo/redo/preview bypass it so they stay responsive.
+- Undo/redo are custom menu items rather than `PredefinedMenuItem`s. They call CodeMirror's `undo`/`redo` (see decisions.md).
+- Close and Quit both call `appWindow.close()`. `onCloseRequested` runs `confirmDiscard()` (Save / Don't Save / Cancel) and can prevent the close.
+- On macOS, Quit lives in the app menu; on other OSes, File has Exit.
+
+## Editor (`src/lib/editor/`)
+
+- `setup.ts` creates a fresh `EditorState` per document. Open/New call `view.setState(createState(...))` instead of recreating the `EditorView`.
+- Line endings: `EditorState.lineSeparator` is set to the separator detected in the file, and `documentText(view)` returns `state.sliceDoc()`. Together these make a round trip byte-identical. Always read text through `documentText()`.
+- `markdownStyling.ts` dims syntax marks via a `HighlightStyle` (`--markup` colour). A `ViewPlugin` decorates leading `#` marks with `.cm-hanging-mark`, which is absolutely positioned and translated left so headings hang into the margin.
+- Layout: a centered column (`max-width: var(--measure)`, 66ch) with bottom padding of 40vh, so the end of the text can scroll up the screen.
+
+## Rendering (`src/lib/preview/render.ts`)
+
+- There is one markdown-it instance, shared by preview, print, PDF and HTML export. Settings: `html: false`, `linkify`, `typographer`, plus `markdown-it-task-lists`.
+- `renderMarkdown(text, { sourceLines: true })` adds `data-line="<source line>"` to block tokens. Only the in-app preview uses this, to match scroll position. Exports omit it.
+
+## Preview (replace-style)
+
+- `togglePreview()` in `+page.svelte` works in two directions:
+  - **Into preview:** reads the editor's top visible line, renders, and mounts `Preview.svelte` in place of the editor.
+  - **Back to the editor:** asks the preview for its top `data-line` and scrolls the editor there.
+- The `EditorView` stays mounted and is only hidden (`class:hidden`), so undo history, selection and scroll survive.
+- `Preview.svelte` intercepts every link click:
+  - `#anchor` links scroll within the preview;
+  - http(s)/mailto links open via `@tauri-apps/plugin-opener`;
+  - nothing ever navigates the webview.
+- Esc also exits.
+
+## Print, PDF and HTML export
+
+- **Print copy.** `+page.svelte` renders the document into a hidden `<div class="print-root">`. Under `@media print`, `app.css` hides `.app-root` and shows only `.print-root`.
+- **Paper typography.** The `@media print` block in `preview.css` sets black on white, full width, and page-break rules.
+- **Print… (Cmd+P).** Renders the print copy, then calls the `print_page` command, which opens the system print dialog.
+- **Export… (Cmd+Shift+E):**
+  - `pickExportTarget()` in `files.ts` returns `{ path, format }`.
+    - On macOS it calls `choose_export`: a native NSSavePanel sheet with an "Export To: HTML/PDF" popup, modelled on `Inspiration/export.png`.
+    - On other OSes it uses the dialog plugin's save dialog, with HTML/PDF filters ("Save as type") and the format taken from the extension.
+  - **PDF:** renders the print copy, then `export_pdf` prints the page straight to the file. This does not go through the print dialog.
+  - **HTML:** `src/lib/export/html.ts` builds a single self-contained file. It includes `preview.css` imported via `?raw`, its own light/dark tokens, and the Classic Mono fonts fetched from `/fonts` and embedded as base64 (~235 KB for a small document).
+- The export format last used is remembered only for the session (`exportFormat` in `+page.svelte`).
+
+## Theming
+
+- `platform.ts` sets `<html data-os="mac|windows|linux">`.
+- `app.css` defines the shared tokens and light/dark defaults. `tokens.mac.css` and `tokens.windows.css` override them per OS: UI font, sizes, radii, accent, surfaces, scrollbars.
+- Tailwind v4 exposes the tokens as utilities through `@theme inline` (`bg-surface`, `text-muted`, `font-ui`, `font-writing`, `rounded-control`).
+- The writing font is Classic Mono (`static/fonts/`, SIL OFL; keep `LICENSE.md` beside it).
+- **macOS window:** `titleBarStyle: "Overlay"` + `hiddenTitle` puts the traffic lights inline. `+page.svelte` draws a draggable header (`data-tauri-drag-region`) showing "name — Edited".
+- **Windows:** keeps the native title bar, with title `*name - Writer`.
+- **Planned:** Bits UI headless components wrapped in `src/lib/ui/`, themed by the tokens. Konsta UI on mobile.
