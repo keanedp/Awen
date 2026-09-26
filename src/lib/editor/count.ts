@@ -1,5 +1,6 @@
 import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import type { EditorState } from "@codemirror/state";
+import { IterMode } from "@lezer/common";
 
 /**
  * Markdown syntax that isn't read as words: marks, URLs, link labels and
@@ -66,6 +67,8 @@ export function countWords(state: EditorState, ranges?: readonly { from: number;
     tree.iterate({
       from,
       to,
+      // Code parsed for highlighting (W-045) is counted as text; its `Comment`s aren't Markdown's.
+      mode: IterMode.IgnoreMounts,
       enter(node) {
         if (!syntax.has(node.name)) return;
         // Of an escape (`\*`), only the backslash is syntax.

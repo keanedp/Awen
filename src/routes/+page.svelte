@@ -7,6 +7,7 @@
   import { message } from "@tauri-apps/plugin-dialog";
   import { findSelection, openFind } from "$lib/editor/find";
   import { countWords, formatCount } from "$lib/editor/count";
+  import { setCodeHighlighting } from "$lib/editor/code";
   import { createState, documentText, setReadOnly } from "$lib/editor/setup";
   import { taskToggle } from "$lib/editor/tasks";
   import { exportHtml } from "$lib/export/html";
@@ -115,6 +116,15 @@
   $effect(() => {
     setMenuChecked("word_count", prefs.wordCount);
   });
+  $effect(() => {
+    setMenuChecked("code_highlighting", prefs.codeHighlighting);
+  });
+
+  // The editor exists once mounted; before that, `newState` takes the setting.
+  $effect(() => {
+    const on = prefs.codeHighlighting;
+    if (view) setCodeHighlighting(view, on);
+  });
 
   function onChange(v: EditorView) {
     dirty = documentText(v) !== savedText;
@@ -145,7 +155,7 @@
   });
 
   function newState(text: string) {
-    return createState(text, onChange, () => exclusive(askToUnlock), scheduleCount);
+    return createState(text, onChange, () => exclusive(askToUnlock), scheduleCount, prefs.codeHighlighting);
   }
 
   /** Shows `text` from `newPath`, or as an unsaved untitled copy if there is no path. */
@@ -414,6 +424,7 @@
     find_selection: () => findSelection(view),
     preview: togglePreview,
     word_count: () => setPreference("wordCount", !prefs.wordCount),
+    code_highlighting: () => setPreference("codeHighlighting", !prefs.codeHighlighting),
   };
 
   /** Find works on the text, so it leaves preview first. */
@@ -433,6 +444,7 @@
     "find_selection",
     "preview",
     "word_count",
+    "code_highlighting",
   ]);
 
   /** Runs a file command unless another one is still in progress. */
@@ -500,6 +512,7 @@
         if (!focused) return;
         setMenuChecked("preview", previewing);
         setMenuChecked("word_count", prefs.wordCount);
+        setMenuChecked("code_highlighting", prefs.codeHighlighting);
         refreshLocked();
         // The user may have changed it in System Settings meanwhile.
         applyAccent();

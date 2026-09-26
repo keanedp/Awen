@@ -1,6 +1,7 @@
 import { HighlightStyle, syntaxHighlighting, syntaxTree } from "@codemirror/language";
 import { RangeSetBuilder } from "@codemirror/state";
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
+import { IterMode } from "@lezer/common";
 import { tags as t } from "@lezer/highlight";
 
 /**
@@ -29,6 +30,8 @@ function hangingHeaders(view: EditorView): DecorationSet {
     syntaxTree(view.state).iterate({
       from,
       to,
+      // Not headings inside a highlighted ```md code block (W-045).
+      mode: IterMode.IgnoreMounts,
       enter(node) {
         if (node.name !== "HeaderMark") return;
         const line = doc.lineAt(node.from);

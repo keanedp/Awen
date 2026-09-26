@@ -20,6 +20,7 @@ pub const FORWARDED: &[&str] = &[
     "find_selection",
     "preview",
     "word_count",
+    "code_highlighting",
     "export",
     "print",
 ];
@@ -114,9 +115,18 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         CheckMenuItem::with_id(app, "preview", "Preview", true, false, Some("CmdOrCtrl+R"))?;
     let word_count =
         CheckMenuItem::with_id(app, "word_count", "Word Count", true, false, None::<&str>)?;
+    let code_highlighting = CheckMenuItem::with_id(
+        app,
+        "code_highlighting",
+        "Code Highlighting",
+        true,
+        false,
+        None::<&str>,
+    )?;
     app.manage(CheckItems(HashMap::from([
         ("preview", preview.clone()),
         ("word_count", word_count.clone()),
+        ("code_highlighting", code_highlighting.clone()),
     ])));
 
     let view = Submenu::with_items(
@@ -127,6 +137,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             &preview,
             &PredefinedMenuItem::separator(app)?,
             &word_count,
+            &code_highlighting,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::fullscreen(app, None)?,
         ],

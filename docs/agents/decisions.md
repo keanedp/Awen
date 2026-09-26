@@ -24,6 +24,10 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 - macOS gets a TextEdit/Safari-style find bar under the title bar, and Windows gets a Notepad-style flyout at the top right. Each OS's menu follows its own convention. On macOS that is the Edit → Find submenu with ⌘F, ⌥⌘F, ⌘G, ⇧⌘G and ⌘E. On Windows it is Find/Find Next/Find Previous/Replace in Edit with Ctrl+F, F3, Shift+F3 and Ctrl+H. Windows uses F3, not Ctrl+G, because Ctrl+G is Go To in Notepad and Word.
 - Searches are literal and ignore case. Options (match case, whole word) are left to W-046.
 
+## 2026-09-25: Editor code highlighting is muted, not a second palette
+- W-045 reuses preview's `--code-*` colours mixed 45% with `--text-muted` (`color-mix` in `editor/setup.ts`), rather than its own tokens, so the two views stay recognisably the same and one palette change moves both. Comments aren't italic in the editor, and headings or invalid code aren't styled, to keep the column calm.
+- It's a View menu toggle rather than always on, because focused editors' editor never colours code and most documents here are prose.
+
 ## 2026-09-25: Code blocks are highlighted in preview only, with Lezer parsers
 - focused editors doesn't highlight code; Typora does. Writer highlights in preview, print and exports, where code is read and shared, and leaves the editor calm. Muted editor highlighting is W-045 and off by default.
 - Lezer parsers (`@codemirror/language-data`) rather than highlight.js or Shiki: the editor already uses Lezer, so W-045 can share the same parsers and `--code-*` colours and the two views match. language-data also gives ~150 languages, loaded on demand as separate chunks.
