@@ -57,6 +57,10 @@ async function toDataUrl(url: string): Promise<string> {
   });
 }
 
+// The export redistributes the fonts, so the OFL wants their copyright and licence with them.
+export const fontNotice = `/* Classic Mono: Copyright © 2018 Information Architects Inc., based on IBM Plex © 2017 IBM Corp.
+   Licensed under the SIL Open Font License 1.1: https://openfontlicense.org */`;
+
 let fontCss: Promise<string> | undefined;
 
 /** @font-face rules with the fonts embedded, so the export is a single file. */
@@ -66,7 +70,7 @@ function embeddedFonts(): Promise<string> {
       const src = await toDataUrl(`/fonts/${file}`);
       return `@font-face { font-family: "Classic Mono"; src: url("${src}") format("woff2"); font-weight: ${weight}; font-style: ${style}; }`;
     }),
-  ).then((rules) => rules.join("\n"));
+  ).then((rules) => [fontNotice, ...rules].join("\n"));
   return fontCss;
 }
 

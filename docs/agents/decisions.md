@@ -2,6 +2,10 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-26: HTML export carries the font licence notice
+- The export embeds the Classic Mono files as data URLs, and anyone can pull them back out, so each export arguably redistributes the fonts. OFL 1.1 condition 2 wants the copyright notice and licence with every copy, and allows a human-readable header. So a short CSS comment (`fontNotice` in `export/html.ts`) with both copyright holders and a link to the OFL goes before the `@font-face` rules. The OFL FAQ says a link is enough for web fonts, so the full licence text isn't embedded.
+- The document itself needs no credit: the OFL doesn't cover documents made with the fonts. Don't remove the notice to save bytes (~200 of ~235 KB). If the fonts are ever subset or modified, the Reserved Font Name can no longer be used for the family name.
+
 ## 2026-09-26: The app is called Awen
 - "Writer" was too generic to search for or trademark. Awen is Welsh for poetic inspiration: short, rare, and it means something to writers. The other candidates are in `ideas/names.md`.
 - The bundle identifier changed with it (`com.danielkeane.awen`). `app_data_dir` follows the identifier, so preferences and recent documents saved under the old name don't carry over. That was acceptable before the first release; don't change the identifier again once there are users.
