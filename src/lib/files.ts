@@ -13,8 +13,8 @@ export function openDocument(path: string, reuse: boolean): Promise<string | nul
   return invoke<string | null>("open_document", { path, reuse });
 }
 
-/** The document Rust opened this window for, if any. */
-export function takeInitialDocument(): Promise<{ path: string; text: string } | null> {
+/** The document Rust opened this window for, if any. `path` is null for an untitled copy. */
+export function takeInitialDocument(): Promise<{ path: string | null; text: string } | null> {
   return invoke("take_initial_document");
 }
 
@@ -42,11 +42,17 @@ export function createDocument(path: string, contents: string): Promise<void> {
   return invoke("create_document", { path, contents });
 }
 
-/** What the title popover asked for. `tags` is set only when they changed. */
+/** Opens an untitled copy of `text` in a new window. */
+export function duplicateDocument(text: string): Promise<void> {
+  return invoke("duplicate_document", { text });
+}
+
+/** What the title popover asked for. `tags` and `locked` are set only when they changed. */
 export interface DocumentInfo {
   name: string;
   directory: string;
   tags: string[] | null;
+  locked: boolean | null;
 }
 
 /**
@@ -66,6 +72,16 @@ export function moveDocument(from: string, to: string): Promise<void> {
 /** Replaces the file's Finder tags (macOS). */
 export function setFileTags(path: string, tags: string[]): Promise<void> {
   return invoke("set_file_tags", { path, tags });
+}
+
+/** Sets or clears the file's locked flag (macOS). */
+export function setFileLocked(path: string, locked: boolean): Promise<void> {
+  return invoke("set_file_locked", { path, locked });
+}
+
+/** Whether the file is locked. Always false outside macOS. */
+export function isFileLocked(path: string): Promise<boolean> {
+  return invoke("is_file_locked", { path });
 }
 
 export async function pickFileToOpen(): Promise<string | null> {

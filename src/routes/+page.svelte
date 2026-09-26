@@ -1,18 +1,20 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { EditorView } from "@codemirror/view";
-  import { isolateHistory, redo, undo } from "@codemirror/commands";
+  import { isolateHistory, redo, redoDepth, undo, undoDepth } from "@codemirror/commands";
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
   import { message } from "@tauri-apps/plugin-dialog";
-  import { createState, documentText } from "$lib/editor/setup";
+  import { createState, documentText, setReadOnly } from "$lib/editor/setup";
   import { exportHtml } from "$lib/export/html";
   import {
     type ExportFormat,
     baseName,
     cancelQuit,
     createDocument,
+    duplicateDocument,
     exportPdf,
     fileName,
+    isFileLocked,
     moveDocument,
     pickExportTarget,
     pickFileToOpen,
@@ -21,6 +23,7 @@
     printPage,
     setDocumentEdited,
     setDocumentPath,
+    setFileLocked,
     setFileTags,
     showDocumentInfo,
     takeInitialDocument,
@@ -35,6 +38,8 @@
   let os = $state<OS>("mac");
   let path = $state<string | null>(null);
   let dirty = $state(false);
+  /** The file is locked (macOS), so the editor is read-only. */
+  let locked = $state(false);
   let savedText = "";
   let busy = false;
 
@@ -55,7 +60,9 @@
 
   $effect(() => {
     const title =
-      os === "windows" ? `${dirty ? "*" : ""}${name} - Writer` : `${name}${dirty ? " — Edited" : ""}`;
+      os === "windows"
+        ? `${dirty ? "*" : ""}${name} - Writer`
+        : `${name}${locked ? " — Locked" : dirty ? " — Edited" : ""}`;
     appWindow.setTitle(title);
   });
 
@@ -72,13 +79,51 @@
     dirty = documentText(v) !== savedText;
   }
 
+  function newState(text: string) {
+    return createState(text, onChange, () => exclusive(askToUnlock));
+  }
+
+  /** Shows `text` from `newPath`, or as an unsaved untitled copy if there is no path. */
   function load(text: string, newPath: string | null) {
-    view.setState(createState(text, onChange));
-    savedText = text;
+    view.setState(newState(text));
+    savedText = newPath ? text : "";
     path = newPath;
-    dirty = false;
+    dirty = text !== savedText;
     previewing = false;
     view.focus();
+    refreshLocked();
+  }
+
+  /** Reads the file's locked flag, which Finder can change at any time. */
+  async function refreshLocked() {
+    const target = path;
+    const now = target !== null && (await isFileLocked(target));
+    if (target !== path) return;
+    locked = now;
+    setReadOnly(view, now);
+  }
+
+  /** An edit to a locked document offers to unlock it or edit a copy, as TextEdit does. */
+  async function askToUnlock() {
+    if (!locked || !path) return;
+    const choice = await message("You can duplicate it and edit the copy, or unlock it and edit it here.", {
+      title: `The document “${name}” is locked.`,
+      kind: "info",
+      buttons: { yes: "Duplicate", no: "Unlock", cancel: "Cancel" },
+    });
+    try {
+      if (choice === "Duplicate" || choice === "Yes") {
+        await duplicateDocument(documentText(view));
+        return;
+      }
+      if (choice === "Unlock" || choice === "No") {
+        await setFileLocked(path, false);
+        await refreshLocked();
+      }
+    } catch (err) {
+      await showError(err);
+    }
+    if (!previewing) view.focus();
   }
 
   /** Swaps between editor and rendered preview, keeping the reading position. */
@@ -101,6 +146,10 @@
   /** Ticks or unticks the task list item on 0-based source `line`; false if it isn't one. */
   function toggleTask(line: number): boolean {
     if (line >= view.state.doc.lines) return false;
+    if (locked) {
+      exclusive(askToUnlock);
+      return false;
+    }
     const { from, text } = view.state.doc.line(line + 1);
     // Optional blockquote marks, a list marker, then the box.
     const match = /^(?:\s*>)*\s*(?:[-*+]|\d{1,9}[.)])\s+\[([ xX])\]/.exec(text);
@@ -116,6 +165,10 @@
 
   /** Undo/redo also work in preview, which is re-rendered to show the result. */
   function runHistory(command: typeof undo) {
+    if (locked) {
+      if ((command === undo ? undoDepth : redoDepth)(view.state) > 0) exclusive(askToUnlock);
+      return;
+    }
     if (command(view) && previewing) {
       previewHtml = renderMarkdown(documentText(view), { preview: true });
     }
@@ -168,7 +221,10 @@
     if (!previewing) view.focus();
     if (!info) return;
     const target = `${info.directory.replace(/\/$/, "")}/${info.name}`;
+    const lock = info.locked ?? locked;
     try {
+      // A locked file can't be renamed, moved or tagged, so unlock it first.
+      if (path && locked) await setFileLocked(path, false);
       if (!path) {
         const text = documentText(view);
         await createDocument(target, text);
@@ -182,9 +238,14 @@
       }
       path = target;
       if (info.tags) await setFileTags(target, info.tags);
+      // Locking keeps the document as saved, so unsaved edits are saved first.
+      if (lock && (!dirty || (await write(target)))) await setFileLocked(target, true);
     } catch (err) {
+      // Don't leave a file unlocked because a rename failed.
+      if (path && lock) await setFileLocked(path, true).catch(() => {});
       await showError(err);
     }
+    await refreshLocked();
   }
 
   /** Returns true when it is safe to close the document. */
@@ -274,7 +335,7 @@
 
   onMount(() => {
     os = applyPlatform();
-    view = new EditorView({ state: createState("", onChange), parent: host });
+    view = new EditorView({ state: newState(""), parent: host });
     view.focus();
 
     // App chrome has no web context menu, like native UI.
@@ -304,7 +365,9 @@
       }),
       // The Preview checkmark is app-wide; restate this window's state when it comes forward.
       appWindow.onFocusChanged(({ payload: focused }) => {
-        if (focused) setPreviewChecked(previewing);
+        if (!focused) return;
+        setPreviewChecked(previewing);
+        refreshLocked();
       }),
     ];
     // Only once listening: after this, Rust sends documents as `load-document` events.
@@ -326,6 +389,7 @@
     {os}
     {name}
     {dirty}
+    {locked}
     {previewing}
     {renaming}
     onTogglePreview={togglePreview}

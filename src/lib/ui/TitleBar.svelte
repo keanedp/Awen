@@ -8,6 +8,7 @@
     os,
     name,
     dirty,
+    locked,
     previewing,
     renaming,
     onTogglePreview,
@@ -16,6 +17,8 @@
     os: OS;
     name: string;
     dirty: boolean;
+    /** The file is locked (macOS); shown instead of "Edited". */
+    locked: boolean;
     previewing: boolean;
     /** The title popover (macOS) is open. */
     renaming: boolean;
@@ -95,7 +98,7 @@
   <!-- Traffic lights sit over the left edge (Overlay title bar). -->
   <header class="titlebar mac chrome" data-tauri-drag-region>
     <button type="button" class="title" class:open={renaming} tabindex="-1" onmousedown={titleMouseDown}>
-      <span class="name">{name}{#if dirty}<span class="edited"> — Edited</span>{/if}</span>
+      <span class="name">{name}{#if locked}<span class="edited"> — Locked</span>{:else if dirty}<span class="edited"> — Edited</span>{/if}</span>
       <!-- Lucide "chevron-down" (MIT) -->
       <svg bind:this={chevron} class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="m6 9 6 6 6-6" />

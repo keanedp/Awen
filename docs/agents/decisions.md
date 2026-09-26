@@ -13,6 +13,9 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 - Windows uses `tauri-plugin-single-instance` so Explorer opens reach the running app. Without it every double-click starts a separate Writer process, and "already open → bring forward" and Quit would only see that process's windows. It is a Windows-only dependency: macOS LaunchServices already keeps one instance.
 - Only `.md` and `.markdown` are registered. The Open dialog also accepts `.txt`, but claiming every text file would be intrusive.
 
+## 2026-09-25: Locked means Finder's locked flag, and locking saves first
+W-043 uses the file's user-immutable flag (`NSURLIsUserImmutableKey`), the same one Finder's Get Info → Locked sets, rather than an app-private setting, so the lock protects the file everywhere and a lock set in Finder shows in Writer. Locking with unsaved edits saves them first, so what's locked is what's on screen. Editing a locked document offers Duplicate (default, as it keeps the file safe) or Unlock, like TextEdit.
+
 ## 2026-09-25: Our own title popover for rename/move/tags
 NSDocument apps get the title-bar rename popover for free, but it belongs to NSDocument and the window's own title, which the Overlay title bar hides. So Writer builds an equivalent NSPopover with objc2 (`rename.rs`) and anchors it to the web title, instead of adopting NSDocument. Locked is left for W-043: it needs a read-only editor state. Windows has no equivalent convention, so it keeps Save As only.
 

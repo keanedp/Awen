@@ -229,10 +229,12 @@ As a Mac user, I want to click the document title to rename it, set its Finder t
 - [ ] Verified by running the app
 
 ### W-043 Lock a document
-Status: Todo · Platforms: macOS
+Status: Needs verification (not yet run) · Platforms: macOS
 As a Mac user, I want the Locked checkbox from the title popover (W-042), so I can protect a finished document from edits.
 - [ ] Locked checkbox in the title popover sets the file's locked flag (`NSURLIsUserImmutableKey`)
 - [ ] A locked document is read-only and its title shows "— Locked"; typing offers to unlock or duplicate, as TextEdit does
+- [ ] Locking in Finder shows in Writer when its window comes forward
+- [ ] Verified by running the app
 
 ---
 

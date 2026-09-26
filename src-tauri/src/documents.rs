@@ -39,7 +39,8 @@ pub struct Documents {
 
 #[derive(Clone, Serialize)]
 pub struct InitialDocument {
-    path: String,
+    /// `None` for an untitled copy (see `duplicate_document`).
+    path: Option<String>,
     text: String,
 }
 
@@ -56,6 +57,12 @@ pub fn focused_window(app: &AppHandle) -> Option<WebviewWindow> {
 
 /// Opens an empty document window, optionally holding `document` (path, text).
 pub fn new_window(app: &AppHandle, document: Option<(String, String)>) -> Result<(), String> {
+    let (path, text) = document.unzip();
+    open_window(app, path, text)
+}
+
+/// Opens a window showing `text` from `path`; an untitled one if `path` is `None`.
+fn open_window(app: &AppHandle, path: Option<String>, text: Option<String>) -> Result<(), String> {
     let Some(mut config) = app.config().app.windows.first().cloned() else {
         return Err("No window configuration".into());
     };
@@ -70,8 +77,8 @@ pub fn new_window(app: &AppHandle, document: Option<(String, String)>) -> Result
         let docs = documents(app);
         let mut paths = docs.paths.lock().map_err(|e| e.to_string())?;
         let mut pending = docs.pending.lock().map_err(|e| e.to_string())?;
-        paths.insert(label.clone(), document.as_ref().map(|(p, _)| p.clone()));
-        if let Some((_, text)) = document {
+        paths.insert(label.clone(), path);
+        if let Some(text) = text {
             pending.insert(label.clone(), text);
         }
     }
@@ -222,7 +229,10 @@ fn open_into_blank(app: &AppHandle, path: String) -> Result<(), String> {
         app.emit_to(
             EventTarget::webview_window(&label),
             "load-document",
-            InitialDocument { path, text },
+            InitialDocument {
+                path: Some(path),
+                text,
+            },
         )
         .map_err(|e| e.to_string())
     } else {
@@ -347,9 +357,15 @@ pub fn take_initial_document(
         .get(label)
         .cloned()
         .flatten();
-    Ok(text
-        .zip(path)
-        .map(|(text, path)| InitialDocument { path, text }))
+    Ok(text.map(|text| InitialDocument { path, text }))
+}
+
+/// Opens an untitled copy of a document in a new window, as Duplicate does in
+/// Mac apps. Async because creating a window from a synchronous command
+/// deadlocks on Windows.
+#[tauri::command]
+pub async fn duplicate_document(app: AppHandle, text: String) -> Result<(), String> {
+    open_window(&app, None, Some(text))
 }
 
 /// Opens a document from a window. `reuse` says the window is an untouched

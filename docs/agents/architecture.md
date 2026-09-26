@@ -107,6 +107,10 @@ Details:
   - The title is a `<button>` that is *not* a drag region: its own mousedown handler calls `startDragging()` once the pointer moves 3px, and opens the popover on mouseup otherwise.
   - `show_document_info` anchors the popover to the chevron's `getBoundingClientRect()`. The Overlay title bar makes the WKWebView fill the whole window, so CSS pixels map straight onto the web view's coordinates.
   - The command returns only what changed (nothing on Esc). `rename()` in `+page.svelte` applies it: `move_document` (refuses to overwrite; updates the window's path and Open Recent), or `create_document` for an untitled document, then `set_file_tags`. Unsaved edits stay unsaved, as in NSDocument apps.
+- **Locked documents (macOS, W-043):** the popover's Locked checkbox sets the file's `NSURLIsUserImmutableKey` flag (Finder's Locked) via `set_file_locked`.
+  - The page re-reads the flag (`is_file_locked`) on load, after the popover and whenever the window gains focus, since Finder can change it. `setReadOnly()` in `editor/setup.ts` toggles `EditorState.readOnly` through a compartment; the title shows "— Locked".
+  - CodeMirror ignores edits while read-only. A `beforeinput`/`paste`/`drop`/`cut` handler (plus undo/redo and preview task clicks) calls `askToUnlock()`: Duplicate opens an untitled copy (`duplicate_document`, a new window whose initial document has no path, so it starts dirty), Unlock clears the flag.
+  - A locked file can't be renamed, moved or re-tagged, so the popover greys those fields out while Locked is ticked, and `rename()` unlocks first and relocks last. Locking a document with unsaved edits saves it first.
 - **Toolbar buttons:** `src/lib/ui/ToolbarButton.svelte`, sized by `--toolbar-button-*` tokens.
   - They cancel `mousedown` so they never steal focus from the editor.
   - Toggle buttons pass `pressed`.

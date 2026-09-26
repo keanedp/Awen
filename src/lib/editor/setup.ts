@@ -1,6 +1,6 @@
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { EditorState } from "@codemirror/state";
+import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { markdownStyling } from "./markdownStyling";
 
@@ -36,10 +36,34 @@ function detectLineSeparator(text: string): string {
   return text.includes("\r\n") ? "\r\n" : "\n";
 }
 
-export function createState(doc: string, onChange: (view: EditorView) => void): EditorState {
+/** Holds the read-only state of a locked document. */
+const lock = new Compartment();
+
+/**
+ * `onLockedEdit` runs when the user tries to change a locked document: typing,
+ * deleting, pasting, cutting or dropping. CodeMirror itself ignores the edit.
+ */
+export function createState(
+  doc: string,
+  onChange: (view: EditorView) => void,
+  onLockedEdit: () => void,
+): EditorState {
+  const blocked = (_: Event, view: EditorView) => {
+    if (!view.state.readOnly) return false;
+    onLockedEdit();
+    return true;
+  };
   return EditorState.create({
     doc,
     extensions: [
+      lock.of(EditorState.readOnly.of(false)),
+      EditorView.domEventHandlers({
+        beforeinput: blocked,
+        paste: blocked,
+        drop: blocked,
+        // Still copies, as CodeMirror's own handler does when read-only.
+        cut: (e, view) => (blocked(e, view), false),
+      }),
       EditorState.lineSeparator.of(detectLineSeparator(doc)),
       history(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
@@ -53,6 +77,11 @@ export function createState(doc: string, onChange: (view: EditorView) => void): 
       }),
     ],
   });
+}
+
+/** Makes the editor read-only (a locked file) or editable again. */
+export function setReadOnly(view: EditorView, readOnly: boolean) {
+  view.dispatch({ effects: lock.reconfigure(EditorState.readOnly.of(readOnly)) });
 }
 
 /** The document text with its original line endings. */

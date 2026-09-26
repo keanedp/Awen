@@ -1,7 +1,8 @@
 //! Rename, tag and move a document from its title, like NSDocument apps
 //! (`Inspiration/file_name_save.png`). On macOS clicking the title shows a
-//! native popover with Name, Tags and Where; the frontend then applies the
-//! result with `move_document` / `create_document` and `set_file_tags`.
+//! native popover with Name, Tags, Where and Locked; the frontend then applies
+//! the result with `move_document` / `create_document`, `set_file_tags` and
+//! `set_file_locked`.
 
 use std::fs;
 use std::io::{ErrorKind, Write};
@@ -19,6 +20,8 @@ pub struct DocumentInfo {
     directory: String,
     /// The new Finder tags, only when the user changed them.
     tags: Option<Vec<String>>,
+    /// The new locked state, only when the user changed it.
+    locked: Option<bool>,
 }
 
 /// The title's rectangle in CSS pixels, from `getBoundingClientRect()`.
@@ -119,6 +122,30 @@ pub fn set_file_tags(path: String, tags: Vec<String>) -> Result<(), String> {
     }
 }
 
+/// Sets or clears the file's locked flag, as Finder's Get Info → Locked does.
+#[tauri::command]
+pub fn set_file_locked(path: String, locked: bool) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    return macos::set_locked(&path, locked);
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = (path, locked);
+        Err("Locking files is only available on macOS".into())
+    }
+}
+
+/// Whether the file is locked. Always false outside macOS.
+#[tauri::command]
+pub fn is_file_locked(path: String) -> bool {
+    #[cfg(target_os = "macos")]
+    return macos::is_locked(&path);
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = path;
+        false
+    }
+}
+
 fn check_name(path: &str) -> Result<(), String> {
     match Path::new(path).file_name().and_then(|n| n.to_str()) {
         Some(name) if !name.starts_with('.') => Ok(()),
@@ -155,14 +182,15 @@ mod macos {
     use objc2::runtime::{AnyObject, NSObject, NSObjectProtocol, ProtocolObject, Sel};
     use objc2::{define_class, msg_send, sel, DefinedClass, MainThreadMarker, MainThreadOnly};
     use objc2_app_kit::{
-        NSControl, NSControlTextEditingDelegate, NSMenuItem, NSModalResponseOK, NSOpenPanel,
-        NSPopUpButton, NSPopover, NSPopoverBehavior, NSPopoverDelegate, NSTextAlignment,
-        NSTextField, NSTextFieldDelegate, NSTextView, NSTokenField, NSTokenFieldDelegate, NSView,
+        NSButton, NSControl, NSControlStateValueOff, NSControlStateValueOn,
+        NSControlTextEditingDelegate, NSMenuItem, NSModalResponseOK, NSOpenPanel, NSPopUpButton,
+        NSPopover, NSPopoverBehavior, NSPopoverDelegate, NSTextAlignment, NSTextField,
+        NSTextFieldDelegate, NSTextView, NSTokenField, NSTokenFieldDelegate, NSView,
         NSViewController, NSWorkspace,
     };
     use objc2_foundation::{
-        NSArray, NSFileManager, NSNotification, NSPoint, NSRect, NSRectEdge, NSSize, NSString,
-        NSURLTagNamesKey, NSURL,
+        NSArray, NSFileManager, NSNotification, NSNumber, NSPoint, NSRect, NSRectEdge, NSSize,
+        NSString, NSURLIsUserImmutableKey, NSURLTagNamesKey, NSURL,
     };
     use std::cell::{Cell, RefCell};
     use std::path::Path;
@@ -177,6 +205,7 @@ mod macos {
         extension: String,
         directory: String,
         tags: Vec<String>,
+        locked: bool,
         untitled: bool,
     }
 
@@ -185,6 +214,8 @@ mod macos {
         name: Retained<NSTextField>,
         tags: Retained<NSTokenField>,
         place: Retained<NSPopUpButton>,
+        /// The Locked checkbox; untitled documents have none.
+        locked: Option<Retained<NSButton>>,
         original: Original,
         /// Esc was pressed: close without applying anything.
         cancelled: Cell<bool>,
@@ -209,6 +240,11 @@ mod macos {
             #[unsafe(method(placeChanged:))]
             fn place_changed(&self, _sender: &NSPopUpButton) {
                 self.choose_place();
+            }
+
+            #[unsafe(method(lockedChanged:))]
+            fn locked_changed(&self, _sender: &NSButton) {
+                self.enable_fields();
             }
         }
 
@@ -281,8 +317,13 @@ mod macos {
             let directory = selected_path(&ivars.place).unwrap_or(original.directory.clone());
             let tags = strings(ivars.tags.objectValue().as_deref());
             let tags_changed = tags != original.tags;
+            let locked = self.is_locked();
+            let locked_changed = locked != original.locked;
 
-            let changed = name != original.name || directory != original.directory || tags_changed;
+            let changed = name != original.name
+                || directory != original.directory
+                || tags_changed
+                || locked_changed;
             let confirmed_untitled = original.untitled && ivars.committed.get();
             if !(changed || confirmed_untitled) {
                 return None;
@@ -291,7 +332,22 @@ mod macos {
                 name,
                 directory,
                 tags: tags_changed.then_some(tags),
+                locked: locked_changed.then_some(locked),
             })
+        }
+
+        fn is_locked(&self) -> bool {
+            let checkbox = self.ivars().locked.as_ref();
+            checkbox.is_some_and(|c| c.state() == NSControlStateValueOn)
+        }
+
+        /// Like Finder, a locked file can't be renamed, moved or tagged.
+        fn enable_fields(&self) {
+            let ivars = self.ivars();
+            let enabled = !self.is_locked();
+            ivars.name.setEnabled(enabled);
+            ivars.tags.setEnabled(enabled);
+            ivars.place.setEnabled(enabled);
         }
 
         /// Handles a Where selection; Other… asks for a folder.
@@ -368,6 +424,32 @@ mod macos {
         }
     }
 
+    pub fn is_locked(path: &str) -> bool {
+        let url = NSURL::fileURLWithPath(&NSString::from_str(path));
+        let mut value = None;
+        // SAFETY: a plain resource lookup on a file URL.
+        let found =
+            unsafe { url.getResourceValue_forKey_error(&mut value, NSURLIsUserImmutableKey) };
+        found.is_ok()
+            && value
+                .as_deref()
+                .and_then(|v| v.downcast_ref::<NSNumber>())
+                .is_some_and(|n| n.boolValue())
+    }
+
+    pub fn set_locked(path: &str, locked: bool) -> Result<(), String> {
+        let url = NSURL::fileURLWithPath(&NSString::from_str(path));
+        let value = NSNumber::numberWithBool(locked);
+        let value: &AnyObject = &value;
+        // SAFETY: NSURLIsUserImmutableKey takes a boolean NSNumber.
+        unsafe { url.setResourceValue_forKey_error(Some(value), NSURLIsUserImmutableKey) }.map_err(
+            |e| {
+                let action = if locked { "lock" } else { "unlock" };
+                format!("Could not {action} the file: {}", e.localizedDescription())
+            },
+        )
+    }
+
     pub fn set_tags(path: &str, tags: &[String]) -> Result<(), String> {
         let url = NSURL::fileURLWithPath(&NSString::from_str(path));
         let tags: Vec<_> = tags.iter().map(|t| NSString::from_str(t)).collect();
@@ -441,22 +523,40 @@ mod macos {
     }
 
     /// Lays out Name / Tags / Where as right-aligned labels beside their controls.
-    fn content_view(rows: [(&str, &NSView); 3], mtm: MainThreadMarker) -> Retained<NSView> {
+    /// `trailing` (the Locked checkbox) sits at the end of the last row, as in NSDocument apps.
+    fn content_view(
+        rows: [(&str, &NSView); 3],
+        trailing: Option<&NSView>,
+        mtm: MainThreadMarker,
+    ) -> Retained<NSView> {
         let (width, pad, label_width, gap, spacing) = (420.0, 16.0, 56.0, 8.0, 10.0);
         let field_x = pad + label_width + gap;
         let heights: Vec<f64> = rows.iter().map(|(_, v)| v.frame().size.height).collect();
-        let height = heights.iter().sum::<f64>() + spacing * 2.0 + pad * 2.0;
+        let gaps = (rows.len() - 1) as f64;
+        let height = heights.iter().sum::<f64>() + spacing * gaps + pad * 2.0;
         let view = NSView::initWithFrame(
             NSView::alloc(mtm),
             NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(width, height)),
         );
         // AppKit's y axis points up, so rows are placed from the top down.
         let mut top = height - pad;
-        for ((text, control), h) in rows.into_iter().zip(heights) {
+        let last = rows.len() - 1;
+        for (i, ((text, control), h)) in rows.into_iter().zip(heights).enumerate() {
             let y = top - h;
+            let mut right = width - pad;
+            if let Some(accessory) = trailing.filter(|_| i == last) {
+                let size = accessory.frame().size;
+                right -= size.width;
+                accessory.setFrame(NSRect::new(
+                    NSPoint::new(right, y + (h - size.height) / 2.0),
+                    size,
+                ));
+                view.addSubview(accessory);
+                right -= gap * 2.0;
+            }
             control.setFrame(NSRect::new(
                 NSPoint::new(field_x, y),
-                NSSize::new(width - field_x - pad, h),
+                NSSize::new(right - field_x, h),
             ));
             let label = label(text, mtm);
             let lh = label.frame().size.height;
@@ -494,6 +594,7 @@ mod macos {
                         .into_owned(),
                     directory: p.parent().unwrap_or(p).to_string_lossy().into_owned(),
                     tags: read_tags(path),
+                    locked: is_locked(path),
                     untitled: false,
                 }
             }
@@ -502,6 +603,7 @@ mod macos {
                 extension: "md".into(),
                 directory: format!("{}/Documents", std::env::var("HOME").unwrap_or_default()),
                 tags: Vec::new(),
+                locked: false,
                 untitled: true,
             },
         };
@@ -521,8 +623,28 @@ mod macos {
         tags.setFrameSize(NSSize::new(0.0, name.frame().size.height));
         let place = place_popup(&original.directory, mtm);
 
+        // A file that doesn't exist yet can't be locked.
+        let locked = (!original.untitled).then(|| {
+            // SAFETY: the target and action are set once the controller exists.
+            let checkbox = unsafe {
+                NSButton::checkboxWithTitle_target_action(
+                    &NSString::from_str("Locked"),
+                    None,
+                    None,
+                    mtm,
+                )
+            };
+            checkbox.setState(if original.locked {
+                NSControlStateValueOn
+            } else {
+                NSControlStateValueOff
+            });
+            checkbox.sizeToFit();
+            checkbox
+        });
         let content = content_view(
             [("Name:", &name), ("Tags:", &tags), ("Where:", &place)],
+            locked.as_deref().map(|c| c as &NSView),
             mtm,
         );
         let controller_view = NSViewController::new(mtm);
@@ -537,6 +659,7 @@ mod macos {
             name: name.clone(),
             tags: tags.clone(),
             place: place.clone(),
+            locked: locked.clone(),
             original,
             cancelled: Cell::new(false),
             committed: Cell::new(false),
@@ -552,7 +675,12 @@ mod macos {
             tags.setDelegate(Some(ProtocolObject::from_ref(&*controller)));
             place.setTarget(Some(&controller));
             place.setAction(Some(sel!(placeChanged:)));
+            if let Some(checkbox) = &locked {
+                checkbox.setTarget(Some(&controller));
+                checkbox.setAction(Some(sel!(lockedChanged:)));
+            }
         }
+        controller.enable_fields();
         if let Some(previous) = CURRENT.replace(Some(controller.clone())) {
             previous.ivars().popover.close();
         }
@@ -577,7 +705,9 @@ mod macos {
         popover.showRelativeToRect_ofView_preferredEdge(rect, view, below);
 
         if popover.isShown() {
-            unsafe { name.selectText(None) };
+            if name.isEnabled() {
+                unsafe { name.selectText(None) };
+            }
         } else {
             // Nothing to wait for: dropping the sender ends the command with `None`.
             controller.ivars().tx.borrow_mut().take();

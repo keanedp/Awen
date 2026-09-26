@@ -8,7 +8,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - `src/documents.rs`: document windows: creating and cascading them, the label → path map, opening files (including from Finder/Explorer: `open_external`), Quit sequencing.
 - `src/terminate.rs`: macOS only: adds `applicationShouldTerminate:` to tao's app delegate so system quit requests prompt about unsaved changes.
 - `src/recent.rs`: File → Open Recent list, persisted to `recent.json` in the app data dir, and mirrored into the Dock menu / Jump List.
-- `src/rename.rs`: the macOS title popover (Name, Tags, Where) and the commands that apply it: `move_document`, `create_document`, `set_file_tags`.
+- `src/rename.rs`: the macOS title popover (Name, Tags, Where, Locked) and the commands that apply it: `move_document`, `create_document`, `set_file_tags`, `set_file_locked` / `is_file_locked`.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
 - `capabilities/default.json`: permissions for plugin and core APIs used by the frontend.
 - `tauri.conf.json`: window config (Overlay title bar on macOS), CSP, bundle settings.

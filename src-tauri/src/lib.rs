@@ -116,7 +116,10 @@ pub fn run() {
             rename::show_document_info,
             rename::move_document,
             rename::create_document,
-            rename::set_file_tags
+            rename::set_file_tags,
+            rename::set_file_locked,
+            rename::is_file_locked,
+            documents::duplicate_document
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
