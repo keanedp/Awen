@@ -58,11 +58,7 @@ impl<R: Runtime> Recent<R> {
     pub fn note(&self, app: &AppHandle<R>, path: String) -> Result<(), String> {
         let noted = path.clone();
         let _ = app.run_on_main_thread(move || system::note(&noted));
-        self.update(app, |paths| {
-            paths.retain(|p| p != &path);
-            paths.insert(0, path);
-            paths.truncate(LIMIT);
-        })
+        self.update(app, |paths| move_to_top(paths, path))
     }
 
     /// Drops `path`, e.g. after it failed to open because it was moved or deleted.
@@ -118,6 +114,12 @@ impl<R: Runtime> Recent<R> {
             None::<&str>,
         )?)
     }
+}
+
+fn move_to_top(paths: &mut Vec<String>, path: String) {
+    paths.retain(|p| p != &path);
+    paths.insert(0, path);
+    paths.truncate(LIMIT);
 }
 
 /// Menu labels: the file name, plus " — folder" where two entries share a name.
@@ -216,4 +218,59 @@ mod system {
 
     #[cfg(not(any(target_os = "macos", windows)))]
     pub fn clear() {}
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn paths(items: &[&str]) -> Vec<String> {
+        items.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn noting_moves_a_path_to_the_top_once() {
+        let mut list = paths(&["/a.md", "/b.md", "/c.md"]);
+        move_to_top(&mut list, "/c.md".into());
+        assert_eq!(list, paths(&["/c.md", "/a.md", "/b.md"]));
+        move_to_top(&mut list, "/d.md".into());
+        assert_eq!(list, paths(&["/d.md", "/c.md", "/a.md", "/b.md"]));
+    }
+
+    #[test]
+    fn the_list_keeps_the_newest_ten() {
+        let mut list = Vec::new();
+        for n in 0..12 {
+            move_to_top(&mut list, format!("/{n}.md"));
+        }
+        assert_eq!(list.len(), LIMIT);
+        assert_eq!(list.first().unwrap(), "/11.md");
+        assert_eq!(list.last().unwrap(), "/2.md");
+    }
+
+    #[test]
+    fn labels_are_file_names() {
+        assert_eq!(
+            labels(&paths(&["/Users/me/Notes.md", "/Users/me/Todo.md"])),
+            ["Notes.md", "Todo.md"]
+        );
+    }
+
+    #[test]
+    fn shared_names_show_their_folder() {
+        assert_eq!(
+            labels(&paths(&[
+                "/work/Notes.md",
+                "/home/Notes.md",
+                "/home/Todo.md"
+            ])),
+            ["Notes.md — work", "Notes.md — home", "Todo.md"]
+        );
+    }
+
+    #[test]
+    fn ampersands_escape_only_on_windows() {
+        let expected = if cfg!(windows) { "R&&D.md" } else { "R&D.md" };
+        assert_eq!(labels(&paths(&["/R&D.md"])), [expected]);
+    }
 }

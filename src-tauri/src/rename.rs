@@ -74,21 +74,7 @@ pub fn move_document(
     from: String,
     to: String,
 ) -> Result<(), String> {
-    check_name(&to)?;
-    if let (Ok(existing), Ok(source)) = (fs::metadata(&to), fs::metadata(&from)) {
-        // A case-only rename finds the file itself on a case-insensitive volume.
-        if !same_file(&existing, &source) {
-            return Err(taken(&to));
-        }
-    }
-    match fs::rename(&from, &to) {
-        Ok(()) => {}
-        Err(e) if e.kind() == ErrorKind::CrossesDevices => {
-            fs::copy(&from, &to).map_err(|e| format!("Could not move to {to}: {e}"))?;
-            fs::remove_file(&from).map_err(|e| format!("Could not remove {from}: {e}"))?;
-        }
-        Err(e) => return Err(format!("Could not move to {to}: {e}")),
-    }
+    move_file(&from, &to)?;
     crate::documents::set_document_path(window, docs, to.clone())?;
     let _ = recent.forget(&app, &from);
     recent.note(&app, to)
@@ -143,6 +129,25 @@ pub fn is_file_locked(path: String) -> bool {
     {
         let _ = path;
         false
+    }
+}
+
+/// Moves the file at `from` to `to`, refusing to replace another file.
+fn move_file(from: &str, to: &str) -> Result<(), String> {
+    check_name(to)?;
+    if let (Ok(existing), Ok(source)) = (fs::metadata(to), fs::metadata(from)) {
+        // A case-only rename finds the file itself on a case-insensitive volume.
+        if !same_file(&existing, &source) {
+            return Err(taken(to));
+        }
+    }
+    match fs::rename(from, to) {
+        Ok(()) => Ok(()),
+        Err(e) if e.kind() == ErrorKind::CrossesDevices => {
+            fs::copy(from, to).map_err(|e| format!("Could not move to {to}: {e}"))?;
+            fs::remove_file(from).map_err(|e| format!("Could not remove {from}: {e}"))
+        }
+        Err(e) => Err(format!("Could not move to {to}: {e}")),
     }
 }
 
@@ -712,5 +717,149 @@ mod macos {
             // Nothing to wait for: dropping the sender ends the command with `None`.
             controller.ivars().tx.borrow_mut().take();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    /// A fresh empty folder, removed when dropped.
+    struct Folder(PathBuf);
+
+    impl Folder {
+        fn new() -> Self {
+            static NEXT: AtomicUsize = AtomicUsize::new(0);
+            let n = NEXT.fetch_add(1, Ordering::SeqCst);
+            let dir = std::env::temp_dir().join(format!("writer-test-{}-{n}", std::process::id()));
+            let _ = fs::remove_dir_all(&dir);
+            fs::create_dir_all(&dir).unwrap();
+            Folder(dir)
+        }
+
+        fn path(&self, name: &str) -> String {
+            self.0.join(name).to_string_lossy().into_owned()
+        }
+
+        fn write(&self, name: &str, text: &str) -> String {
+            let path = self.path(name);
+            fs::write(&path, text).unwrap();
+            path
+        }
+
+        fn names(&self) -> Vec<String> {
+            let mut names: Vec<String> = fs::read_dir(&self.0)
+                .unwrap()
+                .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+                .collect();
+            names.sort();
+            names
+        }
+    }
+
+    impl Drop for Folder {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[test]
+    fn create_writes_a_new_file() {
+        let dir = Folder::new();
+        let path = dir.path("Notes.md");
+        create_document(path.clone(), "# Hello\r\n".into()).unwrap();
+        assert_eq!(fs::read_to_string(path).unwrap(), "# Hello\r\n");
+    }
+
+    #[test]
+    fn create_never_overwrites() {
+        let dir = Folder::new();
+        let path = dir.write("Notes.md", "keep me");
+        let err = create_document(path.clone(), "new".into()).unwrap_err();
+        assert!(err.contains("“Notes.md” is already taken"), "{err}");
+        assert_eq!(fs::read_to_string(path).unwrap(), "keep me");
+    }
+
+    #[test]
+    fn create_rejects_bad_names() {
+        let dir = Folder::new();
+        assert!(create_document(dir.path(".hidden"), String::new()).is_err());
+        assert!(create_document(dir.path(".."), String::new()).is_err());
+        assert_eq!(dir.names(), Vec::<String>::new());
+    }
+
+    #[test]
+    fn move_renames_the_file() {
+        let dir = Folder::new();
+        let from = dir.write("Draft.md", "text");
+        move_file(&from, &dir.path("Final.md")).unwrap();
+        assert_eq!(dir.names(), ["Final.md"]);
+        assert_eq!(fs::read_to_string(dir.path("Final.md")).unwrap(), "text");
+    }
+
+    #[test]
+    fn move_into_another_folder() {
+        let dir = Folder::new();
+        fs::create_dir(dir.path("sub")).unwrap();
+        let from = dir.write("Notes.md", "text");
+        let to = dir.0.join("sub").join("Notes.md");
+        move_file(&from, to.to_str().unwrap()).unwrap();
+        assert_eq!(fs::read_to_string(to).unwrap(), "text");
+        assert!(!Path::new(&from).exists());
+    }
+
+    #[test]
+    fn move_never_overwrites() {
+        let dir = Folder::new();
+        let from = dir.write("Draft.md", "draft");
+        let to = dir.write("Final.md", "final");
+        let err = move_file(&from, &to).unwrap_err();
+        assert!(err.contains("“Final.md” is already taken"), "{err}");
+        assert_eq!(fs::read_to_string(&from).unwrap(), "draft");
+        assert_eq!(fs::read_to_string(&to).unwrap(), "final");
+    }
+
+    // Outside Unix `same_file` can't tell, so a case-only rename counts as taken.
+    #[cfg(unix)]
+    #[test]
+    fn move_can_change_only_the_case() {
+        let dir = Folder::new();
+        let from = dir.write("notes.md", "text");
+        move_file(&from, &dir.path("Notes.md")).unwrap();
+        assert_eq!(dir.names(), ["Notes.md"]);
+    }
+
+    #[test]
+    fn move_rejects_bad_names() {
+        let dir = Folder::new();
+        let from = dir.write("Notes.md", "text");
+        assert!(move_file(&from, &dir.path(".Notes.md")).is_err());
+        assert_eq!(dir.names(), ["Notes.md"]);
+    }
+
+    #[test]
+    fn move_of_a_missing_file_fails() {
+        let dir = Folder::new();
+        assert!(move_file(&dir.path("Gone.md"), &dir.path("New.md")).is_err());
+        assert_eq!(dir.names(), Vec::<String>::new());
+    }
+
+    #[test]
+    fn check_name_rules() {
+        assert!(check_name("/a/Notes.md").is_ok());
+        assert!(check_name("/a/No extension").is_ok());
+        assert!(check_name("/a/.hidden.md").is_err());
+        assert!(check_name("/").is_err());
+        assert!(check_name("").is_err());
+    }
+
+    #[test]
+    fn taken_names_the_file_and_folder() {
+        assert_eq!(
+            taken("/Users/me/Documents/Notes.md"),
+            "The name “Notes.md” is already taken in “Documents”. Please choose a different name."
+        );
     }
 }

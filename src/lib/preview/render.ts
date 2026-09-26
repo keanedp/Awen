@@ -33,7 +33,7 @@ md.core.ruler.push("preview", (state) => {
  * alone (URLs with a scheme, protocol-relative URLs, fragments). Rust lets the
  * asset protocol read only the folders of opened documents.
  */
-function localImage(src: string, folder: string): string | null {
+export function localImage(src: string, folder: string): string | null {
   const drive = /^[a-z]:[\\/]/i.test(src);
   if (!drive && (/^[a-z][a-z0-9+.-]*:/i.test(src) || src.startsWith("//") || src.startsWith("#"))) return null;
   let file: string;

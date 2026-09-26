@@ -113,20 +113,32 @@ export async function pickExportTarget(
   docPath: string | null,
   format: ExportFormat,
 ): Promise<ExportTarget | null> {
-  const name = `${baseName(docPath)}.${format}`;
   if (detectOS() === "mac") {
     return invoke<ExportTarget | null>("choose_export", {
-      name,
+      name: `${baseName(docPath)}.${format}`,
       directory: docPath ? dirName(docPath) : null,
       format,
     });
   }
   const other: ExportFormat = format === "html" ? "pdf" : "html";
   const path = await save({
-    defaultPath: docPath ? `${dirName(docPath)}${docPath.includes("\\") ? "\\" : "/"}${name}` : name,
+    defaultPath: defaultExportPath(docPath, format),
     filters: [exportFilters[format], exportFilters[other]],
   });
-  if (!path) return null;
+  return path ? exportTarget(path, format) : null;
+}
+
+/** Where the export dialog starts: the document's name and folder, with the format's extension. */
+export function defaultExportPath(docPath: string | null, format: ExportFormat): string {
+  const name = `${baseName(docPath)}.${format}`;
+  return docPath ? `${dirName(docPath)}${docPath.includes("\\") ? "\\" : "/"}${name}` : name;
+}
+
+/**
+ * The format follows the extension the user typed or picked in the dialog;
+ * with any other extension, `format`'s is added.
+ */
+export function exportTarget(path: string, format: ExportFormat): ExportTarget {
   const ext = path.split(".").pop()?.toLowerCase();
   if (ext === "html" || ext === "pdf") return { path, format: ext };
   return { path: `${path}.${format}`, format };

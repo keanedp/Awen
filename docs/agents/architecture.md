@@ -16,7 +16,13 @@ How the parts of Writer connect. File-level detail is discoverable from the code
 - **Rust** unit tests go in a `#[cfg(test)] mod tests` at the bottom of the file they test and run with `cargo test`. `#[cfg(windows)]` code can't be tested here (see gotchas.md).
 - **Every feature or fix ships with tests for its logic.** The story's acceptance criteria are the checklist: each one that can be checked without a window gets a test. Put new logic in a plain module (like `editor/tasks.ts`), not in `+page.svelte` or a component, and keep the page to wiring (dispatching, focus, dialogs). If existing logic you're changing is still in the page, move it out first.
 - What tests can't cover (native menus, dialogs, WebView rendering, print/PDF, platform code) is still verified by running the app, and the story stays `Needs verification` until it has been.
-- Covered so far: line endings round trip (`editor/setup.test.ts`) and task ticking, from a preview checkbox's `data-line` to the source edit (`editor/tasks.test.ts`).
+- Covered so far:
+  - `editor/setup.test.ts`: line endings round trip.
+  - `editor/tasks.test.ts`: task ticking, from a preview checkbox's `data-line` to the source edit.
+  - `preview/render.test.ts`: raw HTML and `javascript:` links never survive rendering; highlighted code is escaped; `localImage` path resolution, including Windows paths (mocks `convertFileSrc`).
+  - `files.test.ts`: path helpers and the export dialog's default path and chosen format.
+  - Rust: `rename.rs` (create and move never overwrite, case-only renames, name checks, using a temporary folder) and `recent.rs` (list order and limit, menu labels).
+- Test logic, not glue: when a Tauri command mixes file work with app state, split the file work into a plain function (`rename::move_file`, `recent::move_to_top`) and test that.
 - A known bug gets a `test.fails` with its story ID, so the suite goes red once it's fixed and someone flips it to `test`.
 
 ## Menu → event → action
