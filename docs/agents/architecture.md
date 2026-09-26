@@ -21,7 +21,9 @@ How the parts of Writer connect. File-level detail is discoverable from the code
   - `editor/tasks.test.ts`: task ticking, from a preview checkbox's `data-line` to the source edit.
   - `preview/render.test.ts`: raw HTML and `javascript:` links never survive rendering; highlighted code is escaped; `localImage` path resolution, including Windows paths (mocks `convertFileSrc`).
   - `files.test.ts`: path helpers and the export dialog's default path and chosen format.
-  - Rust: `rename.rs` (create and move never overwrite, case-only renames, name checks, using a temporary folder) and `recent.rs` (list order and limit, menu labels).
+  - `editor/count.test.ts`: word counting (Markdown syntax left out, selections, hyphenated words) and the footer text.
+  - `preferences.test.ts`: saved values are checked and fall back to defaults (mocks `invoke` and `listen`).
+  - Rust: `rename.rs` (create and move never overwrite, case-only renames, name checks, using a temporary folder), `recent.rs` (list order and limit, menu labels) and `preferences.rs` (missing or corrupt file, round trip).
 - Test logic, not glue: when a Tauri command mixes file work with app state, split the file work into a plain function (`rename::move_file`, `recent::move_to_top`) and test that.
 - A known bug gets a `test.fails` with its story ID, so the suite goes red once it's fixed and someone flips it to `test`.
 - Test through the extension the editor actually registers (e.g. run text through `state.facet(EditorView.clipboardInputFilter)`), not a copy of its logic, so the test fails if the extension is dropped from `createState`.
@@ -33,11 +35,21 @@ How the parts of Writer connect. File-level detail is discoverable from the code
 3. `+page.svelte` listens with `appWindow.listen` (not the global `listen`, which would hear every window's events) and dispatches through its `actions` map.
 
 Details:
-- File actions are serialized by a `busy` flag. Undo/redo/preview bypass it so they stay responsive.
+- File actions are serialized by a `busy` flag. Undo/redo, find, Preview and Word Count bypass it (the `immediate` set) so they stay responsive.
 - Undo/redo are custom menu items rather than `PredefinedMenuItem`s. They call CodeMirror's `undo`/`redo` (see decisions.md).
 - Close calls `appWindow.close()`. `onCloseRequested` runs `confirmDiscard()` (Save / Don't Save / Cancel) and can prevent the close.
 - New and Quit never reach the frontend (see Document windows). Open does, unless no window is focused; then Rust shows the Open dialog itself.
 - On macOS, Quit lives in the app menu; on other OSes, File has Exit.
+- **Checkmarks** (View → Preview, View → Word Count) are `CheckMenuItem`s kept by id in `menu::CheckItems`. The menu bar is app-wide but the state is the frontend's, so a window restates them with `setMenuChecked(id, …)` (`set_menu_checked`) whenever the state changes and when it comes forward. A new check item needs adding to `CheckItems` and to the `id` type in `src/lib/menu.ts`.
+
+## Preferences (`src/lib/preferences.ts`, `src-tauri/src/preferences.rs`)
+
+- App-wide settings kept between launches (W-020): today `wordCount` and `exportFormat`.
+- Rust stores them as untyped JSON in `preferences.json` in the app data folder, beside `recent.json`, loaded in `setup`. The frontend owns names, types and defaults: `parsePreferences` checks every saved value and falls back to the default, so an old, newer or hand-edited file can't break the app.
+- `setPreference(key, value)` saves and emits `preference-changed` to every window. Each page listens with the global `listen` (deliberately, unlike menu events) and applies it to its `prefs` state, so all windows follow a change made in one.
+- A new window renders with defaults until `loadPreferences()` resolves. Anything a preference hides waits for `prefsLoaded`, so it doesn't flash up.
+- To add a preference: add it to `Preferences`, `defaults` and `valid` in `preferences.ts`, with a test. Nothing changes in Rust.
+- Window size and position are not preferences: the window-state plugin restores them, for the `main` window only.
 
 ## Document windows (`src-tauri/src/documents.rs`)
 
@@ -76,6 +88,7 @@ Details:
 - Line endings: `EditorState.lineSeparator` is set to the separator detected in the file, and `documentText(view)` returns `state.sliceDoc()`. Together these make a round trip byte-identical. Always read text through `documentText()`.
   - With the separator set, CodeMirror splits inserted text only on that separator. So a `clipboardInputFilter` (`matchLineBreaks`) converts pasted and dropped text to the file's line ending (W-050). Any other path that inserts outside text must do the same.
 - `markdownStyling.ts` dims syntax marks via a `HighlightStyle` (`--markup` colour). A `ViewPlugin` decorates leading `#` marks with `.cm-hanging-mark`, which is absolutely positioned and translated left so headings hang into the margin.
+- **Word count (W-019):** `count.ts` counts words with `Intl.Segmenter`, after blanking the Markdown syntax nodes (marks, URLs, images, HTML tags; see the `syntax` set) in the editor's own parse tree. `createState`'s `onSelect` hook schedules a recount 150ms after typing or selecting stops; the whole document is only recounted when `state.doc` changed. Nothing is counted while the footer is hidden. The footer is `src/lib/ui/WordCount.svelte`; in preview it shows the whole document, since the selection is hidden.
 - Layout: a centered column (`max-width: var(--measure)`, 66ch) with bottom padding of 40vh, so the end of the text can scroll up the screen.
 - **Find (W-022):** `find.ts` adds `@codemirror/search` with a `createPanel` that mounts `src/lib/ui/FindBar.svelte` (Svelte `mount`) as a top panel.
   - The bar dispatches `setSearchQuery` as you type. Menu items call `openFind`, `findNext` and the other commands in `+page.svelte`; find leaves preview first.
@@ -140,5 +153,5 @@ Details:
 - **Toolbar buttons:** `src/lib/ui/ToolbarButton.svelte`, sized by `--toolbar-button-*` tokens.
   - They cancel `mousedown` so they never steal focus from the editor.
   - Toggle buttons pass `pressed`.
-  - A toolbar toggle that also has a menu item should use a `CheckMenuItem`, synced from frontend state the way Preview is (`set_preview_checked`).
+  - A toolbar toggle that also has a menu item should use a `CheckMenuItem`, synced from frontend state the way Preview is (see Checkmarks under Menu → event → action).
 - **Planned:** Bits UI headless components wrapped in `src/lib/ui/`, themed by the tokens. Konsta UI on mobile.

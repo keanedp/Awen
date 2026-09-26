@@ -2,6 +2,7 @@ mod accent;
 mod documents;
 mod export;
 mod menu;
+mod preferences;
 mod recent;
 mod rename;
 mod terminate;
@@ -18,13 +19,18 @@ fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
     window.print().map_err(|e| format!("Could not print: {e}"))
 }
 
-/// The frontend owns preview state; this keeps the menu checkmark in step with it.
+/// The frontend owns preview and view settings; this keeps a menu checkmark in step with them.
 #[tauri::command]
-fn set_preview_checked(
-    item: tauri::State<'_, menu::PreviewMenuItem<tauri::Wry>>,
+fn set_menu_checked(
+    items: tauri::State<'_, menu::CheckItems<tauri::Wry>>,
+    id: String,
     checked: bool,
 ) -> Result<(), String> {
-    item.0.set_checked(checked).map_err(|e| e.to_string())
+    let item = items
+        .0
+        .get(id.as_str())
+        .ok_or(format!("No menu item {id}"))?;
+    item.set_checked(checked).map_err(|e| e.to_string())
 }
 
 /// Puts a document at the top of File → Open Recent.
@@ -58,10 +64,12 @@ pub fn run() {
                 .build(),
         )
         .manage(documents::Documents::default())
+        .manage(preferences::Preferences::default())
         .menu(menu::build)
         .setup(|app| {
             terminate::install(app.handle());
             recent::load(app.handle())?;
+            preferences::load(app.handle())?;
             // macOS passes files as `Opened` events instead of arguments.
             let args = if cfg!(target_os = "macos") {
                 Vec::new()
@@ -105,7 +113,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             write_document,
             print_page,
-            set_preview_checked,
+            set_menu_checked,
+            preferences::preferences,
+            preferences::set_preference,
             note_recent_document,
             documents::take_initial_document,
             documents::open_document,
