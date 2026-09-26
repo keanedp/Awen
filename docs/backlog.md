@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-058**
+Next free ID: **W-060**
 
 ---
 
@@ -232,8 +232,15 @@ As a writer, I want a native-feeling settings window for text size, column width
 - [x] Built with Bits UI components wrapped in `src/lib/ui/` (`Toggle`, `Choice`, `Slider`)
 - [x] Verified in the app on macOS: the window sizes to its content and looks right in light and dark mode; controls work with mouse and keyboard; text size, width and spacing change live in editor and preview but not in print or PDF; the theme switches menus, dialogs and every window; Cmd+W closes Settings; Open… from Settings shows the Open dialog; a relaunch keeps every setting
 
+### W-059 Verify spelling marks on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-057's spelling marks to work in a real build (its `ISpellChecker` code was written against the crate sources and has never been compiled or run).
+- [ ] Misspellings get a red squiggle in the user's language (or US English), and the marks stay after Enter, scrolling and edits elsewhere
+- [ ] Right-clicking a marked word shows suggestions, Ignore, Add to dictionary and working Cut / Copy / Paste; Ignore lasts until quit in every window, Add to dictionary across relaunches
+- [ ] Settings → Check spelling while typing turns it on and off; typing stays smooth in a long document
+
 ### W-057 Spelling marks that stay
-Status: Needs verification · Platforms: macOS, Windows
+Status: Done · Platforms: macOS (Windows verification moved to W-059)
 As a writer, I want every misspelled word underlined until I fix it, not just the word I've just typed.
 WebKit's own checking loses its marks whenever CodeMirror redraws a line (it keeps them on the text nodes CodeMirror rewrites, and only rechecks the word just typed), so misspellings vanish as you write.
 - [x] The system spell checker finds misspellings through Rust (macOS `NSSpellChecker`, Windows `ISpellChecker`), for the visible text and again after a pause in typing, in the system's spelling language
@@ -241,8 +248,7 @@ WebKit's own checking loses its marks whenever CodeMirror redraws a line (it kee
 - [x] Right-clicking a misspelled word shows a native menu with suggestions, Learn Spelling and Ignore Spelling
 - [x] Settings → Check spelling while typing turns this on and off; WebKit's own spell checking and autocorrect are off
 - [x] Unit tested: which ranges are checked and skipped, mapping results back onto the document, updating marks after edits (`editor/spelling.test.ts`, `spelling.rs`)
-- [ ] Verified in the app on macOS: marks stay after Return, scrolling and edits elsewhere; typing stays smooth in a long document
-- [ ] Verified on Windows (written against the crate sources; can't be compiled on the dev Mac)
+- [x] Verified in the app on macOS: marks stay after Return, scrolling and edits elsewhere; typing stays smooth in a long document
 
 ### W-022 Find and replace
 Status: Done · Platforms: macOS (Windows verification moved to W-047)
