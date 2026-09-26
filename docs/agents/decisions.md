@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Ticking a task in preview edits the hidden editor; undo works in preview
+- A click on a preview checkbox changes that one character in the editor's document through a normal CodeMirror transaction, so dirty tracking, undo and saving need nothing extra. The preview isn't re-rendered: the box has already flipped itself, and the click is cancelled if the source line doesn't look like a task.
+- Each tick is its own undo step (`isolateHistory`), so Cmd+Z after ticking several boxes steps back one box at a time.
+- Undo and Redo used to do nothing in preview. They now apply to the document and re-render the preview, because otherwise Cmd+Z right after ticking a box would seem broken.
+
 ## 2026-09-25: Opening from Finder/Explorer reuses a blank window; single instance on Windows
 - A file opened from outside the app goes to an untitled window with no changes if there is one, as TextEdit does. Otherwise it follows the Open rules (bring forward, or a new window). Otherwise launching Writer by double-clicking a file would show the file *and* an empty Untitled window.
 - Rust decides this itself instead of forwarding to the focused window like Open Recent does. The frontend drops file commands while `busy` (e.g. a dialog is open), and a Finder open must never be dropped.
@@ -41,7 +46,8 @@ It matches focused editors' focused feel, it is the only layout that works at ph
 The webview has access to Tauri's backend (IPC), so a document must not be able to inject HTML or scripts. The default `validateLink` already blocks `javascript:` URLs, so no sanitizer is needed. Don't enable `html` without adding sanitization.
 
 ## 2026-09-24: Task lists via `markdown-it-task-lists`
-It works with markdown-it 14. `@hedgedoc/markdown-it-task-lists` has types but crashes (see gotchas.md). Checkboxes are read-only in preview, and they are custom-drawn in CSS for consistency across webviews.
+It works with markdown-it 14. `@hedgedoc/markdown-it-task-lists` has types but crashes (see gotchas.md). Checkboxes are custom-drawn in CSS for consistency across webviews.
+- Superseded in part (W-012, 2026-09-25): checkboxes are now clickable in the in-app preview. They stay disabled in print and exports.
 
 ## 2026-09-23: Custom Undo/Redo menu items
 A native accelerator for Cmd+Z swallows the keystroke before CodeMirror sees it. The menu items call CodeMirror's history instead.

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { EditorView } from "@codemirror/view";
-  import { redo, undo } from "@codemirror/commands";
+  import { isolateHistory, redo, undo } from "@codemirror/commands";
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
   import { message } from "@tauri-apps/plugin-dialog";
   import { createState, documentText } from "$lib/editor/setup";
@@ -80,7 +80,7 @@
     if (!previewing) {
       const top = view.lineBlockAtHeight(view.scrollDOM.scrollTop);
       previewLine = view.state.doc.lineAt(top.from).number - 1;
-      previewHtml = renderMarkdown(documentText(view), { sourceLines: true });
+      previewHtml = renderMarkdown(documentText(view), { preview: true });
       previewing = true;
       return;
     }
@@ -90,6 +90,29 @@
       effects: EditorView.scrollIntoView(view.state.doc.line(line).from, { y: "start" }),
     });
     view.focus();
+  }
+
+  /** Ticks or unticks the task list item on 0-based source `line`; false if it isn't one. */
+  function toggleTask(line: number): boolean {
+    if (line >= view.state.doc.lines) return false;
+    const { from, text } = view.state.doc.line(line + 1);
+    // Optional blockquote marks, a list marker, then the box.
+    const match = /^(?:\s*>)*\s*(?:[-*+]|\d{1,9}[.)])\s+\[([ xX])\]/.exec(text);
+    if (!match) return false;
+    const at = from + match[0].length - 2;
+    view.dispatch({
+      changes: { from: at, to: at + 1, insert: match[1] === " " ? "x" : " " },
+      // Each tick is its own undo step.
+      annotations: isolateHistory.of("full"),
+    });
+    return true;
+  }
+
+  /** Undo/redo also work in preview, which is re-rendered to show the result. */
+  function runHistory(command: typeof undo) {
+    if (command(view) && previewing) {
+      previewHtml = renderMarkdown(documentText(view), { preview: true });
+    }
   }
 
   async function showError(err: unknown) {
@@ -191,8 +214,8 @@
     print,
     // onCloseRequested handles unsaved changes. New and Quit are handled in Rust.
     close: () => appWindow.close(),
-    undo: () => previewing || undo(view),
-    redo: () => previewing || redo(view),
+    undo: () => runHistory(undo),
+    redo: () => runHistory(redo),
     preview: togglePreview,
   };
 
@@ -260,7 +283,13 @@
   <main class="min-h-0 flex-1" class:hidden={previewing} bind:this={host}></main>
   {#if previewing}
     <div class="min-h-0 flex-1">
-      <Preview bind:this={preview} html={previewHtml} line={previewLine} onexit={togglePreview} />
+      <Preview
+        bind:this={preview}
+        html={previewHtml}
+        line={previewLine}
+        onexit={togglePreview}
+        ontoggletask={toggleTask}
+      />
     </div>
   {/if}
 </div>

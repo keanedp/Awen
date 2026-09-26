@@ -64,7 +64,7 @@ Details:
 ## Rendering (`src/lib/preview/render.ts`)
 
 - There is one markdown-it instance, shared by preview, print, PDF and HTML export. Settings: `html: false`, `linkify`, `typographer`, plus `markdown-it-task-lists`.
-- `renderMarkdown(text, { sourceLines: true })` adds `data-line="<source line>"` to block tokens. Only the in-app preview uses this, to match scroll position. Exports omit it.
+- `renderMarkdown(text, { preview: true })` is used only by the in-app preview. It adds `data-line="<0-based source line>"` to block tokens (for scroll matching and task toggling) and removes `disabled` from task checkboxes. Exports and print omit both.
 
 ## Preview (replace-style)
 
@@ -77,6 +77,7 @@ Details:
   - http(s)/mailto links open via `@tauri-apps/plugin-opener`;
   - nothing ever navigates the webview.
 - Esc also exits.
+- **Ticking a task (W-012):** the click passes its `li`'s `data-line` to `toggleTask()` in `+page.svelte`, which flips `[ ]`/`[x]` on that line of the hidden editor. Undo/Redo in preview run on the editor and re-render `previewHtml`.
 
 ## Print, PDF and HTML export
 

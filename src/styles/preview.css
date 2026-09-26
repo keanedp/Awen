@@ -33,7 +33,9 @@
   padding-left: 1.5em;
 }
 .preview ul { list-style: disc; }
-.preview ol { list-style: decimal; }
+/* Markers hang in the padding. WebKit draws "10. " (2.25em in the writing font);
+   anything wider is cut off by the page edge in print and PDF, where .preview has no padding. */
+.preview ol { list-style: decimal; padding-left: 2.5em; }
 .preview li > :is(ul, ol) { margin-bottom: 0; }
 
 .preview strong { font-weight: 700; }

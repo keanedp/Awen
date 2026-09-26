@@ -92,10 +92,13 @@ As a writer, I want `- [ ]` and `- [x]` to show as checkboxes in preview and exp
 - [x] Checked items are visually muted
 
 ### W-012 Tick task checkboxes in preview
-Status: Todo · Platforms: all
+Status: Needs verification · Platforms: all
 As a writer, I want to click a checkbox in preview to tick it, so I can use documents as to-do lists.
-- [ ] Clicking a checkbox toggles `[ ]` ↔ `[x]` on the matching source line
-- [ ] The change is undoable and marks the document as edited
+- [x] Clicking a checkbox toggles `[ ]` ↔ `[x]` on the matching source line (also nested, ordered and quoted items)
+- [x] The change is undoable and marks the document as edited (Undo/Redo also work while in preview)
+- [x] Checkboxes stay non-interactive in print and exports
+- [ ] Verified by clicking through on macOS
+- [ ] Verified on Windows
 
 ### W-013 Export to HTML
 Status: Done · Platforms: macOS, Windows
@@ -126,20 +129,6 @@ As a writer, I want to print my document (Cmd/Ctrl+P) with clean paper typograph
 - [x] Verified that the whole document prints on macOS, not just the visible part
 - [ ] Verified on Windows
 
-### W-017 Focus mode
-Status: Todo · Platforms: all
-As a writer, I want everything except the sentence or paragraph I'm writing to fade, so I can concentrate on the current thought.
-- [ ] View menu toggle with shortcut; choice of sentence or paragraph
-- [ ] Everything outside the focused unit is dimmed and follows the cursor as I type
-- [ ] Works in light and dark mode, and doesn't affect preview or exports
-
-### W-018 Typewriter scrolling
-Status: Todo · Platforms: all
-As a writer, I want the line I'm typing to stay vertically centered, so my eyes stay in one place.
-- [ ] View menu toggle with shortcut
-- [ ] The cursor line stays centered while typing and moving the cursor
-- [ ] Works together with focus mode
-
 ### W-019 Word count and reading time
 Status: Todo · Platforms: all
 As a writer, I want to see word count and reading time, so I can track length without leaving the editor.
@@ -150,7 +139,7 @@ As a writer, I want to see word count and reading time, so I can track length wi
 ### W-020 Remember preferences
 Status: Todo · Platforms: all
 As a writer, I want the app to remember my view settings between launches.
-- [ ] Focus mode, typewriter mode, word-count visibility and last export format persist
+- [ ] Word-count visibility and last export format persist
 - [ ] Window size and position persist (already handled by window-state; verify)
 
 ### W-021 Settings window
@@ -165,6 +154,22 @@ Status: Todo · Platforms: all
 As a writer, I want to find and replace text with the standard shortcuts.
 - [ ] Cmd/Ctrl+F find, Cmd/Ctrl+G next, find and replace, via menu items
 - [ ] Search panel styled to match the OS, not CodeMirror's default
+
+### W-017 Focus mode
+Status: Todo · Platforms: all
+As a writer, I want everything except the sentence or paragraph I'm writing to fade, so I can concentrate on the current thought.
+- [ ] View menu toggle with shortcut; choice of sentence or paragraph
+- [ ] Everything outside the focused unit is dimmed and follows the cursor as I type
+- [ ] Works in light and dark mode, and doesn't affect preview or exports
+- [ ] The on/off setting and sentence/paragraph choice persist between launches (using W-020's preferences store)
+
+### W-018 Typewriter scrolling
+Status: Todo · Platforms: all
+As a writer, I want the line I'm typing to stay vertically centered, so my eyes stay in one place.
+- [ ] View menu toggle with shortcut
+- [ ] The cursor line stays centered while typing and moving the cursor
+- [ ] Works together with focus mode
+- [ ] The on/off setting persists between launches (using W-020's preferences store)
 
 ### W-023 Recent files and open with
 Status: Needs verification (Windows only) · Platforms: macOS, Windows

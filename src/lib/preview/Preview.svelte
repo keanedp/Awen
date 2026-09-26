@@ -2,7 +2,18 @@
   import { onMount } from "svelte";
   import { openUrl } from "@tauri-apps/plugin-opener";
 
-  let { html, line, onexit }: { html: string; line: number; onexit: () => void } = $props();
+  let {
+    html,
+    line,
+    onexit,
+    ontoggletask,
+  }: {
+    html: string;
+    line: number;
+    onexit: () => void;
+    /** Ticks or unticks the task on a 0-based source line; false if that failed. */
+    ontoggletask: (line: number) => boolean;
+  } = $props();
 
   let scroller: HTMLElement;
 
@@ -26,9 +37,19 @@
     scroller.focus();
   });
 
-  // The webview must never navigate away from the app.
   function onclick(e: MouseEvent) {
-    const link = (e.target as Element).closest("a");
+    const target = e.target as Element;
+    if (target.matches(".task-list-item-checkbox")) {
+      // The box has already flipped; undo that if the source couldn't follow.
+      const item = target.closest<HTMLElement>("li[data-line]");
+      if (!item || !ontoggletask(Number(item.dataset.line))) e.preventDefault();
+      // Keep Esc and the menu shortcuts working from the preview.
+      scroller.focus();
+      return;
+    }
+
+    // The webview must never navigate away from the app.
+    const link = target.closest("a");
     if (!link) return;
     e.preventDefault();
     const href = link.getAttribute("href") ?? "";
