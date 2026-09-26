@@ -2,6 +2,14 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-26: Format menu (W-060)
+- Modelled on focused editors' (`screenshots/format_menu.png`), with its shortcuts. The Headings and Lists submenus weren't in the screenshot: headings take ⌘1–⌘6 (as in Bear and Typora; ⌘0 is Actual Size), lists have no shortcuts yet. Blockquote shows as ⇧⌘. rather than ⌘>, since muda can't label a shifted key; it's the same keys on a US keyboard.
+- Italic writes `*`, bold `**`, as the preview's markdown-it reads them anywhere, even inside a word (`_` doesn't work there). Both `*` and `_` are recognised when removing a style.
+- Every style is a toggle, and runs of `*` are read by count (three = bold and italic), so bold and italic can be added and removed independently.
+- Highlight writes `==text==`, rendered by `markdown-it-mark`. It isn't CommonMark, but it's what focused editors, Obsidian and Bear write.
+- The menu is disabled in preview and on a locked document, rather than offering to unlock as typing does: a menu command the user can see is greyed out explains itself.
+- On Windows, Strikethrough and Clear Styles use Ctrl+Alt, which is AltGr on some keyboard layouts. Check this in W-060's Windows verification.
+
 ## 2026-09-26: The editor draws spelling marks with the system checker (W-057)
 - WebKit's continuous spell checking kept marks on the text nodes CodeMirror rewrites, and only rechecks the word just typed, so misspellings vanished as you wrote (`screenshots/spellcheck.png`). Neither side can be configured out of that.
 - So Rust asks `NSSpellChecker` / `ISpellChecker` (the same dictionaries, learned words and language settings as other apps), and the editor draws the marks and the suggestions menu. Marks now also behave the same on both OSes.

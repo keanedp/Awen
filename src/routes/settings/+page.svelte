@@ -2,7 +2,7 @@
   import { onMount, tick } from "svelte";
   import { LogicalSize } from "@tauri-apps/api/dpi";
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-  import { setMenuChecked } from "$lib/menu";
+  import { setFormatEnabled, setMenuChecked } from "$lib/menu";
   import { applyAccent, applyPlatform, type OS } from "$lib/platform";
   import {
     defaults,
@@ -103,8 +103,13 @@
     const unlisten = [
       onPreferenceChanged((change) => Object.assign(prefs, change)),
       appWindow.listen<string>("menu", ({ payload }) => onMenu(payload)),
-      // The user may have changed it in System Settings meanwhile.
-      appWindow.onFocusChanged(({ payload: focused }) => focused && applyAccent()),
+      appWindow.onFocusChanged(({ payload: focused }) => {
+        if (!focused) return;
+        // There's no text to format here.
+        setFormatEnabled(false);
+        // The user may have changed it in System Settings meanwhile.
+        applyAccent();
+      }),
     ];
 
     return () => {

@@ -111,3 +111,18 @@ describe("localImage", () => {
     expect(renderMarkdown("![alt](photo.png)")).toContain('src="photo.png"');
   });
 });
+
+describe("highlight", () => {
+  test("==text== renders as highlighted, in preview and exports", () => {
+    expect(renderMarkdown("Some ==marked== words")).toContain("<p>Some <mark>marked</mark> words</p>");
+    expect(renderMarkdown("Some ==marked== words", { preview: true })).toContain("<mark>marked</mark>");
+  });
+
+  test("its contents stay escaped", () => {
+    expect(renderMarkdown("==<script>x</script>==")).toContain("<mark>&lt;script&gt;x&lt;/script&gt;</mark>");
+  });
+
+  test("not inside code", () => {
+    expect(renderMarkdown("`a ==b== c`")).toContain("<code>a ==b== c</code>");
+  });
+});

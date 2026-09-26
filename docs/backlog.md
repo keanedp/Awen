@@ -264,21 +264,22 @@ As a Windows user, I want the W-022 find flyout and shortcuts to work in a real 
 - [ ] Flyout looks right in light and dark mode (Segoe Fluent Icons, field underline, shadow) and doesn't cover the match it scrolls to
 
 ### W-060 Format menu
-Status: Todo · Platforms: all
+Status: Needs verification · Platforms: all
 As a writer, I want a Format menu that applies Markdown formatting to the selected text, like focused editors (`screenshots/format_menu.png`), so I don't have to type the syntax by hand.
-- [ ] Format menu between Edit and View, with the same groups and shortcuts as focused editors (Cmd on macOS, Ctrl on Windows):
-  - Headings ▸ (Heading 1–6), Lists ▸ (Bulleted, Numbered, Task), Blockquote ⌘>, Body (removes heading, list and quote markers)
+- [x] Format menu between Edit and View, with the same groups and shortcuts as focused editors (Cmd on macOS, Ctrl on Windows):
+  - Headings ▸ (Heading 1–6, ⌘1–⌘6), Lists ▸ (Bulleted, Numbered, Task), Blockquote ⇧⌘., Body (removes heading, list and quote markers)
   - Bold ⌘B, Italic ⌘I, Strikethrough ⌥⌘U, Highlight ⇧⌘U
   - Code ⌘J, Code Block ⇧⌘J
   - Add Link ⌘K, Add Horizontal Rule
   - Clear Styles ⌥⌘⌫ (removes inline and line formatting from the selection)
-- [ ] Inline styles wrap the selection in their markers (`**`, `*`, `~~`, `==`, `` ` ``). Applying one to text that already has it removes it. With no selection, it inserts empty markers with the cursor between them
-- [ ] Line styles (headings, lists, blockquote, Body) apply to every line the selection touches and replace any other line style. Applying the same one again removes it. Numbered lists count up from 1
-- [ ] Code Block wraps the selected lines in a fence. Add Link puts the selection in `[text]()` with the cursor in the URL, or puts a selected URL in `[](url)` with the cursor in the text
-- [ ] Each change is a single undo step, keeps the text selected, and keeps the file's line endings. The items are disabled in preview and when the document is locked
-- [ ] The preview, exports and print render `==highlight==` as highlighted text
-- [ ] Unit tested: wrap/unwrap/toggle for each style, multi-line selections, empty selections, mixed line styles, CRLF files (logic in `src/lib/editor/`, not `+page.svelte`)
-- [ ] Verified in the app on macOS and Windows
+- [x] Inline styles wrap the selection in their markers (`**`, `*`, `~~`, `==`, `` ` ``). Applying one to text that already has it removes it. With no selection, it inserts empty markers with the cursor between them
+- [x] Line styles (headings, lists, Body) apply to every line the selection touches and replace any other heading or list marker; Blockquote wraps what's there instead. Applying the same one again removes it. Numbered lists count up from 1
+- [x] Code Block wraps the selected lines in a fence. Add Link puts the selection in `[text]()` with the cursor in the URL, or puts a selected URL in `[](url)` with the cursor in the text
+- [x] Each change is a single undo step, keeps the text selected, and keeps the file's line endings. The items are disabled in preview and when the document is locked
+- [x] The preview, exports and print render `==highlight==` as highlighted text
+- [x] Unit tested: wrap/unwrap/toggle for each style, multi-line selections, empty selections, mixed line styles, CRLF files (logic in `src/lib/editor/`, not `+page.svelte`)
+- [ ] Verified in the app on macOS: every item and shortcut, disabled in preview, on a locked document and in Settings, undo, highlight in preview, PDF and print
+- [ ] Verified in the app on Windows (never compiled there; check Ctrl+Alt+U and Ctrl+Alt+Backspace with AltGr keyboard layouts)
 
 ### W-061 More Format menu items
 Status: Todo · Platforms: all

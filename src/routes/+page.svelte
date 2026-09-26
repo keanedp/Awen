@@ -11,6 +11,7 @@
   import { createState, documentText, setReadOnly, setSpellcheck } from "$lib/editor/setup";
   import { systemSpellChecker } from "$lib/spellchecker";
   import { taskToggle } from "$lib/editor/tasks";
+  import { formatCommands } from "$lib/editor/format";
   import { exportHtml } from "$lib/export/html";
   import {
     baseName,
@@ -36,7 +37,7 @@
     writeDocument,
   } from "$lib/files";
   import { applyAccent, applyPlatform, type OS } from "$lib/platform";
-  import { noteRecentDocument, setMenuChecked } from "$lib/menu";
+  import { noteRecentDocument, setFormatEnabled, setMenuChecked } from "$lib/menu";
   import {
     defaults,
     loadPreferences,
@@ -121,6 +122,10 @@
   });
   $effect(() => {
     setMenuChecked("code_highlighting", prefs.codeHighlighting);
+  });
+  // Formatting only applies in the editor, to a document that can be changed.
+  $effect(() => {
+    setFormatEnabled(!previewing && !locked);
   });
 
   // The editor exists once mounted; before that, `newState` takes the setting.
@@ -256,6 +261,17 @@
       annotations: isolateHistory.of("full"),
     });
     return true;
+  }
+
+  /** Applies a Format menu command (W-060) to the selection, as one undo step. */
+  function format(id: string) {
+    // The menu is disabled then, but a shortcut may still get here. The find bar keeps its keys.
+    if (previewing || locked || document.activeElement instanceof HTMLInputElement) return;
+    const spec = formatCommands[id](view.state);
+    if (spec) {
+      view.dispatch(spec, { annotations: isolateHistory.of("full"), scrollIntoView: true, userEvent: "input.format" });
+    }
+    view.focus();
   }
 
   /** Undo/redo also work in preview, which is re-rendered to show the result. */
@@ -439,6 +455,7 @@
     text_bigger: () => changeView("text_bigger"),
     text_smaller: () => changeView("text_smaller"),
     text_actual: () => changeView("text_actual"),
+    ...Object.fromEntries(Object.keys(formatCommands).map((id) => [id, () => format(id)])),
   };
 
   /** A View menu preference, applied here at once so key repeats build on it, then in every window. */
@@ -470,6 +487,7 @@
     "text_bigger",
     "text_smaller",
     "text_actual",
+    ...Object.keys(formatCommands),
   ]);
 
   /** Runs a file command unless another one is still in progress. */
@@ -538,6 +556,7 @@
         setMenuChecked("preview", previewing);
         setMenuChecked("word_count", prefs.wordCount);
         setMenuChecked("code_highlighting", prefs.codeHighlighting);
+        setFormatEnabled(!previewing && !locked);
         refreshLocked();
         // The user may have changed it in System Settings meanwhile.
         applyAccent();
