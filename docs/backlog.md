@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-062**
+Next free ID: **W-063**
 
 ---
 
@@ -263,8 +263,16 @@ As a Windows user, I want the W-022 find flyout and shortcuts to work in a real 
 - [ ] Edit menu: Find… Ctrl+F, Find Next F3, Find Previous Shift+F3, Replace… Ctrl+H
 - [ ] Flyout looks right in light and dark mode (Segoe Fluent Icons, field underline, shadow) and doesn't cover the match it scrolls to
 
+### W-062 Verify the Format menu on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-060's Format menu to work in a real build (its menu code has never been compiled or run on Windows).
+- [ ] Format sits between Edit and View; every item works from the menu and its Ctrl shortcut (Blockquote is Ctrl+Shift+.)
+- [ ] Ctrl+Alt+U (Strikethrough) and Ctrl+Alt+Backspace (Clear Styles) don't clash with AltGr on keyboard layouts that use it (e.g. German, Polish)
+- [ ] The items are greyed out in preview, on a locked document and in Settings; each change is one undo step and keeps CRLF line endings
+- [ ] `==highlight==` shows highlighted in preview, HTML export, PDF and print
+
 ### W-060 Format menu
-Status: Needs verification · Platforms: all
+Status: Done · Platforms: macOS (Windows verification moved to W-062)
 As a writer, I want a Format menu that applies Markdown formatting to the selected text, like focused editors (`screenshots/format_menu.png`), so I don't have to type the syntax by hand.
 - [x] Format menu between Edit and View, with the same groups and shortcuts as focused editors (Cmd on macOS, Ctrl on Windows):
   - Headings ▸ (Heading 1–6, ⌘1–⌘6), Lists ▸ (Bulleted, Numbered, Task), Blockquote ⌘> (Ctrl+Shift+. on Windows), Body (removes heading, list and quote markers)
@@ -278,8 +286,7 @@ As a writer, I want a Format menu that applies Markdown formatting to the select
 - [x] Each change is a single undo step, keeps the text selected, and keeps the file's line endings. The items are disabled in preview and when the document is locked
 - [x] The preview, exports and print render `==highlight==` as highlighted text
 - [x] Unit tested: wrap/unwrap/toggle for each style, multi-line selections, empty selections, mixed line styles, CRLF files (logic in `src/lib/editor/`, not `+page.svelte`)
-- [ ] Verified in the app on macOS: every item and shortcut, disabled in preview, on a locked document and in Settings, undo, highlight in preview, PDF and print
-- [ ] Verified in the app on Windows (never compiled there; check Ctrl+Alt+U and Ctrl+Alt+Backspace with AltGr keyboard layouts)
+- [x] Verified in the app on macOS: every item and shortcut, disabled in preview, on a locked document and in Settings, undo, highlight in preview, PDF and print
 
 ### W-061 More Format menu items
 Status: Todo · Platforms: all
