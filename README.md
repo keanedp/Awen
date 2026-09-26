@@ -1,7 +1,154 @@
-# Tauri + SvelteKit + TypeScript
+# Writer
 
-This template should help get you started developing with Tauri, SvelteKit and TypeScript in Vite.
+**A calm place to write.** Writer is a focused Markdown editor for macOS and Windows. It's just you, your words and a clean column of text. There are no toolbars full of buttons, no accounts and no cloud lock-in. Your writing stays in plain `.md` files that you own and that open anywhere.
 
-## Recommended IDE Setup
+Writer is built to feel like it belongs on your computer. On a Mac it looks and behaves like a Mac app. On Windows it looks and behaves like a Windows 11 app.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+---
+
+## Why Writer
+
+- **Distraction-free by design.** Text sits in a centred column about 66 characters wide, set in the Classic Mono typeface. Markdown marks like `#` and `*` fade into the background, and headings hang into the margin, so the page reads like prose and not like code.
+- **Plain files, no lock-in.** Writer opens and saves ordinary Markdown files. It even keeps each file's original line endings, so saving never rewrites a file you didn't change.
+- **Never lose your work.** Writer asks before closing a document with unsaved changes, including when you quit, log out or restart.
+- **Native on every platform.** Writer uses real system menus, your system accent colour, light and dark mode, and your platform's keyboard shortcuts.
+
+## Features
+
+### Writing
+- **Clean Markdown editing.** Syntax is dimmed rather than hidden, so you always know what you've typed.
+- **Spell checking that stays put.** Your system's spell checker underlines mistakes, and the underlines stay until you fix them. Right-click a word for suggestions, Learn Spelling or Ignore.
+- **Find and replace.** A find bar styled like your OS, with the standard shortcuts.
+- **Word count and reading time.** Shown in a quiet footer that switches to the selection's count when you select text. You can hide it from the View menu.
+- **Code-friendly.** Fenced code blocks can get light, muted syntax highlighting in the editor if you like.
+
+### Preview and publishing
+- **One-keystroke preview.** Press **⌘R** / **Ctrl+R** (or click ▷ in the title bar) to see your document rendered, and press it again to go back to where you were. Links open in your browser, and images next to your document show inline.
+- **Tick off tasks.** Click `- [ ]` checkboxes in the preview to tick them, and the change is made in your Markdown.
+- **Export to PDF.** Get a properly paginated PDF with clean paper typography, without going through the print dialog.
+- **Export to HTML.** Get a single self-contained file with the styles and fonts built in, ready to share or publish. It follows the reader's light or dark mode.
+- **Print.** Prints black on white, whatever your theme.
+
+### Feels at home
+- **One document per window**, with Open Recent, the Dock menu (macOS) and Jump Lists (Windows).
+- **Opens `.md` files from Finder or Explorer.** Double-click a file, or use Open With.
+- **Rename, tag and move from the title bar** (macOS). Click the document's name, just like in Apple's own apps. You can also lock a document to protect it from accidental edits.
+- **Settings that follow you.** Change the text size, column width (Narrow, Medium or Wide), line spacing and theme (Match System, Light or Dark). Changes apply live in every window and are remembered between launches.
+
+<p align="center"><img src="screenshots/settings.png" alt="Writer's Settings window on macOS in dark mode" width="520"></p>
+
+### Coming soon
+Focus mode, typewriter scrolling, a library sidebar with full-text search, and Writer on iPhone, iPad and Android. See [`docs/backlog.md`](docs/backlog.md) for the full roadmap.
+
+---
+
+## Download and install
+
+Download the latest version for your system from this repository's **Releases** page.
+
+### macOS
+1. Download `Writer_<version>_aarch64.dmg` (Apple silicon) or `Writer_<version>_x64.dmg` (Intel).
+2. Open the `.dmg` and drag **Writer** into your **Applications** folder.
+3. Eject the disk image, then open Writer from Applications or Launchpad.
+
+> **First launch:** Writer isn't notarized by Apple yet, so macOS may say it "can't be opened". Right-click (or Control-click) Writer in Applications, choose **Open**, then click **Open** again. You only need to do this once. On macOS 15 and later, go to **System Settings → Privacy & Security** and click **Open Anyway**.
+
+### Windows (Windows 10 or 11)
+1. Download `Writer_<version>_x64-setup.exe` (or the `.msi` if you prefer).
+2. Run the installer and follow the steps.
+3. Start Writer from the Start menu. `.md` files can now be opened with Writer.
+
+> **SmartScreen:** the installer isn't signed yet, so Windows may show "Windows protected your PC". Click **More info → Run anyway**.
+>
+> Windows support is newer than macOS support, and some features are still being checked on real Windows machines. If something looks wrong, please open an issue.
+
+### Keyboard shortcuts
+
+| Action | macOS | Windows |
+| --- | --- | --- |
+| New / Open / Save | ⌘N / ⌘O / ⌘S | Ctrl+N / Ctrl+O / Ctrl+S |
+| Toggle preview | ⌘R | Ctrl+R |
+| Find / Replace | ⌘F / ⌥⌘F | Ctrl+F / Ctrl+H |
+| Find next / previous | ⌘G / ⇧⌘G | F3 / Shift+F3 |
+| Export… | ⇧⌘E | Ctrl+Shift+E |
+| Print | ⌘P | Ctrl+P |
+| Bigger / Smaller / Actual Size | ⌘+ / ⌘− / ⌘0 | Ctrl++ / Ctrl+− / Ctrl+0 |
+| Settings | ⌘, | Ctrl+, |
+
+---
+
+## Development
+
+### Architecture
+
+Writer is a [Tauri 2](https://tauri.app) app. A small Rust backend hosts a web frontend in the system's own web view (WKWebView on macOS, WebView2 on Windows), so the app stays small and fast.
+
+| Layer | Technology | Where |
+| --- | --- | --- |
+| Shell, menus, windows, native dialogs | Rust, Tauri 2, `objc2` (macOS), `windows` / `webview2-com` (Windows) | `src-tauri/` |
+| UI | SvelteKit (static SPA) with Svelte 5 runes and TypeScript | `src/routes/`, `src/lib/` |
+| Editor | CodeMirror 6 with Lezer Markdown parsing | `src/lib/editor/` |
+| Preview and export | markdown-it (`html: false`), with Lezer-based code highlighting | `src/lib/preview/`, `src/lib/export/` |
+| Styling | Tailwind CSS v4 over CSS tokens, with a token file per OS | `src/styles/` |
+| UI components | Bits UI (headless), themed per OS | `src/lib/ui/` |
+
+How it fits together:
+- **Native menus drive the app.** Rust builds the menu bar and forwards each menu item's id to the focused window. The page then dispatches it through an `actions` map.
+- **One document per window.** Rust keeps track of which file each window shows. It also handles opening files from Finder or Explorer, Open Recent, and quitting in order so each window can prompt about unsaved changes.
+- **Preferences** are stored as JSON in the app data folder and broadcast to every window, so a change applies everywhere at once.
+- **Platform-specific parts are native code**: the macOS export sheet and title popover, PDF export, the system spell checker and the accent colour.
+
+The detailed design notes live in [`docs/agents/`](docs/agents/):
+- [`architecture.md`](docs/agents/architecture.md) explains how the pieces connect.
+- [`decisions.md`](docs/agents/decisions.md) records why things are the way they are.
+- [`gotchas.md`](docs/agents/gotchas.md) lists traps that have already been hit.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org) 20 or later, and npm
+- [Rust](https://www.rust-lang.org/tools/install) (stable)
+- Platform tools for Tauri ([guide](https://tauri.app/start/prerequisites/)): Xcode Command Line Tools on macOS; Microsoft C++ Build Tools and WebView2 on Windows
+
+### Build and run
+
+```sh
+npm install
+make dev      # run the app with hot reload (npm run tauri dev)
+make build    # release bundle: .app + .dmg on macOS, .exe + .msi on Windows
+```
+
+Bundles are written to `src-tauri/target/release/bundle/`.
+
+> Opening `.md` files from Finder or Explorer only works in a bundled build (`make build`), not in `make dev`.
+
+### Checks
+
+Run all of these before sending a change. They must be clean:
+
+```sh
+npm test                           # Vitest unit tests (src/**/*.test.ts)
+npm run check                      # svelte-check: 0 errors, 0 warnings
+cd src-tauri && cargo fmt && cargo clippy && cargo test
+```
+
+Then try the change in the running app. Native menus, dialogs, rendering and printing can't be unit tested.
+
+### Contributing
+
+1. **Pick a story.** [`docs/backlog.md`](docs/backlog.md) lists user stories with their status and acceptance criteria. Find open work with:
+   `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`.
+   Mark the story as in progress, and tick its criteria as you go.
+2. **Keep logic testable.** Put new logic in plain TypeScript or Rust modules with unit tests next to them, not in `+page.svelte` or Svelte components.
+3. **Follow the house rules.** They're listed in [`AGENTS.md`](AGENTS.md). In particular:
+   - A new menu item needs its id in `src-tauri/src/menu.rs` (`FORWARDED`) **and** a handler in the page's `actions` map.
+   - Read document text with `documentText()`, never `doc.toString()`.
+   - markdown-it stays `html: false`.
+   - Style with CSS tokens, not hard-coded colours, so per-OS themes and dark mode keep working.
+4. **Update the knowledge base.** If you learn something non-obvious, record it in `docs/agents/` in the same change.
+5. **Help with Windows.** Many stories are waiting for verification on a real Windows build (`Needs verification`). Testing them there is one of the most useful contributions right now.
+
+AI coding agents (Claude Code, Codex and others) are welcome. [`AGENTS.md`](AGENTS.md) is written for them as well as for people.
+
+### Licence
+
+Writer is released under the MIT licence. The bundled Classic Mono font is licensed under the SIL Open Font License (see `static/fonts/LICENSE.md`).
