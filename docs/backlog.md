@@ -59,11 +59,12 @@ As a Mac or Windows user, I want the app to look and behave like other apps on m
 - [x] No text selection or web context menu on app chrome
 
 ### W-050 Pasting keeps the file's line endings
-Status: Todo · Platforms: all
+Status: Needs verification · Platforms: all
 As a writer, I want pasted text to use my document's line endings, so a file never ends up with mixed or broken lines.
-- [ ] Pasting LF text into a CRLF file, or CRLF text into an LF file, gives proper lines in the file's own line ending, with no stray `\r` or `\n` (a `clipboardInputFilter` that normalises to `state.lineBreak` should do it)
-- [ ] Dropped text is normalised too
-- [ ] The two `test.fails` paste tests in `src/lib/editor/setup.test.ts` pass as ordinary tests
+- [x] Pasting LF text into a CRLF file, or CRLF text into an LF file, gives proper lines in the file's own line ending, with no stray `\r` or `\n` (`matchLineBreaks`, a `clipboardInputFilter` in `editor/setup.ts`)
+- [x] Dropped text is normalised too (CodeMirror runs drops through the same filter)
+- [x] The paste tests in `src/lib/editor/setup.test.ts` pass as ordinary tests
+- [ ] Verified in the app: paste CRLF text into an LF file and LF into a CRLF file, save, and check the bytes (e.g. `od -c`) on macOS and Windows
 
 ### W-048 Follow the system accent colour
 Status: Done · Platforms: macOS (Windows verification moved to W-049)

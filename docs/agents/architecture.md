@@ -17,13 +17,14 @@ How the parts of Writer connect. File-level detail is discoverable from the code
 - **Every feature or fix ships with tests for its logic.** The story's acceptance criteria are the checklist: each one that can be checked without a window gets a test. Put new logic in a plain module (like `editor/tasks.ts`), not in `+page.svelte` or a component, and keep the page to wiring (dispatching, focus, dialogs). If existing logic you're changing is still in the page, move it out first.
 - What tests can't cover (native menus, dialogs, WebView rendering, print/PDF, platform code) is still verified by running the app, and the story stays `Needs verification` until it has been.
 - Covered so far:
-  - `editor/setup.test.ts`: line endings round trip.
+  - `editor/setup.test.ts`: line endings round trip, and pasted text takes the file's line endings.
   - `editor/tasks.test.ts`: task ticking, from a preview checkbox's `data-line` to the source edit.
   - `preview/render.test.ts`: raw HTML and `javascript:` links never survive rendering; highlighted code is escaped; `localImage` path resolution, including Windows paths (mocks `convertFileSrc`).
   - `files.test.ts`: path helpers and the export dialog's default path and chosen format.
   - Rust: `rename.rs` (create and move never overwrite, case-only renames, name checks, using a temporary folder) and `recent.rs` (list order and limit, menu labels).
 - Test logic, not glue: when a Tauri command mixes file work with app state, split the file work into a plain function (`rename::move_file`, `recent::move_to_top`) and test that.
 - A known bug gets a `test.fails` with its story ID, so the suite goes red once it's fixed and someone flips it to `test`.
+- Test through the extension the editor actually registers (e.g. run text through `state.facet(EditorView.clipboardInputFilter)`), not a copy of its logic, so the test fails if the extension is dropped from `createState`.
 
 ## Menu → event → action
 
@@ -73,7 +74,7 @@ Details:
 
 - `setup.ts` creates a fresh `EditorState` per document. Loading a document into an existing window calls `view.setState(createState(...))` instead of recreating the `EditorView`.
 - Line endings: `EditorState.lineSeparator` is set to the separator detected in the file, and `documentText(view)` returns `state.sliceDoc()`. Together these make a round trip byte-identical. Always read text through `documentText()`.
-  - With the separator set, CodeMirror splits inserted text only on that separator, so a paste with the other line ending leaves stray `\r` or `\n` inside lines (W-050).
+  - With the separator set, CodeMirror splits inserted text only on that separator. So a `clipboardInputFilter` (`matchLineBreaks`) converts pasted and dropped text to the file's line ending (W-050). Any other path that inserts outside text must do the same.
 - `markdownStyling.ts` dims syntax marks via a `HighlightStyle` (`--markup` colour). A `ViewPlugin` decorates leading `#` marks with `.cm-hanging-mark`, which is absolutely positioned and translated left so headings hang into the margin.
 - Layout: a centered column (`max-width: var(--measure)`, 66ch) with bottom padding of 40vh, so the end of the text can scroll up the screen.
 - **Find (W-022):** `find.ts` adds `@codemirror/search` with a `createPanel` that mounts `src/lib/ui/FindBar.svelte` (Svelte `mount`) as a top panel.
