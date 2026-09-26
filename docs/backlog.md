@@ -267,7 +267,7 @@ As a Windows user, I want the W-022 find flyout and shortcuts to work in a real 
 Status: Needs verification · Platforms: all
 As a writer, I want a Format menu that applies Markdown formatting to the selected text, like focused editors (`screenshots/format_menu.png`), so I don't have to type the syntax by hand.
 - [x] Format menu between Edit and View, with the same groups and shortcuts as focused editors (Cmd on macOS, Ctrl on Windows):
-  - Headings ▸ (Heading 1–6, ⌘1–⌘6), Lists ▸ (Bulleted, Numbered, Task), Blockquote ⇧⌘., Body (removes heading, list and quote markers)
+  - Headings ▸ (Heading 1–6, ⌘1–⌘6), Lists ▸ (Bulleted, Numbered, Task), Blockquote ⌘> (Ctrl+Shift+. on Windows), Body (removes heading, list and quote markers)
   - Bold ⌘B, Italic ⌘I, Strikethrough ⌥⌘U, Highlight ⇧⌘U
   - Code ⌘J, Code Block ⇧⌘J
   - Add Link ⌘K, Add Horizontal Rule

@@ -82,6 +82,8 @@ pub fn run() {
         .menu(menu::build)
         .setup(|app| {
             terminate::install(app.handle());
+            #[cfg(target_os = "macos")]
+            menu::use_character_shortcuts();
             recent::load(app.handle())?;
             preferences::load(app.handle())?;
             // macOS passes files as `Opened` events instead of arguments.
