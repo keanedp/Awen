@@ -13,6 +13,7 @@ Following TextEdit and focused editors: New and Open always make a new window. T
 
 ## 2026-09-25: Open Recent is our own list, not NSDocumentController
 The app isn't NSDocument-based, so AppKit's automatic Open Recent menu isn't available. Rust keeps the list and builds the submenu itself, which also works unchanged on Windows. Adding entries to the system recents (Dock menu, `noteNewRecentDocumentURL:`) only makes sense once Writer registers as a `.md` handler and handles open-file events (rest of W-023).
+- Update (W-040): now that it does, our list stays the source of truth for the menu and is *mirrored* into the system list, not replaced by it. The Windows Clear Menu uses `RemoveAllDestinations` rather than `SHAddToRecentDocs(…, NULL)`, which would clear the user's recent files for every app.
 
 ## 2026-09-25: Title bar toolbar; custom title bar on Windows
 - Preview gets a play button in the title bar, like focused editors. The button, shortcut and menu item all call the same `togglePreview()`. View → Preview is a `CheckMenuItem`, synced from the frontend's state.

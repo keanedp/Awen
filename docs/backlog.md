@@ -23,7 +23,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-041**
+Next free ID: **W-042**
 
 ---
 
@@ -70,13 +70,13 @@ As a writer, I want to swap to a rendered preview and back with one shortcut, so
 - [x] Links open in the default browser; the app never navigates away
 
 ### W-036 Toggle preview from the title bar
-Status: Needs verification · Platforms: macOS, Windows
+Status: Needs verification (Windows only) · Platforms: macOS, Windows
 As a writer, I want a play button in the window header, like focused editors, so I can switch to preview without remembering the shortcut.
 - [x] Play button at the trailing edge of the title bar; tooltip shows the shortcut
 - [x] Button, Cmd/Ctrl+R, View → Preview and Esc all stay in sync: the button shows pressed and the menu item shows a checkmark
 - [x] Clicking the button doesn't take focus or the caret from the editor
 - [x] Windows: custom title bar with title, preview button and native-looking minimize/maximize/close
-- [ ] Verified by clicking through on macOS
+- [x] Verified by clicking through on macOS
 - [ ] Verified on Windows (title bar drag, double-click maximize, edge resize, caption buttons, close prompt)
 
 ### W-037 Snap Layouts on the custom Windows title bar
@@ -105,25 +105,25 @@ As a writer, I want to export a single HTML file that looks like my preview, so 
 - [x] Raw HTML in the document is shown as text, never executed
 
 ### W-014 Export dialog with a format choice
-Status: Needs verification · Platforms: macOS, Windows
+Status: Needs verification (Windows only) · Platforms: macOS, Windows
 As a writer, I want one Export… dialog where I choose the format, like focused editors (`Inspiration/export.png`).
 - [x] macOS: native save sheet with "Export To: HTML / PDF"; switching format updates the extension
 - [x] Windows: HTML / PDF in the "Save as type" list
-- [ ] Verified by clicking through on macOS
+- [x] Verified by clicking through on macOS
 - [ ] Verified on a Windows build (the Windows code has never been compiled)
 
 ### W-015 Export to PDF
-Status: Needs verification · Platforms: macOS, Windows
+Status: Needs verification (Windows only) · Platforms: macOS, Windows
 As a writer, I want to export a properly paginated PDF directly, without going through the print dialog.
 - [x] PDF written to the chosen file, with page margins and page-break rules
-- [ ] Verified on macOS: multiple pages, not blank, not one long page
+- [x] Verified on macOS: multiple pages, not blank, not one long page
 - [ ] Verified on Windows (including whether checked task boxes keep their fill)
 
 ### W-016 Print
-Status: Needs verification · Platforms: macOS, Windows
+Status: Needs verification (Windows only) · Platforms: macOS, Windows
 As a writer, I want to print my document (Cmd/Ctrl+P) with clean paper typography.
 - [x] Prints the rendered document only, black on white, regardless of dark mode
-- [ ] Verified that the whole document prints on macOS, not just the visible part
+- [x] Verified that the whole document prints on macOS, not just the visible part
 - [ ] Verified on Windows
 
 ### W-017 Focus mode
@@ -167,42 +167,49 @@ As a writer, I want to find and replace text with the standard shortcuts.
 - [ ] Search panel styled to match the OS, not CodeMirror's default
 
 ### W-023 Recent files and open with
-Status: Needs verification · Platforms: macOS, Windows
+Status: Needs verification (Windows only) · Platforms: macOS, Windows
 As a writer, I want to reopen recent documents and open `.md` files from Finder/Explorer with Writer.
-- [x] File → Open Recent submenu, clearable (not yet verified by running the app on macOS or Windows)
-- [x] Writer registers as an editor for `.md` files; double-clicking opens the file (bundle declares the association; not yet verified by double-clicking in Finder or Explorer)
+- [x] File → Open Recent submenu, clearable
+- [x] Writer registers as an editor for `.md` files; double-clicking opens the file (bundle declares the association)
 - [x] Opening a file while another is open opens it in a new window (W-024); an untouched Untitled window is reused
-- [ ] Verified on macOS with a bundled build: double-click with Writer closed (opens in the launch window, no extra Untitled), with Writer running, several files at once, a file already open, dropping on the Dock icon
+- [x] Verified on macOS with a bundled build: double-click with Writer closed (opens in the launch window, no extra Untitled), with Writer running, several files at once, a file already open, dropping on the Dock icon
 - [ ] Verified on Windows installer build: association registered, double-click opens in the running instance (single-instance plugin, never compiled)
 
 ### W-024 Multiple windows
-Status: Needs verification · Platforms: macOS, Windows
+Status: Needs verification (Windows only) · Platforms: macOS, Windows
 As a writer, I want each document in its own window, so I can work on several at once.
 - [x] New/Open create new windows; closing the last window follows platform conventions (macOS keeps running, Dock click or New/Open brings a window back; Windows exits)
 - [x] Unsaved-changes prompts work per window; Quit asks each edited window in turn and Cancel stops it
 - [x] Opening a file that is already open brings its window forward
 - [x] macOS Window menu lists the open windows
-- [ ] Verified by running the app on macOS (only startup checked so far)
+- [x] Verified by running the app on macOS
 - [ ] Verified on Windows (never compiled there)
 
 ### W-038 Quit from the Dock or on logout asks about unsaved changes
-Status: Needs verification · Platforms: macOS
+Status: Done · Platforms: macOS
 As a Mac user, I want Quit from the Dock menu, and logging out, to ask about unsaved changes like Quit Writer does.
 - [x] Handle `applicationShouldTerminate:` (tao doesn't forward it) and run the same close-each-window flow
-- [ ] Verified: Dock → Quit with an edited document prompts; Cancel keeps Writer running; logout waits for the prompt
+- [x] Verified: Dock → Quit with an edited document prompts; Cancel keeps Writer running; logout waits for the prompt
 
 ### W-040 Recent documents in the Dock menu and Jump List
-Status: Todo · Platforms: macOS, Windows
+Status: Done · Platforms: macOS (Windows verification moved to W-041)
 As a writer, I want my recent documents in the Dock menu (macOS) and the taskbar Jump List (Windows), like other document apps.
-- [ ] macOS: opened and saved files are added with `NSDocumentController noteNewRecentDocumentURL:`; the Dock menu lists them and choosing one opens it
-- [ ] Clear Menu in File → Open Recent clears the system list too
-- [ ] Windows: recent files appear in the Jump List (`SHAddToRecentDocs`)
+- [x] macOS: opened and saved files are added with `NSDocumentController noteNewRecentDocumentURL:`; the Dock menu lists them and choosing one opens it
+- [x] Clear Menu in File → Open Recent clears the system list too
+- [x] Windows: recent files appear in the Jump List (`SHAddToRecentDocs`); Clear Menu uses `RemoveAllDestinations` (code written, see W-041)
+- [x] Verified on macOS with a bundled build: open and Save As add entries, choosing one opens it, Clear Menu empties it
+
+### W-041 Verify recent documents in the Windows Jump List
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want the W-040 Jump List to work in a real build.
+- [ ] Compiles on Windows (`recent::system`, never built)
+- [ ] Installer build: Jump List shows recents, choosing one opens it in the running instance, Clear Menu empties it
 
 ### W-039 Show unsaved state in the close button
-Status: Needs verification · Platforms: macOS
+Status: Done · Platforms: macOS
 As a Mac user, I want the dot in the red close button when a document has unsaved changes, like other document apps.
 - [x] `NSWindow.documentEdited` follows the dirty flag
-- [ ] Verified by running the app
+- [x] Verified by running the app
 
 ---
 

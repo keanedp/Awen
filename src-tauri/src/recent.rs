@@ -1,5 +1,8 @@
 //! File → Open Recent: a short most-recent-first list of documents, kept in
 //! `recent.json` in the app data folder and mirrored into a native submenu.
+//! Opened files also go to the system's recent documents (the Dock menu on
+//! macOS, the taskbar Jump List on Windows), which hand choices back as
+//! ordinary file opens.
 
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
@@ -53,6 +56,8 @@ pub fn load<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
 impl<R: Runtime> Recent<R> {
     /// Moves `path` to the top of the list.
     pub fn note(&self, app: &AppHandle<R>, path: String) -> Result<(), String> {
+        let noted = path.clone();
+        let _ = app.run_on_main_thread(move || system::note(&noted));
         self.update(app, |paths| {
             paths.retain(|p| p != &path);
             paths.insert(0, path);
@@ -66,6 +71,7 @@ impl<R: Runtime> Recent<R> {
     }
 
     pub fn clear(&self, app: &AppHandle<R>) -> Result<(), String> {
+        let _ = app.run_on_main_thread(system::clear);
         self.update(app, Vec::clear)
     }
 
@@ -139,4 +145,75 @@ fn labels(paths: &[String]) -> Vec<String> {
             }
         })
         .collect()
+}
+
+/// The system's recent documents. Both calls must run on the main thread.
+/// There is no per-file removal: macOS leaves out missing files by itself.
+mod system {
+    #[cfg(target_os = "macos")]
+    pub fn note(path: &str) {
+        use objc2::MainThreadMarker;
+        use objc2_app_kit::NSDocumentController;
+        use objc2_foundation::{NSString, NSURL};
+
+        let Some(mtm) = MainThreadMarker::new() else {
+            return;
+        };
+        let url = NSURL::fileURLWithPath(&NSString::from_str(path));
+        NSDocumentController::sharedDocumentController(mtm).noteNewRecentDocumentURL(&url);
+    }
+
+    #[cfg(target_os = "macos")]
+    pub fn clear() {
+        use objc2::MainThreadMarker;
+        use objc2_app_kit::NSDocumentController;
+
+        let Some(mtm) = MainThreadMarker::new() else {
+            return;
+        };
+        unsafe { NSDocumentController::sharedDocumentController(mtm).clearRecentDocuments(None) };
+    }
+
+    /// The Jump List's Recent category only lists file types registered to
+    /// the app, which the installer's `.md` association does.
+    #[cfg(windows)]
+    pub fn note(path: &str) {
+        use windows::core::HSTRING;
+        use windows::Win32::UI::Shell::{SHAddToRecentDocs, SHARD_PATHW};
+
+        let path = HSTRING::from(path);
+        unsafe { SHAddToRecentDocs(SHARD_PATHW.0 as u32, Some(path.as_ptr().cast())) };
+    }
+
+    /// Clears this app's Jump List only. `SHAddToRecentDocs` with a null path
+    /// would wipe the user's recent files for every app.
+    #[cfg(windows)]
+    pub fn clear() {
+        use windows::Win32::System::Com::{
+            CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER,
+            COINIT_APARTMENTTHREADED,
+        };
+        use windows::Win32::UI::Shell::{ApplicationDestinations, IApplicationDestinations};
+
+        unsafe {
+            // Usually already initialised on the main thread; balance only our own call.
+            let initialised = CoInitializeEx(None, COINIT_APARTMENTTHREADED).is_ok();
+            if let Ok(destinations) = CoCreateInstance::<_, IApplicationDestinations>(
+                &ApplicationDestinations,
+                None,
+                CLSCTX_INPROC_SERVER,
+            ) {
+                let _ = destinations.RemoveAllDestinations();
+            }
+            if initialised {
+                CoUninitialize();
+            }
+        }
+    }
+
+    #[cfg(not(any(target_os = "macos", windows)))]
+    pub fn note(_path: &str) {}
+
+    #[cfg(not(any(target_os = "macos", windows)))]
+    pub fn clear() {}
 }

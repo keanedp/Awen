@@ -52,6 +52,7 @@ Details:
 - Document items have the id `recent:<full path>`. Clicking one emits an `open-recent` event with the path (not a `menu` event) to the focused window, which opens it through the same `busy` guard as other file actions. With no window open, Rust opens it directly. Clear Menu is handled entirely in Rust.
 - Rust notes a file when it opens and forgets one that fails to open (moved or deleted). The frontend calls `noteRecentDocument` when Save As writes to a new path.
 - Labels are the file name, with ` — folder` added when two entries share a name, as macOS does.
+- `note` and `clear` also update the system's recent documents (`recent::system`, on the main thread): `NSDocumentController` on macOS feeds the Dock menu; `SHAddToRecentDocs` and `IApplicationDestinations::RemoveAllDestinations` on Windows feed the Jump List. Picking one arrives as an ordinary external open (`RunEvent::Opened` / a second process forwarded by single-instance), so no extra handling is needed. `forget` doesn't touch the system list.
 
 ## Editor (`src/lib/editor/`)
 
