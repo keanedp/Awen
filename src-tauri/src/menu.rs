@@ -26,6 +26,26 @@ pub const FORWARDED: &[&str] = &[
     "text_actual",
     "export",
     "print",
+    "format_heading_1",
+    "format_heading_2",
+    "format_heading_3",
+    "format_heading_4",
+    "format_heading_5",
+    "format_heading_6",
+    "format_bulleted",
+    "format_numbered",
+    "format_task",
+    "format_quote",
+    "format_body",
+    "format_bold",
+    "format_italic",
+    "format_strikethrough",
+    "format_highlight",
+    "format_code",
+    "format_code_block",
+    "format_link",
+    "format_rule",
+    "format_clear",
 ];
 
 /// Items with a checkmark, by id, kept so the frontend can sync them
@@ -42,6 +62,10 @@ impl<R: Runtime> CheckItems<R> {
         }
     }
 }
+
+/// The Format menu's items, kept so they can be disabled while the focused
+/// window can't be edited (preview, a locked document, Settings).
+pub struct FormatItems<R: Runtime>(pub Vec<MenuItem<R>>);
 
 pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let item =
@@ -130,6 +154,88 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         ],
     )?;
 
+    // focused editors' Format menu (W-060), with its shortcuts. muda can't show ⌘> for
+    // Blockquote, so it reads ⇧⌘. (the same keys on a US keyboard).
+    let mut format_items = Vec::new();
+    let mut format_item = |id: &str, text: &str, accel: Option<&str>| {
+        let item = MenuItem::with_id(app, id, text, true, accel)?;
+        format_items.push(item.clone());
+        tauri::Result::Ok(item)
+    };
+    let headings = (1..=6)
+        .map(|n| {
+            format_item(
+                &format!("format_heading_{n}"),
+                &format!("Heading {n}"),
+                Some(&format!("CmdOrCtrl+{n}")),
+            )
+        })
+        .collect::<tauri::Result<Vec<_>>>()?;
+    let headings = Submenu::with_items(
+        app,
+        "Headings",
+        true,
+        &headings
+            .iter()
+            .map(|item| item as &dyn tauri::menu::IsMenuItem<R>)
+            .collect::<Vec<_>>(),
+    )?;
+    let lists = Submenu::with_items(
+        app,
+        "Lists",
+        true,
+        &[
+            &format_item("format_bulleted", "Bulleted List", None)?,
+            &format_item("format_numbered", "Numbered List", None)?,
+            &format_item("format_task", "Task List", None)?,
+        ],
+    )?;
+    let blockquote = format_item("format_quote", "Blockquote", Some("CmdOrCtrl+Shift+."))?;
+    let body = format_item("format_body", "Body", None)?;
+    let bold = format_item("format_bold", "Bold", Some("CmdOrCtrl+B"))?;
+    let italic = format_item("format_italic", "Italic", Some("CmdOrCtrl+I"))?;
+    let strikethrough = format_item(
+        "format_strikethrough",
+        "Strikethrough",
+        Some("CmdOrCtrl+Alt+U"),
+    )?;
+    let highlight = format_item("format_highlight", "Highlight", Some("CmdOrCtrl+Shift+U"))?;
+    let code = format_item("format_code", "Code", Some("CmdOrCtrl+J"))?;
+    let code_block = format_item("format_code_block", "Code Block", Some("CmdOrCtrl+Shift+J"))?;
+    let link = format_item("format_link", "Add Link", Some("CmdOrCtrl+K"))?;
+    let rule = format_item("format_rule", "Add Horizontal Rule", None)?;
+    let clear = format_item(
+        "format_clear",
+        "Clear Styles",
+        Some("CmdOrCtrl+Alt+Backspace"),
+    )?;
+    let format = Submenu::with_items(
+        app,
+        "Format",
+        true,
+        &[
+            &headings,
+            &lists,
+            &blockquote,
+            &body,
+            &PredefinedMenuItem::separator(app)?,
+            &bold,
+            &italic,
+            &strikethrough,
+            &highlight,
+            &PredefinedMenuItem::separator(app)?,
+            &code,
+            &code_block,
+            &PredefinedMenuItem::separator(app)?,
+            &link,
+            &PredefinedMenuItem::separator(app)?,
+            &rule,
+            &PredefinedMenuItem::separator(app)?,
+            &clear,
+        ],
+    )?;
+    app.manage(FormatItems(format_items));
+
     let preview =
         CheckMenuItem::with_id(app, "preview", "Preview", true, false, Some("CmdOrCtrl+R"))?;
     let word_count =
@@ -200,9 +306,9 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
                 &item("quit", "Quit Writer", "CmdOrCtrl+Q")?,
             ],
         )?;
-        Menu::with_items(app, &[&app_menu, &file, &edit, &view, &window])
+        Menu::with_items(app, &[&app_menu, &file, &edit, &format, &view, &window])
     }
 
     #[cfg(not(target_os = "macos"))]
-    Menu::with_items(app, &[&file, &edit, &view, &window])
+    Menu::with_items(app, &[&file, &edit, &format, &view, &window])
 }

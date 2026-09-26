@@ -35,6 +35,18 @@ fn set_menu_checked(
     item.set_checked(checked).map_err(|e| e.to_string())
 }
 
+/// Enables the Format menu while the focused window's document can be edited.
+#[tauri::command]
+fn set_format_enabled(
+    items: tauri::State<'_, menu::FormatItems<tauri::Wry>>,
+    enabled: bool,
+) -> Result<(), String> {
+    for item in &items.0 {
+        item.set_enabled(enabled).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 /// Puts a document at the top of File → Open Recent.
 #[tauri::command]
 fn note_recent_document(
@@ -123,6 +135,7 @@ pub fn run() {
             write_document,
             print_page,
             set_menu_checked,
+            set_format_enabled,
             preferences::preferences,
             preferences::set_preference,
             note_recent_document,

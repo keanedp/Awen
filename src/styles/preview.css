@@ -62,6 +62,12 @@
   background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
+.preview mark {
+  color: inherit;
+  background: var(--highlight);
+  border-radius: 2px;
+}
+
 .preview pre {
   padding: 0.9em 1em;
   border-radius: 6px;
@@ -88,6 +94,8 @@
   --code-property: #6a6a2c;
   --code-inserted: #3b7a3e;
   --code-deleted: #b3403a;
+  /* ==Highlighted== text (W-060), a highlighter-pen yellow. */
+  --highlight: rgb(255 214 10 / 0.45);
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -100,6 +108,7 @@
     --code-property: #c4c48a;
     --code-inserted: #9cc190;
     --code-deleted: #e38d86;
+    --highlight: rgb(255 214 10 / 0.3);
   }
 }
 .preview .hl-keyword { color: var(--code-keyword); }
@@ -203,6 +212,7 @@
     --code-property: #4f4f1c;
     --code-inserted: #2a5e2d;
     --code-deleted: #962c27;
+    --highlight: rgb(255 214 10 / 0.5);
     max-width: none;
     padding: 0;
     font-size: 11pt;
@@ -217,7 +227,7 @@
   .preview pre {
     white-space: pre-wrap;
   }
-  .preview .task-list-item-checkbox {
+  .preview :is(.task-list-item-checkbox, mark) {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
