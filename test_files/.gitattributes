@@ -1,0 +1,2 @@
+# Keep each file's line endings on every checkout, including Windows with core.autocrlf.
+*.md -text
