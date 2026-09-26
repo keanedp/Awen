@@ -23,7 +23,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-046**
+Next free ID: **W-048**
 
 ---
 
@@ -167,10 +167,23 @@ As a writer, I want a native-feeling settings window for font size, line width a
 - [ ] Built with the planned Bits UI components wrapped in `src/lib/ui/`
 
 ### W-022 Find and replace
-Status: Todo · Platforms: all
+Status: Done · Platforms: macOS (Windows verification moved to W-047)
 As a writer, I want to find and replace text with the standard shortcuts.
-- [ ] Cmd/Ctrl+F find, Cmd/Ctrl+G next, find and replace, via menu items
-- [ ] Search panel styled to match the OS, not CodeMirror's default
+- [x] Cmd/Ctrl+F find, Cmd/Ctrl+G next, find and replace, via menu items (macOS: Edit → Find submenu with ⌘F, ⌥⌘F, ⌘G, ⇧⌘G and ⌘E; Windows: Ctrl+F, F3, Shift+F3 and Ctrl+H, as in Notepad, see decisions.md)
+- [x] Search panel styled to match the OS, not CodeMirror's default (macOS find bar, Windows 11 flyout)
+- [x] Verified on macOS: highlight while typing, match count, next/previous, replace and replace all (a single undo), Esc and Done, find from preview, a locked document, undo while typing in the find field
+
+### W-047 Verify find and replace on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want the W-022 find flyout and shortcuts to work in a real build.
+- [ ] Edit menu: Find… Ctrl+F, Find Next F3, Find Previous Shift+F3, Replace… Ctrl+H
+- [ ] Flyout looks right in light and dark mode (Segoe Fluent Icons, field underline, shadow) and doesn't cover the match it scrolls to
+
+### W-046 Find options
+Status: Todo · Platforms: all
+As a writer, I want to match case or whole words when I search, like other editors' find bars.
+- [ ] Match Case and Whole Words options (macOS: a menu on the magnifying glass; Windows: an options button in the flyout)
+- [ ] The choices persist between launches (using W-020's preferences store)
 
 ### W-017 Focus mode
 Status: Todo · Platforms: all
@@ -234,24 +247,24 @@ As a Mac user, I want the dot in the red close button when a document has unsave
 - [x] Verified by running the app
 
 ### W-042 Rename, tag and move from the title
-Status: Needs verification (not yet run) · Platforms: macOS
+Status: Done · Platforms: macOS
 As a Mac user, I want to click the document title to rename it, set its Finder tags or move it, like NSDocument apps (`Inspiration/file_name_save.png`).
-- [ ] Hovering the title shows a chevron; clicking it (or File → Rename…) opens a native popover with Name, Tags and Where
-- [ ] Name is selected without its extension; Return or clicking outside applies, Esc cancels
-- [ ] Renaming or moving keeps unsaved edits, updates the title, Open Recent and the window's path; an existing file is never overwritten
-- [ ] Where lists the current folder, Desktop, Documents, Downloads, iCloud Drive and Other…
-- [ ] Tags are read from and written to the file's Finder tags
-- [ ] An untitled document is saved to the chosen name and place
-- [ ] Dragging the window by the title still works
-- [ ] Verified by running the app
+- [x] Hovering the title shows a chevron; clicking it (or File → Rename…) opens a native popover with Name, Tags and Where
+- [x] Name is selected without its extension; Return or clicking outside applies, Esc cancels
+- [x] Renaming or moving keeps unsaved edits, updates the title, Open Recent and the window's path; an existing file is never overwritten
+- [x] Where lists the current folder, Desktop, Documents, Downloads, iCloud Drive and Other…
+- [x] Tags are read from and written to the file's Finder tags
+- [x] An untitled document is saved to the chosen name and place
+- [x] Dragging the window by the title still works
+- [x] Verified by running the app
 
 ### W-043 Lock a document
-Status: Needs verification (not yet run) · Platforms: macOS
+Status: Done · Platforms: macOS
 As a Mac user, I want the Locked checkbox from the title popover (W-042), so I can protect a finished document from edits.
-- [ ] Locked checkbox in the title popover sets the file's locked flag (`NSURLIsUserImmutableKey`)
-- [ ] A locked document is read-only and its title shows "— Locked"; typing offers to unlock or duplicate, as TextEdit does
-- [ ] Locking in Finder shows in Writer when its window comes forward
-- [ ] Verified by running the app
+- [x] Locked checkbox in the title popover sets the file's locked flag (`NSURLIsUserImmutableKey`)
+- [x] A locked document is read-only and its title shows "— Locked"; typing offers to unlock or duplicate, as TextEdit does
+- [x] Locking in Finder shows in Writer when its window comes forward
+- [x] Verified by running the app
 
 ---
 

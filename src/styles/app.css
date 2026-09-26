@@ -59,6 +59,9 @@
   --selection: rgb(0 122 255 / 0.2);
   --caret: #19a0e6;
   --accent: #0a84ff;
+  --separator: rgb(0 0 0 / 0.1);
+  --find-match: rgb(255 204 0 / 0.3);
+  --find-current: rgb(255 204 0 / 0.75);
 
   color-scheme: light dark;
 }
@@ -71,6 +74,9 @@
     --text-muted: #6e6e6e;
     --markup: #585858;
     --selection: rgb(10 132 255 / 0.3);
+    --separator: rgb(255 255 255 / 0.1);
+    --find-match: rgb(255 214 10 / 0.2);
+    --find-current: rgb(255 214 10 / 0.5);
   }
 }
 

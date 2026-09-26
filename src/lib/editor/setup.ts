@@ -2,6 +2,7 @@ import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
+import { find } from "./find";
 import { markdownStyling } from "./markdownStyling";
 
 const theme = EditorView.theme({
@@ -29,6 +30,11 @@ const theme = EditorView.theme({
     transform: "translateX(-100%)",
   },
   "::selection, .cm-content ::selection": { backgroundColor: "var(--selection)" },
+  // The find bar draws its own background and separator.
+  ".cm-panels": { backgroundColor: "transparent", color: "inherit" },
+  ".cm-panels-top": { borderBottom: "none" },
+  ".cm-searchMatch": { backgroundColor: "var(--find-match)", borderRadius: "2px" },
+  ".cm-searchMatch-selected": { backgroundColor: "var(--find-current)" },
 });
 
 /** Files keep their original line endings; CodeMirror otherwise normalises to "\n". */
@@ -67,6 +73,7 @@ export function createState(
       EditorState.lineSeparator.of(detectLineSeparator(doc)),
       history(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
+      find(onLockedEdit),
       markdown({ base: markdownLanguage }),
       markdownStyling,
       EditorView.lineWrapping,

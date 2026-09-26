@@ -2,8 +2,10 @@
   import { onMount, tick } from "svelte";
   import { EditorView } from "@codemirror/view";
   import { isolateHistory, redo, redoDepth, undo, undoDepth } from "@codemirror/commands";
+  import { findNext, findPrevious } from "@codemirror/search";
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
   import { message } from "@tauri-apps/plugin-dialog";
+  import { findSelection, openFind } from "$lib/editor/find";
   import { createState, documentText, setReadOnly } from "$lib/editor/setup";
   import { exportHtml } from "$lib/export/html";
   import {
@@ -190,6 +192,11 @@
 
   /** Undo/redo also work in preview, which is re-rendered to show the result. */
   function runHistory(command: typeof undo) {
+    // The menu shortcut also reaches us while typing in the find bar; undo there.
+    if (document.activeElement instanceof HTMLInputElement) {
+      document.execCommand(command === undo ? "undo" : "redo");
+      return;
+    }
     if (locked) {
       if ((command === undo ? undoDepth : redoDepth)(view.state) > 0) exclusive(askToUnlock);
       return;
@@ -350,8 +357,31 @@
     close: () => appWindow.close(),
     undo: () => runHistory(undo),
     redo: () => runHistory(redo),
+    find: () => inEditor(() => openFind(view, false)),
+    find_replace: () => inEditor(() => openFind(view, true)),
+    find_next: () => inEditor(() => findNext(view)),
+    find_previous: () => inEditor(() => findPrevious(view)),
+    find_selection: () => findSelection(view),
     preview: togglePreview,
   };
+
+  /** Find works on the text, so it leaves preview first. */
+  async function inEditor(command: () => unknown) {
+    if (previewing) await togglePreview();
+    command();
+  }
+
+  /** Commands that must stay responsive, so they skip the file-command queue. */
+  const immediate = new Set([
+    "undo",
+    "redo",
+    "find",
+    "find_replace",
+    "find_next",
+    "find_previous",
+    "find_selection",
+    "preview",
+  ]);
 
   /** Runs a file command unless another one is still in progress. */
   async function exclusive(action: (() => unknown) | undefined) {
@@ -392,9 +422,7 @@
       // Rust sends menu commands to the focused window only.
       appWindow.listen<string>("menu", ({ payload }) => {
         // Editing commands must stay responsive; file commands shouldn't overlap.
-        if (payload === "undo" || payload === "redo" || payload === "preview") {
-          return actions[payload]();
-        }
+        if (immediate.has(payload)) return actions[payload]();
         return exclusive(actions[payload]);
       }),
       appWindow.listen<string>("open-recent", ({ payload }) => exclusive(() => open(payload))),

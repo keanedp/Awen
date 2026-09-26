@@ -4,7 +4,21 @@ use tauri::{AppHandle, Manager, Runtime};
 /// Menu item ids that are forwarded to the focused window as `menu` events.
 /// New, Quit and (with no window open) Open are handled in Rust.
 pub const FORWARDED: &[&str] = &[
-    "open", "save", "save_as", "rename", "close", "undo", "redo", "preview", "export", "print",
+    "open",
+    "save",
+    "save_as",
+    "rename",
+    "close",
+    "undo",
+    "redo",
+    "find",
+    "find_replace",
+    "find_next",
+    "find_previous",
+    "find_selection",
+    "preview",
+    "export",
+    "print",
 ];
 
 /// View → Preview, kept so the frontend can sync its checkmark
@@ -42,6 +56,29 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         ],
     )?;
 
+    // macOS groups these in an Edit → Find submenu; Windows lists them in Edit
+    // with Notepad's shortcuts (F3, and Ctrl+H, since Cmd+H hides apps on macOS).
+    #[cfg(target_os = "macos")]
+    let find = Submenu::with_items(
+        app,
+        "Find",
+        true,
+        &[
+            &item("find", "Find…", "CmdOrCtrl+F")?,
+            &item("find_replace", "Find and Replace…", "CmdOrCtrl+Alt+F")?,
+            &item("find_next", "Find Next", "CmdOrCtrl+G")?,
+            &item("find_previous", "Find Previous", "CmdOrCtrl+Shift+G")?,
+            &item("find_selection", "Use Selection for Find", "CmdOrCtrl+E")?,
+        ],
+    )?;
+    #[cfg(not(target_os = "macos"))]
+    let find = [
+        item("find", "Find…", "CmdOrCtrl+F")?,
+        item("find_next", "Find Next", "F3")?,
+        item("find_previous", "Find Previous", "Shift+F3")?,
+        item("find_replace", "Replace…", "CmdOrCtrl+H")?,
+    ];
+
     let edit = Submenu::with_items(
         app,
         "Edit",
@@ -56,6 +93,17 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             &PredefinedMenuItem::copy(app, None)?,
             &PredefinedMenuItem::paste(app, None)?,
             &PredefinedMenuItem::select_all(app, None)?,
+            &PredefinedMenuItem::separator(app)?,
+            #[cfg(target_os = "macos")]
+            &find,
+            #[cfg(not(target_os = "macos"))]
+            &find[0],
+            #[cfg(not(target_os = "macos"))]
+            &find[1],
+            #[cfg(not(target_os = "macos"))]
+            &find[2],
+            #[cfg(not(target_os = "macos"))]
+            &find[3],
         ],
     )?;
 

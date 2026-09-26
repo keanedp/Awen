@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Find uses CodeMirror's search with our own find bar, and each OS's shortcuts
+- `@codemirror/search` provides the query state, match highlighting and find/replace commands. Its default panel looks like a web form, so `createPanel` mounts `FindBar.svelte` instead (W-022).
+- macOS gets a TextEdit/Safari-style find bar under the title bar, and Windows gets a Notepad-style flyout at the top right. Each OS's menu follows its own convention. On macOS that is the Edit → Find submenu with ⌘F, ⌥⌘F, ⌘G, ⇧⌘G and ⌘E. On Windows it is Find/Find Next/Find Previous/Replace in Edit with Ctrl+F, F3, Shift+F3 and Ctrl+H. Windows uses F3, not Ctrl+G, because Ctrl+G is Go To in Notepad and Word.
+- Searches are literal and ignore case. Options (match case, whole word) are left to W-046.
+
 ## 2026-09-25: Code blocks are highlighted in preview only, with Lezer parsers
 - focused editors doesn't highlight code; Typora does. Writer highlights in preview, print and exports, where code is read and shared, and leaves the editor calm. Muted editor highlighting is W-045 and off by default.
 - Lezer parsers (`@codemirror/language-data`) rather than highlight.js or Shiki: the editor already uses Lezer, so W-045 can share the same parsers and `--code-*` colours and the two views match. language-data also gives ~150 languages, loaded on demand as separate chunks.

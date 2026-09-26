@@ -10,6 +10,18 @@
   --toolbar-icon-size: 13px;
   --accent: -apple-system-control-accent; /* WebKit-only; follows System Settings */
   --focus-ring: color-mix(in srgb, #0a84ff 50%, transparent);
+  /* Push buttons and text fields (the find bar). */
+  --control-bg: #ffffff;
+  --control-border: rgb(0 0 0 / 0.15);
+  --field-bg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-os="mac"] {
+    --control-bg: rgb(255 255 255 / 0.2);
+    --control-border: rgb(0 0 0 / 0.3);
+    --field-bg: rgb(255 255 255 / 0.06);
+  }
 }
 
 /* Scrollbars: deliberately unstyled. Any ::-webkit-scrollbar rule makes WebKit

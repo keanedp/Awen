@@ -17,6 +17,7 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 - CSS custom properties can't take a fallback list like a font stack: `--accent: -apple-system-control-accent, #0a84ff` is invalid. Use a single value, which is WebKit-only and follows System Settings on macOS.
 - **Testing a module outside the app:** `ssrLoadModule` resolves `$lib` and `?raw` imports, but it runs in SvelteKit's dev server, which replaces the global `fetch` and rejects relative URLs. Stub `fetch` *after* `createServer()`.
 - **Never style scrollbars on macOS.** Any `::-webkit-scrollbar` rule makes WKWebView swap native overlay scrollbars (hidden until you scroll or hover) for legacy always-visible ones. The mac token file intentionally has none. The Windows token file does style them.
+- Svelte 5's `mount()` doesn't run effects synchronously, and `bind:this` is an effect. A component mounted imperatively (the find bar) needs `flushSync()` before its element refs exist.
 - Accessibility warnings from svelte-check: prefer a document-level listener (e.g. the `.chrome` context-menu blocker) over handlers on non-interactive elements.
 
 ## Tauri / native
@@ -26,6 +27,7 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 - `Menu::get(id)` only searches top-level items. To reach a nested item later (e.g. the View → Preview checkmark), keep its handle in managed state (`menu::PreviewMenuItem`).
 - Windows custom title bar: HTML caption buttons don't trigger the Snap Layouts flyout (W-037). Win+Z and dragging to screen edges still work.
 - A native menu accelerator consumes the key before the webview sees it. Any shortcut CodeMirror must handle has to be a custom menu item that calls into the editor, as undo/redo do.
+  - The same custom item also fires while focus is in an `<input>`, such as the find bar. `runHistory` checks for that case and calls `document.execCommand("undo")` there, so the field's text is undone, not the document.
 - **Creating a window from a synchronous command deadlocks on Windows.** Commands that may open a window (`open_document`) must be `async`. Menu and run-event handlers are fine.
 - JS `listen()` from `@tauri-apps/api/event` hears events emitted to *any* target, so `emit_to` a window doesn't isolate it. Listen with `getCurrentWebviewWindow().listen(...)`.
 - **File associations only exist in a bundled app.** `make dev` runs a bare binary that LaunchServices doesn't know, so testing Finder double-click / Open With needs `make build` (then run `Writer.app` from `target/release/bundle/macos/`, not from the DMG). macOS may keep an older registration: `lsregister -f <path to Writer.app>` refreshes it.

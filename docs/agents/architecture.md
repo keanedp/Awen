@@ -60,6 +60,10 @@ Details:
 - Line endings: `EditorState.lineSeparator` is set to the separator detected in the file, and `documentText(view)` returns `state.sliceDoc()`. Together these make a round trip byte-identical. Always read text through `documentText()`.
 - `markdownStyling.ts` dims syntax marks via a `HighlightStyle` (`--markup` colour). A `ViewPlugin` decorates leading `#` marks with `.cm-hanging-mark`, which is absolutely positioned and translated left so headings hang into the margin.
 - Layout: a centered column (`max-width: var(--measure)`, 66ch) with bottom padding of 40vh, so the end of the text can scroll up the screen.
+- **Find (W-022):** `find.ts` adds `@codemirror/search` with a `createPanel` that mounts `src/lib/ui/FindBar.svelte` (Svelte `mount`) as a top panel.
+  - The bar dispatches `setSearchQuery` as you type. Menu items call `openFind`, `findNext` and the other commands in `+page.svelte`; find leaves preview first.
+  - CodeMirror highlights matches only while the panel is open. Find Next/Previous still work after the bar closes, using the last query.
+  - The panel container is sticky at the top of the editor. The macOS bar takes up layout space in it. The Windows flyout is absolutely positioned inside it, so it floats over the text.
 
 ## Rendering (`src/lib/preview/render.ts`)
 
