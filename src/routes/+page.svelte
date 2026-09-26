@@ -8,7 +8,7 @@
   import { findSelection, openFind } from "$lib/editor/find";
   import { countWords, formatCount } from "$lib/editor/count";
   import { setCodeHighlighting } from "$lib/editor/code";
-  import { createState, documentText, setReadOnly } from "$lib/editor/setup";
+  import { createState, documentText, setReadOnly, setSpellcheck } from "$lib/editor/setup";
   import { taskToggle } from "$lib/editor/tasks";
   import { exportHtml } from "$lib/export/html";
   import {
@@ -41,8 +41,10 @@
     loadPreferences,
     onPreferenceChanged,
     setPreference,
+    setPreferences,
     type Preferences,
   } from "$lib/preferences";
+  import { viewChange, writingStyle } from "$lib/settings";
   import Preview from "$lib/preview/Preview.svelte";
   import TitleBar from "$lib/ui/TitleBar.svelte";
   import WordCount from "$lib/ui/WordCount.svelte";
@@ -125,6 +127,10 @@
     const on = prefs.codeHighlighting;
     if (view) setCodeHighlighting(view, on);
   });
+  $effect(() => {
+    const on = prefs.spellcheck;
+    if (view) setSpellcheck(view, on);
+  });
 
   function onChange(v: EditorView) {
     dirty = documentText(v) !== savedText;
@@ -155,7 +161,10 @@
   });
 
   function newState(text: string) {
-    return createState(text, onChange, () => exclusive(askToUnlock), scheduleCount, prefs.codeHighlighting);
+    return createState(text, onChange, () => exclusive(askToUnlock), scheduleCount, {
+      highlightCode: prefs.codeHighlighting,
+      spellcheck: prefs.spellcheck,
+    });
   }
 
   /** Shows `text` from `newPath`, or as an unsaved untitled copy if there is no path. */
@@ -423,9 +432,20 @@
     find_previous: () => inEditor(() => findPrevious(view)),
     find_selection: () => findSelection(view),
     preview: togglePreview,
-    word_count: () => setPreference("wordCount", !prefs.wordCount),
-    code_highlighting: () => setPreference("codeHighlighting", !prefs.codeHighlighting),
+    word_count: () => changeView("word_count"),
+    code_highlighting: () => changeView("code_highlighting"),
+    text_bigger: () => changeView("text_bigger"),
+    text_smaller: () => changeView("text_smaller"),
+    text_actual: () => changeView("text_actual"),
   };
+
+  /** A View menu preference, applied here at once so key repeats build on it, then in every window. */
+  function changeView(id: string) {
+    const change = viewChange(id, prefs);
+    if (!change) return;
+    Object.assign(prefs, change);
+    setPreferences(change);
+  }
 
   /** Find works on the text, so it leaves preview first. */
   async function inEditor(command: () => unknown) {
@@ -445,6 +465,9 @@
     "preview",
     "word_count",
     "code_highlighting",
+    "text_bigger",
+    "text_smaller",
+    "text_actual",
   ]);
 
   /** Runs a file command unless another one is still in progress. */
@@ -533,7 +556,8 @@
   });
 </script>
 
-<div class="app-root flex h-full flex-col bg-surface">
+<!-- Settings' writing tokens go here, not on :root, so print and PDF keep paper typography. -->
+<div class="app-root flex h-full flex-col bg-surface" style={writingStyle(prefs)}>
   <TitleBar
     bind:this={titleBar}
     {os}

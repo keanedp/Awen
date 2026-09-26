@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { EditorView } from "@codemirror/view";
-import { createState, documentText } from "./setup";
+import type { EditorState, TransactionSpec } from "@codemirror/state";
+import { createState, documentText, setSpellcheck } from "./setup";
 
 const open = (text: string) => ({ state: createState(text, () => {}, () => {}) });
 
@@ -36,5 +37,29 @@ describe("line endings", () => {
     ["LF into LF", "Two\n", "One\n", "One\nTwo\n"],
   ])("pasting %s takes the file's line endings", (_, text, into, result) => {
     expect(paste(text, into)).toBe(result);
+  });
+});
+
+describe("spell checking", () => {
+  /** The attributes the editor puts on its content element. */
+  const attributes = (state: EditorState) =>
+    Object.assign({}, ...state.facet(EditorView.contentAttributes).filter((a) => typeof a !== "function"));
+
+  test("is on by default, with autocorrect", () => {
+    expect(attributes(open("Text").state)).toMatchObject({ spellcheck: "true", autocorrect: "on" });
+  });
+
+  test("can start off", () => {
+    const state = createState("Text", () => {}, () => {}, () => {}, { spellcheck: false });
+    expect(attributes(state)).toMatchObject({ spellcheck: "false", autocorrect: "off" });
+  });
+
+  test("setSpellcheck switches it in an open editor", () => {
+    let state = open("Text").state;
+    const view = { dispatch: (spec: TransactionSpec) => (state = state.update(spec).state) } as unknown as EditorView;
+    setSpellcheck(view, false);
+    expect(attributes(state)).toMatchObject({ spellcheck: "false", autocorrect: "off" });
+    setSpellcheck(view, true);
+    expect(attributes(state)).toMatchObject({ spellcheck: "true", autocorrect: "on" });
   });
 });

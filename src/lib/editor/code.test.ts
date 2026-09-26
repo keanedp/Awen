@@ -12,7 +12,7 @@ import { createState } from "./setup";
 const doc = "# Notes\n\n```js\nconst answer = 42; // why\n```\n\nText after.\n";
 const inCode = doc.indexOf("const");
 
-const open = (text: string, highlight: boolean) => createState(text, () => {}, () => {}, () => {}, highlight);
+const open = (text: string, highlight: boolean) => createState(text, () => {}, () => {}, () => {}, { highlightCode: highlight });
 
 /** The innermost node at `pos`, once the whole document is parsed. */
 function nodeAt(state: EditorState, pos: number) {

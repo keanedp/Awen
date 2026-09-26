@@ -4,7 +4,7 @@ use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu, WI
 use tauri::{AppHandle, Manager, Runtime};
 
 /// Menu item ids that are forwarded to the focused window as `menu` events.
-/// New, Quit and (with no window open) Open are handled in Rust.
+/// New, Quit, Settings and (with no document focused) Open are handled in Rust.
 pub const FORWARDED: &[&str] = &[
     "open",
     "save",
@@ -21,6 +21,9 @@ pub const FORWARDED: &[&str] = &[
     "preview",
     "word_count",
     "code_highlighting",
+    "text_bigger",
+    "text_smaller",
+    "text_actual",
     "export",
     "print",
 ];
@@ -28,6 +31,17 @@ pub const FORWARDED: &[&str] = &[
 /// Items with a checkmark, by id, kept so the frontend can sync them
 /// (`Menu::get` only searches top-level items).
 pub struct CheckItems<R: Runtime>(pub HashMap<&'static str, CheckMenuItem<R>>);
+
+impl<R: Runtime> CheckItems<R> {
+    /// Undoes the checkmark a click toggled, when no window owns its state.
+    pub fn untoggle(&self, id: &str) {
+        if let Some(item) = self.0.get(id) {
+            if let Ok(checked) = item.is_checked() {
+                let _ = item.set_checked(!checked);
+            }
+        }
+    }
+}
 
 pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let item =
@@ -108,6 +122,11 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             &find[2],
             #[cfg(not(target_os = "macos"))]
             &find[3],
+            // On macOS, Settings… lives in the app menu instead.
+            #[cfg(not(target_os = "macos"))]
+            &PredefinedMenuItem::separator(app)?,
+            #[cfg(not(target_os = "macos"))]
+            &item("settings", "Settings…", "CmdOrCtrl+,")?,
         ],
     )?;
 
@@ -136,6 +155,11 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         &[
             &preview,
             &PredefinedMenuItem::separator(app)?,
+            // The text size preference, also set in Settings.
+            &item("text_bigger", "Bigger", "CmdOrCtrl+=")?,
+            &item("text_smaller", "Smaller", "CmdOrCtrl+-")?,
+            &item("text_actual", "Actual Size", "CmdOrCtrl+0")?,
+            &PredefinedMenuItem::separator(app)?,
             &word_count,
             &code_highlighting,
             &PredefinedMenuItem::separator(app)?,
@@ -163,6 +187,8 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             true,
             &[
                 &PredefinedMenuItem::about(app, Some("About Writer"), None)?,
+                &PredefinedMenuItem::separator(app)?,
+                &item("settings", "Settings…", "CmdOrCtrl+,")?,
                 &PredefinedMenuItem::separator(app)?,
                 &PredefinedMenuItem::services(app, None)?,
                 &PredefinedMenuItem::separator(app)?,

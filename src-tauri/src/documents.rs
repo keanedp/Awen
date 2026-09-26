@@ -57,11 +57,32 @@ fn allow_images_beside(app: &AppHandle, path: &str) {
     }
 }
 
-/// The window menu commands apply to.
+/// Whether the window shows a document (`main` or `doc-N`), rather than Settings.
+pub fn is_document(label: &str) -> bool {
+    label == MAIN || label.starts_with("doc-")
+}
+
+/// The window menu commands apply to: a document or Settings.
 pub fn focused_window(app: &AppHandle) -> Option<WebviewWindow> {
     app.webview_windows()
         .into_values()
         .find(|w| w.is_focused().unwrap_or(false))
+}
+
+/// The focused window, if it shows a document.
+fn focused_document(app: &AppHandle) -> Option<WebviewWindow> {
+    focused_window(app).filter(|w| is_document(w.label()))
+}
+
+fn document_windows(app: &AppHandle) -> impl Iterator<Item = WebviewWindow> {
+    app.webview_windows()
+        .into_values()
+        .filter(|w| is_document(w.label()))
+}
+
+/// Whether any document window is open (Settings may be open without one).
+pub fn any_open(app: &AppHandle) -> bool {
+    document_windows(app).next().is_some()
 }
 
 /// Opens an empty document window, optionally holding `document` (path, text).
@@ -110,7 +131,7 @@ fn open_window(app: &AppHandle, path: Option<String>, text: Option<String>) -> R
 
 /// Just below and right of the focused window, in logical coordinates.
 fn cascade_position(app: &AppHandle) -> Option<(f64, f64)> {
-    let from = focused_window(app).or_else(|| app.webview_windows().into_values().next())?;
+    let from = focused_document(app).or_else(|| document_windows(app).next())?;
     let scale = from.scale_factor().ok()?;
     let pos = from.outer_position().ok()?.to_logical::<f64>(scale);
     Some((pos.x + CASCADE, pos.y + CASCADE))
@@ -262,9 +283,7 @@ fn blank_window(app: &AppHandle, docs: &Documents) -> Result<Option<WebviewWindo
     let paths = docs.paths.lock().map_err(|e| e.to_string())?;
     let pending = docs.pending.lock().map_err(|e| e.to_string())?;
     let edited = docs.edited.lock().map_err(|e| e.to_string())?;
-    let mut blank: Vec<WebviewWindow> = app
-        .webview_windows()
-        .into_values()
+    let mut blank: Vec<WebviewWindow> = document_windows(app)
         .filter(|w| {
             let label = w.label();
             paths.get(label).is_none_or(|p| p.is_none())
@@ -340,7 +359,25 @@ pub fn keep_running(app: &AppHandle) -> bool {
 
 /// Sends a menu command to the focused window only; every window listens.
 pub fn emit_to_focused<S: Serialize + Clone>(app: &AppHandle, event: &str, payload: S) -> bool {
-    let Some(window) = focused_window(app) else {
+    emit_to(app, focused_window(app), event, payload)
+}
+
+/// Like `emit_to_focused`, but only to a document window: Settings can't open files.
+pub fn emit_to_focused_document<S: Serialize + Clone>(
+    app: &AppHandle,
+    event: &str,
+    payload: S,
+) -> bool {
+    emit_to(app, focused_document(app), event, payload)
+}
+
+fn emit_to<S: Serialize + Clone>(
+    app: &AppHandle,
+    window: Option<WebviewWindow>,
+    event: &str,
+    payload: S,
+) -> bool {
+    let Some(window) = window else {
         return false;
     };
     app.emit_to(EventTarget::webview_window(window.label()), event, payload)
@@ -449,5 +486,17 @@ pub fn set_document_edited(
         // Windows shows it in the title instead (`*name - Writer`).
         let _ = (window, edited);
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn document_windows_are_main_and_doc_n() {
+        assert!(is_document(MAIN));
+        assert!(is_document("doc-3"));
+        assert!(!is_document(crate::settings::LABEL));
     }
 }

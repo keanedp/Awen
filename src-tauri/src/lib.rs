@@ -5,6 +5,7 @@ mod menu;
 mod preferences;
 mod recent;
 mod rename;
+mod settings;
 mod terminate;
 
 use tauri::Manager;
@@ -86,9 +87,16 @@ pub fn run() {
                     let _ = documents::new_window(app, None);
                 }
                 "quit" => documents::quit(app),
-                // With no window to ask, Rust shows the Open dialog itself.
-                "open" if !documents::emit_to_focused(app, "menu", id) => {
+                "settings" => settings::show(app),
+                // With no document to ask, Rust shows the Open dialog itself.
+                "open" if !documents::emit_to_focused_document(app, "menu", id) => {
                     documents::open_without_window(app, None)
+                }
+                // Sent by the guard above; don't fall through to FORWARDED and send it twice.
+                "open" => {}
+                // Preview belongs to a document; Settings can't restate it.
+                "preview" if settings::is_focused(app) => {
+                    app.state::<menu::CheckItems<tauri::Wry>>().untoggle(id)
                 }
                 recent::CLEAR_ID => {
                     let _ = app.state::<recent::Recent<tauri::Wry>>().clear(app);
@@ -98,7 +106,7 @@ pub fn run() {
                 }
                 _ => {
                     if let Some(path) = id.strip_prefix(recent::OPEN_PREFIX) {
-                        if !documents::emit_to_focused(app, "open-recent", path) {
+                        if !documents::emit_to_focused_document(app, "open-recent", path) {
                             documents::open_without_window(app, Some(path.to_string()));
                         }
                     }
@@ -152,7 +160,7 @@ pub fn run() {
                 documents::open_external(app, paths);
             }
             #[cfg(target_os = "macos")]
-            tauri::RunEvent::Reopen { .. } if app.webview_windows().is_empty() => {
+            tauri::RunEvent::Reopen { .. } if !documents::any_open(app) => {
                 let _ = documents::new_window(app, None);
             }
             _ => {}

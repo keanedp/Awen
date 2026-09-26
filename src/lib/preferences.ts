@@ -1,6 +1,16 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import type { ExportFormat } from "./files";
+import {
+  columnWidths,
+  defaultTextSize,
+  isTextSize,
+  lineSpacings,
+  themes,
+  type ColumnWidth,
+  type LineSpacing,
+  type Theme,
+} from "./settings";
 
 /**
  * App-wide preferences, shared by every window and kept between launches.
@@ -15,19 +25,45 @@ export interface Preferences {
   codeHighlighting: boolean;
   /** The format the export dialog starts with: the last one used. */
   exportFormat: ExportFormat;
+  /** Settings → Text size, in CSS pixels; also View → Bigger / Smaller / Actual Size. */
+  textSize: number;
+  /** Settings → Column width. */
+  columnWidth: ColumnWidth;
+  /** Settings → Line spacing. */
+  lineSpacing: LineSpacing;
+  /** Settings → Check spelling while typing. */
+  spellcheck: boolean;
+  /** Settings → Appearance. Rust applies it to the app (`preferences::apply_theme`). */
+  theme: Theme;
 }
 
 export const defaults: Preferences = {
   wordCount: true,
   codeHighlighting: false,
   exportFormat: "html",
+  textSize: defaultTextSize,
+  columnWidth: "medium",
+  lineSpacing: "normal",
+  spellcheck: true,
+  theme: "system",
 };
+
+/** A check that a value is one of `choices`. */
+const oneOf =
+  <T extends string>(choices: readonly T[]) =>
+  (value: unknown): value is T =>
+    choices.includes(value as T);
 
 /** Checks a saved value, which may come from an older or newer version, or a hand-edited file. */
 const valid: { [K in keyof Preferences]: (value: unknown) => value is Preferences[K] } = {
   wordCount: (value) => typeof value === "boolean",
   codeHighlighting: (value) => typeof value === "boolean",
   exportFormat: (value) => value === "html" || value === "pdf",
+  textSize: isTextSize,
+  columnWidth: oneOf(Object.keys(columnWidths) as ColumnWidth[]),
+  lineSpacing: oneOf(Object.keys(lineSpacings) as LineSpacing[]),
+  spellcheck: (value) => typeof value === "boolean",
+  theme: oneOf(themes),
 };
 
 function isKey(key: string): key is keyof Preferences {
@@ -50,6 +86,11 @@ export async function loadPreferences(): Promise<Preferences> {
 /** Saves a preference; every window, this one included, then gets `onPreferenceChanged`. */
 export function setPreference<K extends keyof Preferences>(key: K, value: Preferences[K]): Promise<void> {
   return invoke("set_preference", { key, value });
+}
+
+/** Saves several preferences, as `setPreference` does. */
+export function setPreferences(change: Partial<Preferences>): Promise<unknown> {
+  return Promise.all(Object.entries(change).map(([key, value]) => invoke("set_preference", { key, value })));
 }
 
 /** Calls `apply` when any window changes a preference. */

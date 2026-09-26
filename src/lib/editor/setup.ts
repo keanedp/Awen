@@ -70,18 +70,26 @@ const matchLineBreaks = EditorView.clipboardInputFilter.of((text, state) =>
 /** Holds the read-only state of a locked document. */
 const lock = new Compartment();
 
+/** Holds Settings → Check spelling while typing. */
+const spelling = new Compartment();
+
+/** WebKit's autocorrect goes with spell checking: off while drafting means no corrections either. */
+const spellingAttributes = (on: boolean) =>
+  EditorView.contentAttributes.of({ spellcheck: String(on), autocorrect: on ? "on" : "off" });
+
 /**
  * `onLockedEdit` runs when the user tries to change a locked document: typing,
  * deleting, pasting, cutting or dropping. CodeMirror itself ignores the edit.
  * `onSelect` runs when the text or the selection changes. `highlightCode`
- * turns on muted highlighting in fenced code blocks (`setCodeHighlighting`).
+ * turns on muted highlighting in fenced code blocks (`setCodeHighlighting`);
+ * `spellcheck` is the system's spell checking (`setSpellcheck`).
  */
 export function createState(
   doc: string,
   onChange: (view: EditorView) => void,
   onLockedEdit: () => void,
   onSelect: (view: EditorView) => void = () => {},
-  highlightCode = false,
+  { highlightCode = false, spellcheck = true } = {},
 ): EditorState {
   const blocked = (_: Event, view: EditorView) => {
     if (!view.state.readOnly) return false;
@@ -109,7 +117,7 @@ export function createState(
       markdownWithCode(highlightCode),
       markdownStyling,
       EditorView.lineWrapping,
-      EditorView.contentAttributes.of({ spellcheck: "true", autocorrect: "on" }),
+      spelling.of(spellingAttributes(spellcheck)),
       theme,
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.view);
@@ -122,6 +130,11 @@ export function createState(
 /** Makes the editor read-only (a locked file) or editable again. */
 export function setReadOnly(view: EditorView, readOnly: boolean) {
   view.dispatch({ effects: lock.reconfigure(EditorState.readOnly.of(readOnly)) });
+}
+
+/** Turns the system's spell checking (and autocorrect) on or off in an open editor. */
+export function setSpellcheck(view: EditorView, on: boolean) {
+  view.dispatch({ effects: spelling.reconfigure(spellingAttributes(on)) });
 }
 
 /** The document text with its original line endings. */
