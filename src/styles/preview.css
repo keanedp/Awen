@@ -76,8 +76,9 @@
 
 /* Code highlighting (src/lib/preview/highlight.ts). A few muted colours, so code
    stays calm next to the prose. Defined here rather than in the app tokens
-   because HTML export and print use this file too. */
-.preview {
+   because HTML export and print use this file too. On :root, so the editor's
+   muted highlighting (W-045, editor/setup.ts) mixes from the same colours. */
+:root {
   --code-keyword: #9a3f86;
   --code-string: #3b7a3e;
   --code-literal: #a8581a;
@@ -89,7 +90,7 @@
   --code-deleted: #b3403a;
 }
 @media (prefers-color-scheme: dark) {
-  .preview {
+  :root {
     --code-keyword: #cf8ec0;
     --code-string: #9cc190;
     --code-literal: #dba67a;

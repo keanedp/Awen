@@ -173,11 +173,13 @@ As a writer, I want fenced code blocks with a language (```` ```js ````) to be s
 - [ ] Verified on Windows (including whether PDF export keeps the code colours)
 
 ### W-045 Muted code highlighting in the editor
-Status: Todo · Platforms: all
+Status: Needs verification · Platforms: all
 As a writer of technical documents, I want code inside fenced blocks to be lightly highlighted in the editor, so I can read it while I write.
-- [ ] Uses the same Lezer parsers and `--code-*` colours as preview (W-044), via CodeMirror's `codeLanguages`
-- [ ] Muted: much lower contrast than preview, so code never competes with the prose or the dimmed Markdown marks
-- [ ] Off by default, toggled from the View menu; the setting persists (using W-020's preferences store)
+- [x] Uses the same Lezer parsers and `--code-*` colours as preview (W-044), via CodeMirror's `codeLanguages` (`editor/code.ts`, unit tested in `editor/code.test.ts`)
+- [x] Muted: much lower contrast than preview, so code never competes with the prose or the dimmed Markdown marks (each colour mixed 45% with `--text-muted`)
+- [x] Off by default, toggled from View → Code Highlighting; the setting persists (using W-020's preferences store)
+- [ ] Verified in the app on macOS: toggle on and off with the checkmark in step across windows, colours look muted in light and dark mode, a language loads the first time its fence appears, the setting survives a relaunch
+- [ ] Verified on Windows
 
 ### W-019 Word count and reading time
 Status: Done · Platforms: macOS (Windows verification moved to W-051)

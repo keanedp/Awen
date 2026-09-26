@@ -11,18 +11,22 @@ import type { ExportFormat } from "./files";
 export interface Preferences {
   /** View → Word Count: the footer with words and reading time. */
   wordCount: boolean;
+  /** View → Code Highlighting: muted colours in the editor's fenced code blocks. */
+  codeHighlighting: boolean;
   /** The format the export dialog starts with: the last one used. */
   exportFormat: ExportFormat;
 }
 
 export const defaults: Preferences = {
   wordCount: true,
+  codeHighlighting: false,
   exportFormat: "html",
 };
 
 /** Checks a saved value, which may come from an older or newer version, or a hand-edited file. */
 const valid: { [K in keyof Preferences]: (value: unknown) => value is Preferences[K] } = {
   wordCount: (value) => typeof value === "boolean",
+  codeHighlighting: (value) => typeof value === "boolean",
   exportFormat: (value) => value === "html" || value === "pdf",
 };
 

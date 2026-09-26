@@ -3,12 +3,12 @@ import { languages } from "@codemirror/language-data";
 import { highlightCode, tagHighlighter, tags as t } from "@lezer/highlight";
 
 /**
- * Syntax highlighting for fenced code blocks in preview, print and exports.
- * It uses the same Lezer parsers CodeMirror would, so the editor could share
- * them later. A small palette keeps code calm next to the prose; the colours
- * are `--code-*` tokens in preview.css.
+ * Syntax highlighting for fenced code blocks in preview, print and exports,
+ * and (muted, W-045) in the editor. Both use these Lezer parsers and classes,
+ * so they match. A small palette keeps code calm next to the prose; the
+ * colours are `--code-*` tokens in preview.css.
  */
-const highlighter = tagHighlighter([
+export const codeHighlighter = tagHighlighter([
   { tag: t.keyword, class: "hl-keyword" },
   { tag: [t.string, t.regexp, t.escape], class: "hl-string" },
   { tag: [t.literal, t.atom], class: "hl-literal" },
@@ -26,8 +26,12 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
 }
 
-/** The language a fence's info string names, by name, alias or file extension (`py`, `rs`). */
-function describe(name: string): LanguageDescription | null {
+/**
+ * The language a fence's info string names, by name, alias or file extension
+ * (`py`, `rs`). Attributes after the name (`js{1,3}`) are ignored.
+ */
+export function codeLanguage(info: string): LanguageDescription | null {
+  const name = /^[^\s`{]*/.exec(info)![0];
   if (!name) return null;
   return (
     LanguageDescription.matchLanguageName(languages, name, false) ??
@@ -43,7 +47,7 @@ function describe(name: string): LanguageDescription | null {
 export async function loadCodeLanguages(markdown: string): Promise<void> {
   const loads = new Set<Promise<unknown>>();
   for (const [, info] of markdown.matchAll(/^[ \t>]*(?:`{3,}|~{3,})[ \t]*([^\s`{]+)/gm)) {
-    const language = describe(info);
+    const language = codeLanguage(info);
     if (language && !language.support) loads.add(language.load().catch(() => {}));
   }
   await Promise.all(loads);
@@ -54,13 +58,13 @@ export async function loadCodeLanguages(markdown: string): Promise<void> {
  * language named `name`, or "" to let markdown-it escape it as plain code.
  */
 export function highlight(code: string, name: string): string {
-  const support = describe(name)?.support;
+  const support = codeLanguage(name)?.support;
   if (!support) return "";
   let html = "";
   highlightCode(
     code,
     support.language.parser.parse(code),
-    highlighter,
+    codeHighlighter,
     (text, classes) => {
       html += classes ? `<span class="${classes}">${escapeHtml(text)}</span>` : escapeHtml(text);
     },

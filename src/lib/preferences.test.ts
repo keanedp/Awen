@@ -24,14 +24,15 @@ describe("parsePreferences", () => {
   });
 
   test("saved values replace the defaults", () => {
-    expect(parsePreferences({ wordCount: false, exportFormat: "pdf" })).toEqual({
+    expect(parsePreferences({ wordCount: false, codeHighlighting: true, exportFormat: "pdf" })).toEqual({
       wordCount: false,
+      codeHighlighting: true,
       exportFormat: "pdf",
     });
   });
 
   test("invalid values fall back to the default", () => {
-    expect(parsePreferences({ wordCount: "no", exportFormat: "docx" })).toEqual(defaults);
+    expect(parsePreferences({ wordCount: "no", codeHighlighting: 1, exportFormat: "docx" })).toEqual(defaults);
     expect(parsePreferences({ wordCount: null, exportFormat: 1 })).toEqual(defaults);
   });
 

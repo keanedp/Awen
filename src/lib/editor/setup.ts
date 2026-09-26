@@ -1,9 +1,12 @@
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
+import { markdownWithCode } from "./code";
 import { find } from "./find";
 import { markdownStyling } from "./markdownStyling";
+
+/** Code highlighting in the editor (W-045): preview's colours, mixed well towards the muted code text. */
+const muted = (name: string) => ({ color: `color-mix(in srgb, var(--code-${name}) 45%, var(--text-muted))` });
 
 const theme = EditorView.theme({
   "&": {
@@ -35,6 +38,15 @@ const theme = EditorView.theme({
   ".cm-panels-top": { borderBottom: "none" },
   ".cm-searchMatch": { backgroundColor: "var(--find-match)", borderRadius: "2px" },
   ".cm-searchMatch-selected": { backgroundColor: "var(--find-current)" },
+  ".hl-keyword": muted("keyword"),
+  ".hl-string": muted("string"),
+  ".hl-literal": muted("literal"),
+  ".hl-comment": muted("comment"),
+  ".hl-type": muted("type"),
+  ".hl-function": muted("function"),
+  ".hl-property": muted("property"),
+  ".hl-inserted": muted("inserted"),
+  ".hl-deleted": muted("deleted"),
 });
 
 /** Files keep their original line endings; CodeMirror otherwise normalises to "\n". */
@@ -57,13 +69,15 @@ const lock = new Compartment();
 /**
  * `onLockedEdit` runs when the user tries to change a locked document: typing,
  * deleting, pasting, cutting or dropping. CodeMirror itself ignores the edit.
- * `onSelect` runs when the text or the selection changes.
+ * `onSelect` runs when the text or the selection changes. `highlightCode`
+ * turns on muted highlighting in fenced code blocks (`setCodeHighlighting`).
  */
 export function createState(
   doc: string,
   onChange: (view: EditorView) => void,
   onLockedEdit: () => void,
   onSelect: (view: EditorView) => void = () => {},
+  highlightCode = false,
 ): EditorState {
   const blocked = (_: Event, view: EditorView) => {
     if (!view.state.readOnly) return false;
@@ -86,7 +100,7 @@ export function createState(
       history(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
       find(onLockedEdit),
-      markdown({ base: markdownLanguage }),
+      markdownWithCode(highlightCode),
       markdownStyling,
       EditorView.lineWrapping,
       EditorView.contentAttributes.of({ spellcheck: "true", autocorrect: "on" }),

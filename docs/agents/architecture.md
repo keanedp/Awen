@@ -22,6 +22,7 @@ How the parts of Writer connect. File-level detail is discoverable from the code
   - `preview/render.test.ts`: raw HTML and `javascript:` links never survive rendering; highlighted code is escaped; `localImage` path resolution, including Windows paths (mocks `convertFileSrc`).
   - `files.test.ts`: path helpers and the export dialog's default path and chosen format.
   - `editor/count.test.ts`: word counting (Markdown syntax left out, selections, hyphenated words) and the footer text.
+  - `editor/code.test.ts`: editor code highlighting (fences parsed only when on, preview's language names and classes, Markdown never styled as code, word count unchanged).
   - `preferences.test.ts`: saved values are checked and fall back to defaults (mocks `invoke` and `listen`).
   - Rust: `rename.rs` (create and move never overwrite, case-only renames, name checks, using a temporary folder), `recent.rs` (list order and limit, menu labels) and `preferences.rs` (missing or corrupt file, round trip).
 - Test logic, not glue: when a Tauri command mixes file work with app state, split the file work into a plain function (`rename::move_file`, `recent::move_to_top`) and test that.
@@ -40,11 +41,11 @@ Details:
 - Close calls `appWindow.close()`. `onCloseRequested` runs `confirmDiscard()` (Save / Don't Save / Cancel) and can prevent the close.
 - New and Quit never reach the frontend (see Document windows). Open does, unless no window is focused; then Rust shows the Open dialog itself.
 - On macOS, Quit lives in the app menu; on other OSes, File has Exit.
-- **Checkmarks** (View → Preview, View → Word Count) are `CheckMenuItem`s kept by id in `menu::CheckItems`. The menu bar is app-wide but the state is the frontend's, so a window restates them with `setMenuChecked(id, …)` (`set_menu_checked`) whenever the state changes and when it comes forward. A new check item needs adding to `CheckItems` and to the `id` type in `src/lib/menu.ts`.
+- **Checkmarks** (View → Preview, Word Count, Code Highlighting) are `CheckMenuItem`s kept by id in `menu::CheckItems`. The menu bar is app-wide but the state is the frontend's, so a window restates them with `setMenuChecked(id, …)` (`set_menu_checked`) whenever the state changes and when it comes forward. A new check item needs adding to `CheckItems` and to the `id` type in `src/lib/menu.ts`.
 
 ## Preferences (`src/lib/preferences.ts`, `src-tauri/src/preferences.rs`)
 
-- App-wide settings kept between launches (W-020): today `wordCount` and `exportFormat`.
+- App-wide settings kept between launches (W-020): today `wordCount`, `codeHighlighting` and `exportFormat`.
 - Rust stores them as untyped JSON in `preferences.json` in the app data folder, beside `recent.json`, loaded in `setup`. The frontend owns names, types and defaults: `parsePreferences` checks every saved value and falls back to the default, so an old, newer or hand-edited file can't break the app.
 - `setPreference(key, value)` saves and emits `preference-changed` to every window. Each page listens with the global `listen` (deliberately, unlike menu events) and applies it to its `prefs` state, so all windows follow a change made in one.
 - A new window renders with defaults until `loadPreferences()` resolves. Anything a preference hides waits for `prefsLoaded`, so it doesn't flash up.
@@ -89,6 +90,7 @@ Details:
   - With the separator set, CodeMirror splits inserted text only on that separator. So a `clipboardInputFilter` (`matchLineBreaks`) converts pasted and dropped text to the file's line ending (W-050). Any other path that inserts outside text must do the same.
 - `markdownStyling.ts` dims syntax marks via a `HighlightStyle` (`--markup` colour). A `ViewPlugin` decorates leading `#` marks with `.cm-hanging-mark`, which is absolutely positioned and translated left so headings hang into the margin.
 - **Word count (W-019):** `count.ts` counts words with `Intl.Segmenter`, after blanking the Markdown syntax nodes (marks, URLs, images, HTML tags; see the `syntax` set) in the editor's own parse tree. `createState`'s `onSelect` hook schedules a recount 150ms after typing or selecting stops; the whole document is only recounted when `state.doc` changed. Nothing is counted while the footer is hidden. The footer is `src/lib/ui/WordCount.svelte`; in preview it shows the whole document, since the selection is hidden.
+- **Code highlighting (W-045):** `code.ts` holds the Markdown language in a compartment. Off, fences are plain `CodeText`; on, `markdown({ codeLanguages })` parses them with the same lookup (`codeLanguage`) and `hl-*` classes (`codeHighlighter`) as preview, loading parsers on demand. The highlighter is scoped to non-Markdown trees, since tags like `heading` and `processingInstruction` also mark Markdown. `setup.ts`'s theme mutes the colours by mixing each `--code-*` token (now on `:root`) with `--text-muted`. Code parsed this way is mounted as nested trees: `count.ts` and the hanging-mark plugin iterate with `IterMode.IgnoreMounts` (see gotchas.md).
 - Layout: a centered column (`max-width: var(--measure)`, 66ch) with bottom padding of 40vh, so the end of the text can scroll up the screen.
 - **Find (W-022):** `find.ts` adds `@codemirror/search` with a `createPanel` that mounts `src/lib/ui/FindBar.svelte` (Svelte `mount`) as a top panel.
   - The bar dispatches `setSearchQuery` as you type. Menu items call `openFind`, `findNext` and the other commands in `+page.svelte`; find leaves preview first.
