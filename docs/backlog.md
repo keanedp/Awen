@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-055**
+Next free ID: **W-056**
 
 ---
 
@@ -65,6 +65,13 @@ As a writer, I want pasted text to use my document's line endings, so a file nev
 - [x] Dropped text is normalised too (CodeMirror runs drops through the same filter)
 - [x] The paste tests in `src/lib/editor/setup.test.ts` pass as ordinary tests
 - [x] Verified in the app: paste CRLF text into an LF file and LF into a CRLF file, save, and check the bytes (e.g. `od -c`) on macOS (`test_files/lf.md` and `crlf.md`)
+
+### W-055 The caret keeps up when editing fences
+Status: Needs verification · Platforms: macOS, Windows
+As a writer, I want the caret to move as soon as I type or delete, including on code fence lines.
+- [x] CodeMirror draws the caret and selection (`drawSelection()`), in `--caret` and `--selection` colours, grey when the editor isn't focused
+- [ ] Verified on macOS: deleting and typing a fence's backticks moves the caret at once; caret and selection look right in light and dark mode, while typing, selecting by mouse and keyboard, with the find bar focused, and with the window in the background
+- [ ] Verified on Windows
 
 ### W-052 Verify pasting line endings on Windows
 Status: Needs verification · Platforms: Windows
