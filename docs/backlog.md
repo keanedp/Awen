@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-060**
+Next free ID: **W-062**
 
 ---
 
@@ -262,6 +262,30 @@ Status: Needs verification · Platforms: Windows
 As a Windows user, I want the W-022 find flyout and shortcuts to work in a real build.
 - [ ] Edit menu: Find… Ctrl+F, Find Next F3, Find Previous Shift+F3, Replace… Ctrl+H
 - [ ] Flyout looks right in light and dark mode (Segoe Fluent Icons, field underline, shadow) and doesn't cover the match it scrolls to
+
+### W-060 Format menu
+Status: Todo · Platforms: all
+As a writer, I want a Format menu that applies Markdown formatting to the selected text, like focused editors (`screenshots/format_menu.png`), so I don't have to type the syntax by hand.
+- [ ] Format menu between Edit and View, with the same groups and shortcuts as focused editors (Cmd on macOS, Ctrl on Windows):
+  - Headings ▸ (Heading 1–6), Lists ▸ (Bulleted, Numbered, Task), Blockquote ⌘>, Body (removes heading, list and quote markers)
+  - Bold ⌘B, Italic ⌘I, Strikethrough ⌥⌘U, Highlight ⇧⌘U
+  - Code ⌘J, Code Block ⇧⌘J
+  - Add Link ⌘K, Add Horizontal Rule
+  - Clear Styles ⌥⌘⌫ (removes inline and line formatting from the selection)
+- [ ] Inline styles wrap the selection in their markers (`**`, `*`, `~~`, `==`, `` ` ``). Applying one to text that already has it removes it. With no selection, it inserts empty markers with the cursor between them
+- [ ] Line styles (headings, lists, blockquote, Body) apply to every line the selection touches and replace any other line style. Applying the same one again removes it. Numbered lists count up from 1
+- [ ] Code Block wraps the selected lines in a fence. Add Link puts the selection in `[text]()` with the cursor in the URL, or puts a selected URL in `[](url)` with the cursor in the text
+- [ ] Each change is a single undo step, keeps the text selected, and keeps the file's line endings. The items are disabled in preview and when the document is locked
+- [ ] The preview, exports and print render `==highlight==` as highlighted text
+- [ ] Unit tested: wrap/unwrap/toggle for each style, multi-line selections, empty selections, mixed line styles, CRLF files (logic in `src/lib/editor/`, not `+page.svelte`)
+- [ ] Verified in the app on macOS and Windows
+
+### W-061 More Format menu items
+Status: Todo · Platforms: all
+As a writer, I want the rest of focused editors' Format menu (`screenshots/format_menu.png`), once W-060's basic formatting is done.
+- [ ] Add Footnote ⌃⌘K, and footnotes render in preview and exports
+- [ ] Add Table, Add Date, Add Page Break (honoured in print and PDF), Add Table of Contents
+- [ ] Decide whether Structure ▸, Add Wikilink, Add Content Block and Add Hashtag fit Writer (they depend on library features, see W-030), and record the decision in `decisions.md`
 
 ### W-046 Find options
 Status: Todo · Platforms: all
