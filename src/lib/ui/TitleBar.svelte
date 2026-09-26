@@ -108,7 +108,7 @@
   </header>
 {:else if os === "windows"}
   <header class="titlebar windows chrome" class:inactive={!focused} data-tauri-drag-region>
-    <span class="title">{dirty ? "*" : ""}{name} - Writer</span>
+    <span class="title">{dirty ? "*" : ""}{name} - Awen</span>
     <div class="actions">
       {@render previewButton()}
       <div class="captions">

@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-26: The app is called Awen
+- "Writer" was too generic to search for or trademark. Awen is Welsh for poetic inspiration: short, rare, and it means something to writers. The other candidates are in `ideas/names.md`.
+- The bundle identifier changed with it (`com.danielkeane.awen`). `app_data_dir` follows the identifier, so preferences and recent documents saved under the old name don't carry over. That was acceptable before the first release; don't change the identifier again once there are users.
+- The repo folder, the `W-` story ids and "focused editors" references keep their names.
+
 ## 2026-09-26: Format menu (W-060)
 - Modelled on focused editors' (`screenshots/format_menu.png`), with its shortcuts. The Headings and Lists submenus weren't in the screenshot: headings take ⌘1–⌘6 (as in Bear and Typora; ⌘0 is Actual Size), lists have no shortcuts yet. Blockquote is ⌘> on macOS, as in focused editors; on Windows, Ctrl+Shift+. .
 - Italic writes `*`, bold `**`, as the preview's markdown-it reads them anywhere, even inside a word (`_` doesn't work there). Both `*` and `_` are recognised when removing a style.
@@ -57,7 +62,7 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 - It's a View menu toggle rather than always on, because focused editors' editor never colours code and most documents here are prose.
 
 ## 2026-09-25: Code blocks are highlighted in preview only, with Lezer parsers
-- focused editors doesn't highlight code; Typora does. Writer highlights in preview, print and exports, where code is read and shared, and leaves the editor calm. Muted editor highlighting is W-045 and off by default.
+- focused editors doesn't highlight code; Typora does. Awen highlights in preview, print and exports, where code is read and shared, and leaves the editor calm. Muted editor highlighting is W-045 and off by default.
 - Lezer parsers (`@codemirror/language-data`) rather than highlight.js or Shiki: the editor already uses Lezer, so W-045 can share the same parsers and `--code-*` colours and the two views match. language-data also gives ~150 languages, loaded on demand as separate chunks.
 - The cost is that loading is async while markdown-it is sync, so callers await `loadCodeLanguages` before rendering (see architecture.md).
 
@@ -72,22 +77,22 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 - Undo and Redo used to do nothing in preview. They now apply to the document and re-render the preview, because otherwise Cmd+Z right after ticking a box would seem broken.
 
 ## 2026-09-25: Opening from Finder/Explorer reuses a blank window; single instance on Windows
-- A file opened from outside the app goes to an untitled window with no changes if there is one, as TextEdit does. Otherwise it follows the Open rules (bring forward, or a new window). Otherwise launching Writer by double-clicking a file would show the file *and* an empty Untitled window.
+- A file opened from outside the app goes to an untitled window with no changes if there is one, as TextEdit does. Otherwise it follows the Open rules (bring forward, or a new window). Otherwise launching Awen by double-clicking a file would show the file *and* an empty Untitled window.
 - Rust decides this itself instead of forwarding to the focused window like Open Recent does. The frontend drops file commands while `busy` (e.g. a dialog is open), and a Finder open must never be dropped.
-- Windows uses `tauri-plugin-single-instance` so Explorer opens reach the running app. Without it every double-click starts a separate Writer process, and "already open → bring forward" and Quit would only see that process's windows. It is a Windows-only dependency: macOS LaunchServices already keeps one instance.
+- Windows uses `tauri-plugin-single-instance` so Explorer opens reach the running app. Without it every double-click starts a separate Awen process, and "already open → bring forward" and Quit would only see that process's windows. It is a Windows-only dependency: macOS LaunchServices already keeps one instance.
 - Only `.md` and `.markdown` are registered. The Open dialog also accepts `.txt`, but claiming every text file would be intrusive.
 
 ## 2026-09-25: Locked means Finder's locked flag, and locking saves first
-W-043 uses the file's user-immutable flag (`NSURLIsUserImmutableKey`), the same one Finder's Get Info → Locked sets, rather than an app-private setting, so the lock protects the file everywhere and a lock set in Finder shows in Writer. Locking with unsaved edits saves them first, so what's locked is what's on screen. Editing a locked document offers Duplicate (default, as it keeps the file safe) or Unlock, like TextEdit.
+W-043 uses the file's user-immutable flag (`NSURLIsUserImmutableKey`), the same one Finder's Get Info → Locked sets, rather than an app-private setting, so the lock protects the file everywhere and a lock set in Finder shows in Awen. Locking with unsaved edits saves them first, so what's locked is what's on screen. Editing a locked document offers Duplicate (default, as it keeps the file safe) or Unlock, like TextEdit.
 
 ## 2026-09-25: Our own title popover for rename/move/tags
-NSDocument apps get the title-bar rename popover for free, but it belongs to NSDocument and the window's own title, which the Overlay title bar hides. So Writer builds an equivalent NSPopover with objc2 (`rename.rs`) and anchors it to the web title, instead of adopting NSDocument. Locked is left for W-043: it needs a read-only editor state. Windows has no equivalent convention, so it keeps Save As only.
+NSDocument apps get the title-bar rename popover for free, but it belongs to NSDocument and the window's own title, which the Overlay title bar hides. So Awen builds an equivalent NSPopover with objc2 (`rename.rs`) and anchors it to the web title, instead of adopting NSDocument. Locked is left for W-043: it needs a read-only editor state. Windows has no equivalent convention, so it keeps Save As only.
 
 ## 2026-09-25: One window per document; the Mac app outlives its windows
 Following TextEdit and focused editors: New and Open always make a new window. The exception is an untouched Untitled window, which Open reuses, as NSDocument apps do. On macOS closing the last window leaves the app running. Windows keeps its convention of exiting. Rust owns window creation and the label → path map, so it can open files with no window present (needed for Dock reopen and later for open-with, W-023) and bring an already-open file forward. Quit closes windows one by one so each can prompt, rather than using a single "Review changes" dialog.
 
 ## 2026-09-25: Open Recent is our own list, not NSDocumentController
-The app isn't NSDocument-based, so AppKit's automatic Open Recent menu isn't available. Rust keeps the list and builds the submenu itself, which also works unchanged on Windows. Adding entries to the system recents (Dock menu, `noteNewRecentDocumentURL:`) only makes sense once Writer registers as a `.md` handler and handles open-file events (rest of W-023).
+The app isn't NSDocument-based, so AppKit's automatic Open Recent menu isn't available. Rust keeps the list and builds the submenu itself, which also works unchanged on Windows. Adding entries to the system recents (Dock menu, `noteNewRecentDocumentURL:`) only makes sense once Awen registers as a `.md` handler and handles open-file events (rest of W-023).
 - Update (W-040): now that it does, our list stays the source of truth for the menu and is *mirrored* into the system list, not replaced by it. The Windows Clear Menu uses `RemoveAllDestinations` rather than `SHAddToRecentDocs(…, NULL)`, which would clear the user's recent files for every app.
 
 ## 2026-09-25: Title bar toolbar; custom title bar on Windows

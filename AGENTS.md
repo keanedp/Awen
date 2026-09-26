@@ -2,7 +2,7 @@
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others) when working with code in this repository.
 
-Writer is a focused Markdown editor in the style of focused editors, built with Tauri 2 (Rust) + SvelteKit (Svelte 5 runes, TypeScript) + CodeMirror 6. Targets: macOS and Windows now, iOS/Android later from the same codebase. The overriding design goal is to look and behave as native as possible on each OS.
+Awen is a focused Markdown editor in the style of focused editors, built with Tauri 2 (Rust) + SvelteKit (Svelte 5 runes, TypeScript) + CodeMirror 6. Targets: macOS and Windows now, iOS/Android later from the same codebase. The overriding design goal is to look and behave as native as possible on each OS.
 
 ## Commands
 

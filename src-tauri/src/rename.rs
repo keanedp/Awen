@@ -237,7 +237,7 @@ mod macos {
         /// Owns the popover's controls and reports the result when it closes.
         #[unsafe(super(NSObject))]
         #[thread_kind = MainThreadOnly]
-        #[name = "WriterDocumentInfoController"]
+        #[name = "AwenDocumentInfoController"]
         #[ivars = Ivars]
         struct Controller;
 

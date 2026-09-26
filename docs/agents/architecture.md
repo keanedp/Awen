@@ -1,6 +1,6 @@
 # Architecture
 
-How the parts of Writer connect. File-level detail is discoverable from the code; this covers the flows that span several files.
+How the parts of Awen connect. File-level detail is discoverable from the code; this covers the flows that span several files.
 
 ## Shape of the app
 
@@ -73,7 +73,7 @@ Details:
 
 ## Settings window (`src-tauri/src/settings.rs`, `src/routes/settings/+page.svelte`)
 
-- One app-wide window, label `settings`, opened by the `settings` menu item (Writer → Settings… on macOS, Edit → Settings… on Windows), handled in Rust. A second click brings it forward.
+- One app-wide window, label `settings`, opened by the `settings` menu item (Awen → Settings… on macOS, Edit → Settings… on Windows), handled in Rust. A second click brings it forward.
 - It loads the `/settings` route. Tauri serves the SPA fallback `index.html` for it, and SvelteKit routes it client-side. Its permissions are in `capabilities/settings.json`.
 - Rust builds it hidden and fixed-size, with native decorations on both OSes (no custom title bar). On macOS it uses the Overlay title bar style, like document windows: the page runs under the title bar (top padding of `--titlebar-height`, plus a `data-tauri-drag-region` strip), so `setSize` and the page's height measure the same thing. The page loads the preferences, waits for fonts, sets the window's height to its content (`setSize`), then shows and focuses it, so it never jumps or flashes defaults. A `ResizeObserver` refits it if the content's height changes later, since a single measurement right after the first render came out short.
 - Controls are Bits UI wrapped in `src/lib/ui/`: `Toggle` (Switch), `Choice` (Select; its menu is portalled to `<body>`, so its styles are global) and `Slider` (with a tick per stop). Each is styled per OS with `[data-os]` selectors and tokens: `--menu-*`, `--settings-bg`, `--group-*` and, on Windows, `--text-on-accent`.
@@ -86,7 +86,7 @@ Details:
   - macOS: `RunEvent::Opened` with `file://` URLs (Finder double-click, Open With, drop on the Dock icon), handled in `lib.rs`'s run loop.
   - Windows (and Linux): as command-line arguments. `setup` reads them at launch. Later launches are caught by `tauri-plugin-single-instance`, which passes the second process's arguments and working directory to the running app.
 - **Launch ordering:** AppKit can deliver `Opened` before `applicationDidFinishLaunching`, i.e. before Tauri's setup has created `main` or managed `Recent`. `open_external` queues paths until `finish_launching` (called at the end of `setup`) opens them.
-- **Which window:** each file first goes to a *blank* window (untitled, no unsaved changes, no document pending), preferring the focused one, so launching Writer by double-clicking a file doesn't leave an extra Untitled window. Otherwise `open_path` brings forward or opens a new window.
+- **Which window:** each file first goes to a *blank* window (untitled, no unsaved changes, no document pending), preferring the focused one, so launching Awen by double-clicking a file doesn't leave an extra Untitled window. Otherwise `open_path` brings forward or opens a new window.
   - If the blank window's page hasn't mounted yet, the text goes into `pending` for `take_initial_document`; if it has, Rust emits `load-document` to it.
   - Rust tracks `ready` (the page called `take_initial_document`) and `edited` (from `set_document_edited`) to decide this. The `ready` lock is held across the decision, so a window can't mount in between.
   - The page registers its event listeners *before* calling `take_initial_document`, so a `load-document` sent after that call is never missed.
@@ -166,7 +166,7 @@ Details:
 - The writing font is Classic Mono (`static/fonts/`, SIL OFL; keep `LICENSE.md` beside it).
 - **Title bar:** `src/lib/ui/TitleBar.svelte`, used by `+page.svelte`.
   - **macOS:** `titleBarStyle: "Overlay"` + `hiddenTitle` puts the traffic lights inline over our draggable header, which shows "name — Edited" centered and toolbar buttons at the trailing edge.
-  - **Windows:** `decorations: false` (in `tauri.windows.conf.json`). `TitleBar` draws the whole bar: title `*name - Writer`, toolbar buttons, then minimize/maximize/close using Segoe Fluent Icons glyphs. It tracks maximized/focused state to swap the restore icon and dim when inactive.
+  - **Windows:** `decorations: false` (in `tauri.windows.conf.json`). `TitleBar` draws the whole bar: title `*name - Awen`, toolbar buttons, then minimize/maximize/close using Segoe Fluent Icons glyphs. It tracks maximized/focused state to swap the restore icon and dim when inactive.
   - Linux keeps native decorations and has no toolbar yet.
   - `appWindow.setTitle()` still runs on every OS, so the taskbar/Dock and Window menu stay right.
 - **Title popover (macOS, W-042):** clicking the title, or File → Rename…, opens a native NSPopover (Name, Tags, Where) from `src-tauri/src/rename.rs`.

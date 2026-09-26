@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Writer",
+  "productName": "Awen",
   "version": "0.1.0",
-  "identifier": "com.danielkeane.writer",
+  "identifier": "com.danielkeane.awen",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",

@@ -1,22 +1,23 @@
-# Writer
+# Awen
 
-**A calm place to write.** Writer is a focused Markdown editor for macOS and Windows. It's just you, your words and a clean column of text. There are no toolbars full of buttons, no accounts and no cloud lock-in. Your writing stays in plain `.md` files that you own and that open anywhere.
+**A calm place to write.** Awen is a focused Markdown editor for macOS and Windows. It's just you, your words and a clean column of text. There are no toolbars full of buttons, no accounts and no cloud lock-in. Your writing stays in plain `.md` files that you own and that open anywhere.
 
-Writer is built to feel like it belongs on your computer. On a Mac it looks and behaves like a Mac app. On Windows it looks and behaves like a Windows 11 app.
+Awen is built to feel like it belongs on your computer. On a Mac it looks and behaves like a Mac app. On Windows it looks and behaves like a Windows 11 app.
 
 ---
 
-## Why Writer
+## Why Awen
 
 - **Distraction-free by design.** Text sits in a centred column about 66 characters wide, set in the Classic Mono typeface. Markdown marks like `#` and `*` fade into the background, and headings hang into the margin, so the page reads like prose and not like code.
-- **Plain files, no lock-in.** Writer opens and saves ordinary Markdown files. It even keeps each file's original line endings, so saving never rewrites a file you didn't change.
-- **Never lose your work.** Writer asks before closing a document with unsaved changes, including when you quit, log out or restart.
-- **Native on every platform.** Writer uses real system menus, your system accent colour, light and dark mode, and your platform's keyboard shortcuts.
+- **Plain files, no lock-in.** Awen opens and saves ordinary Markdown files. It even keeps each file's original line endings, so saving never rewrites a file you didn't change.
+- **Never lose your work.** Awen asks before closing a document with unsaved changes, including when you quit, log out or restart.
+- **Native on every platform.** Awen uses real system menus, your system accent colour, light and dark mode, and your platform's keyboard shortcuts.
 
 ## Features
 
 ### Writing
 - **Clean Markdown editing.** Syntax is dimmed rather than hidden, so you always know what you've typed.
+- **New to Markdown? Use the Format menu.** Select some text and choose Bold, Italic, a heading, a list, a quote, a link and more. Awen adds the Markdown for you, so you learn the syntax by seeing it appear. Choose a style again to take it off. The shortcuts are the ones you already know from word processors, like ⌘B / Ctrl+B for bold, and Clear Styles strips the formatting from a selection.
 - **Spell checking that stays put.** Your system's spell checker underlines mistakes, and the underlines stay until you fix them. Right-click a word for suggestions, Learn Spelling or Ignore.
 - **Find and replace.** A find bar styled like your OS, with the standard shortcuts.
 - **Word count and reading time.** Shown in a quiet footer that switches to the selection's count when you select text. You can hide it from the View menu.
@@ -35,10 +36,10 @@ Writer is built to feel like it belongs on your computer. On a Mac it looks and 
 - **Rename, tag and move from the title bar** (macOS). Click the document's name, just like in Apple's own apps. You can also lock a document to protect it from accidental edits.
 - **Settings that follow you.** Change the text size, column width (Narrow, Medium or Wide), line spacing and theme (Match System, Light or Dark). Changes apply live in every window and are remembered between launches.
 
-<p align="center"><img src="screenshots/settings.png" alt="Writer's Settings window on macOS in dark mode" width="520"></p>
+<p align="center"><img src="screenshots/settings.png" alt="Awen's Settings window on macOS in dark mode" width="520"></p>
 
 ### Coming soon
-Focus mode, typewriter scrolling, a library sidebar with full-text search, and Writer on iPhone, iPad and Android. See [`docs/backlog.md`](docs/backlog.md) for the full roadmap.
+Focus mode, typewriter scrolling, a library sidebar with full-text search, and Awen on iPhone, iPad and Android. See [`docs/backlog.md`](docs/backlog.md) for the full roadmap.
 
 ---
 
@@ -47,16 +48,16 @@ Focus mode, typewriter scrolling, a library sidebar with full-text search, and W
 Download the latest version for your system from this repository's **Releases** page.
 
 ### macOS
-1. Download `Writer_<version>_aarch64.dmg` (Apple silicon) or `Writer_<version>_x64.dmg` (Intel).
-2. Open the `.dmg` and drag **Writer** into your **Applications** folder.
-3. Eject the disk image, then open Writer from Applications or Launchpad.
+1. Download `Awen_<version>_aarch64.dmg` (Apple silicon) or `Awen_<version>_x64.dmg` (Intel).
+2. Open the `.dmg` and drag **Awen** into your **Applications** folder.
+3. Eject the disk image, then open Awen from Applications or Launchpad.
 
-> **First launch:** Writer isn't notarized by Apple yet, so macOS may say it "can't be opened". Right-click (or Control-click) Writer in Applications, choose **Open**, then click **Open** again. You only need to do this once. On macOS 15 and later, go to **System Settings → Privacy & Security** and click **Open Anyway**.
+> **First launch:** Awen isn't notarized by Apple yet, so macOS may say it "can't be opened". Right-click (or Control-click) Awen in Applications, choose **Open**, then click **Open** again. You only need to do this once. On macOS 15 and later, go to **System Settings → Privacy & Security** and click **Open Anyway**.
 
 ### Windows (Windows 10 or 11)
-1. Download `Writer_<version>_x64-setup.exe` (or the `.msi` if you prefer).
+1. Download `Awen_<version>_x64-setup.exe` (or the `.msi` if you prefer).
 2. Run the installer and follow the steps.
-3. Start Writer from the Start menu. `.md` files can now be opened with Writer.
+3. Start Awen from the Start menu. `.md` files can now be opened with Awen.
 
 > **SmartScreen:** the installer isn't signed yet, so Windows may show "Windows protected your PC". Click **More info → Run anyway**.
 >
@@ -70,6 +71,11 @@ Download the latest version for your system from this repository's **Releases** 
 | Toggle preview | ⌘R | Ctrl+R |
 | Find / Replace | ⌘F / ⌥⌘F | Ctrl+F / Ctrl+H |
 | Find next / previous | ⌘G / ⇧⌘G | F3 / Shift+F3 |
+| Bold / Italic | ⌘B / ⌘I | Ctrl+B / Ctrl+I |
+| Heading 1–6 | ⌘1–⌘6 | Ctrl+1–Ctrl+6 |
+| Blockquote | ⌘> | Ctrl+Shift+. |
+| Code / Code block | ⌘J / ⇧⌘J | Ctrl+J / Ctrl+Shift+J |
+| Add link | ⌘K | Ctrl+K |
 | Export… | ⇧⌘E | Ctrl+Shift+E |
 | Print | ⌘P | Ctrl+P |
 | Bigger / Smaller / Actual Size | ⌘+ / ⌘− / ⌘0 | Ctrl++ / Ctrl+− / Ctrl+0 |
@@ -81,7 +87,7 @@ Download the latest version for your system from this repository's **Releases** 
 
 ### Architecture
 
-Writer is a [Tauri 2](https://tauri.app) app. A small Rust backend hosts a web frontend in the system's own web view (WKWebView on macOS, WebView2 on Windows), so the app stays small and fast.
+Awen is a [Tauri 2](https://tauri.app) app. A small Rust backend hosts a web frontend in the system's own web view (WKWebView on macOS, WebView2 on Windows), so the app stays small and fast.
 
 | Layer | Technology | Where |
 | --- | --- | --- |
@@ -151,4 +157,4 @@ AI coding agents (Claude Code, Codex and others) are welcome. [`AGENTS.md`](AGEN
 
 ### Licence
 
-Writer is released under the MIT licence. The bundled Classic Mono font is licensed under the SIL Open Font License (see `static/fonts/LICENSE.md`).
+Awen is released under the MIT licence. The bundled Classic Mono font is licensed under the SIL Open Font License (see `static/fonts/LICENSE.md`).

@@ -1,4 +1,4 @@
-//! The Settings window (W-021): one for the whole app, opened from Writer →
+//! The Settings window (W-021): one for the whole app, opened from Awen →
 //! Settings… on macOS or Edit → Settings… on Windows. It loads the `/settings`
 //! route, which sizes the window to its content and then shows it.
 

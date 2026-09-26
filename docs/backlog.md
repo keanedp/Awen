@@ -1,6 +1,6 @@
 # Backlog
 
-User stories for Writer, grouped by milestone. This file is the single place to track progress, for people and agents alike.
+User stories for Awen, grouped by milestone. This file is the single place to track progress, for people and agents alike.
 
 ## How to use this file
 
@@ -293,7 +293,7 @@ Status: Todo · Platforms: all
 As a writer, I want the rest of focused editors' Format menu (`screenshots/format_menu.png`), once W-060's basic formatting is done.
 - [ ] Add Footnote ⌃⌘K, and footnotes render in preview and exports
 - [ ] Add Table, Add Date, Add Page Break (honoured in print and PDF), Add Table of Contents
-- [ ] Decide whether Structure ▸, Add Wikilink, Add Content Block and Add Hashtag fit Writer (they depend on library features, see W-030), and record the decision in `decisions.md`
+- [ ] Decide whether Structure ▸, Add Wikilink, Add Content Block and Add Hashtag fit Awen (they depend on library features, see W-030), and record the decision in `decisions.md`
 
 ### W-046 Find options
 Status: Todo · Platforms: all
@@ -319,11 +319,11 @@ As a writer, I want the line I'm typing to stay vertically centered, so my eyes 
 
 ### W-023 Recent files and open with
 Status: Needs verification (Windows only) · Platforms: macOS, Windows
-As a writer, I want to reopen recent documents and open `.md` files from Finder/Explorer with Writer.
+As a writer, I want to reopen recent documents and open `.md` files from Finder/Explorer with Awen.
 - [x] File → Open Recent submenu, clearable
-- [x] Writer registers as an editor for `.md` files; double-clicking opens the file (bundle declares the association)
+- [x] Awen registers as an editor for `.md` files; double-clicking opens the file (bundle declares the association)
 - [x] Opening a file while another is open opens it in a new window (W-024); an untouched Untitled window is reused
-- [x] Verified on macOS with a bundled build: double-click with Writer closed (opens in the launch window, no extra Untitled), with Writer running, several files at once, a file already open, dropping on the Dock icon
+- [x] Verified on macOS with a bundled build: double-click with Awen closed (opens in the launch window, no extra Untitled), with Awen running, several files at once, a file already open, dropping on the Dock icon
 - [ ] Verified on Windows installer build: association registered, double-click opens in the running instance (single-instance plugin, never compiled)
 
 ### W-024 Multiple windows
@@ -338,9 +338,9 @@ As a writer, I want each document in its own window, so I can work on several at
 
 ### W-038 Quit from the Dock or on logout asks about unsaved changes
 Status: Done · Platforms: macOS
-As a Mac user, I want Quit from the Dock menu, and logging out, to ask about unsaved changes like Quit Writer does.
+As a Mac user, I want Quit from the Dock menu, and logging out, to ask about unsaved changes like Quit Awen does.
 - [x] Handle `applicationShouldTerminate:` (tao doesn't forward it) and run the same close-each-window flow
-- [x] Verified: Dock → Quit with an edited document prompts; Cancel keeps Writer running; logout waits for the prompt
+- [x] Verified: Dock → Quit with an edited document prompts; Cancel keeps Awen running; logout waits for the prompt
 
 ### W-040 Recent documents in the Dock menu and Jump List
 Status: Done · Platforms: macOS (Windows verification moved to W-041)
@@ -379,7 +379,7 @@ Status: Done · Platforms: macOS
 As a Mac user, I want the Locked checkbox from the title popover (W-042), so I can protect a finished document from edits.
 - [x] Locked checkbox in the title popover sets the file's locked flag (`NSURLIsUserImmutableKey`)
 - [x] A locked document is read-only and its title shows "— Locked"; typing offers to unlock or duplicate, as TextEdit does
-- [x] Locking in Finder shows in Writer when its window comes forward
+- [x] Locking in Finder shows in Awen when its window comes forward
 - [x] Verified by running the app
 
 ---
@@ -414,7 +414,7 @@ As a writer, I want `![](photo.png)` images next to my document to show in previ
 
 Verified in the macOS preview (local, data-URI and missing images). Windows (`http://asset.localhost` URLs) and mobile are unverified. Images in a parent folder (`../`) are blocked by the scope.
 
-### W-034 Writer on iPhone, iPad and Android
+### W-034 Awen on iPhone, iPad and Android
 Status: Todo · Platforms: iOS, Android
 As a writer, I want to write on my phone and tablet with the same focused experience.
 - [ ] `tauri ios init` / `tauri android init` projects created and committed
@@ -423,7 +423,7 @@ As a writer, I want to write on my phone and tablet with the same focused experi
 
 ### W-035 Signed and notarized releases
 Status: Todo · Platforms: macOS, Windows
-As a user, I want to install Writer without security warnings.
+As a user, I want to install Awen without security warnings.
 - [ ] macOS build signed with Developer ID and notarized
 - [ ] Windows installer signed
 - [ ] Release steps documented in `docs/agents/` (signing keys stay out of git)

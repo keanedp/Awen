@@ -164,7 +164,7 @@ mod macos {
         /// Receives "Export To" pop-up changes and updates the panel.
         #[unsafe(super(NSObject))]
         #[thread_kind = MainThreadOnly]
-        #[name = "WriterExportFormatTarget"]
+        #[name = "AwenExportFormatTarget"]
         #[ivars = FormatTargetIvars]
         struct FormatTarget;
 
@@ -279,7 +279,7 @@ mod macos {
         /// Reports when a save-to-file print operation finishes.
         #[unsafe(super(NSObject))]
         #[thread_kind = MainThreadOnly]
-        #[name = "WriterPdfExportDelegate"]
+        #[name = "AwenPdfExportDelegate"]
         #[ivars = PdfDelegateIvars]
         struct PdfDelegate;
 
