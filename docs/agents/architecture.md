@@ -103,6 +103,10 @@ Details:
   - **Windows:** `decorations: false` (in `tauri.windows.conf.json`). `TitleBar` draws the whole bar: title `*name - Writer`, toolbar buttons, then minimize/maximize/close using Segoe Fluent Icons glyphs. It tracks maximized/focused state to swap the restore icon and dim when inactive.
   - Linux keeps native decorations and has no toolbar yet.
   - `appWindow.setTitle()` still runs on every OS, so the taskbar/Dock and Window menu stay right.
+- **Title popover (macOS, W-042):** clicking the title, or File → Rename…, opens a native NSPopover (Name, Tags, Where) from `src-tauri/src/rename.rs`.
+  - The title is a `<button>` that is *not* a drag region: its own mousedown handler calls `startDragging()` once the pointer moves 3px, and opens the popover on mouseup otherwise.
+  - `show_document_info` anchors the popover to the chevron's `getBoundingClientRect()`. The Overlay title bar makes the WKWebView fill the whole window, so CSS pixels map straight onto the web view's coordinates.
+  - The command returns only what changed (nothing on Esc). `rename()` in `+page.svelte` applies it: `move_document` (refuses to overwrite; updates the window's path and Open Recent), or `create_document` for an untitled document, then `set_file_tags`. Unsaved edits stay unsaved, as in NSDocument apps.
 - **Toolbar buttons:** `src/lib/ui/ToolbarButton.svelte`, sized by `--toolbar-button-*` tokens.
   - They cancel `mousedown` so they never steal focus from the editor.
   - Toggle buttons pass `pressed`.

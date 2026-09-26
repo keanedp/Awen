@@ -9,18 +9,60 @@
     name,
     dirty,
     previewing,
+    renaming,
     onTogglePreview,
+    onRename,
   }: {
     os: OS;
     name: string;
     dirty: boolean;
     previewing: boolean;
+    /** The title popover (macOS) is open. */
+    renaming: boolean;
     onTogglePreview: () => void;
+    onRename: () => void;
   } = $props();
 
   const appWindow = getCurrentWindow();
   let maximized = $state(false);
   let focused = $state(true);
+  let chevron = $state<SVGElement>();
+
+  /** Where the title popover points: the chevron after the title. */
+  export function anchor(): DOMRect {
+    return chevron!.getBoundingClientRect();
+  }
+
+  // A click on the title while the popover is open closes it (AppKit does that
+  // on mouse-down), and must not reopen it. The close can reach us just before
+  // or just after the mouse-down, so both cases are checked.
+  let closedAt = 0;
+  $effect(() => {
+    if (!renaming) closedAt = performance.now();
+  });
+
+  /** A click opens the popover; a drag moves the window, as on the rest of the title bar. */
+  function titleMouseDown(e: MouseEvent) {
+    if (e.button !== 0) return;
+    e.preventDefault(); // keep focus and the caret in the editor
+    if (e.detail > 1 || renaming || performance.now() - closedAt < 300) return;
+    const [x, y] = [e.screenX, e.screenY];
+    const move = (m: MouseEvent) => {
+      if (Math.hypot(m.screenX - x, m.screenY - y) < 3) return;
+      done();
+      appWindow.startDragging();
+    };
+    const up = () => {
+      done();
+      onRename();
+    };
+    const done = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  }
 
   // Windows draws its own caption buttons, so it tracks maximize and focus state.
   onMount(() => {
@@ -52,9 +94,13 @@
 {#if os === "mac"}
   <!-- Traffic lights sit over the left edge (Overlay title bar). -->
   <header class="titlebar mac chrome" data-tauri-drag-region>
-    <span class="title">
-      {name}{#if dirty}<span class="edited"> — Edited</span>{/if}
-    </span>
+    <button type="button" class="title" class:open={renaming} tabindex="-1" onmousedown={titleMouseDown}>
+      <span class="name">{name}{#if dirty}<span class="edited"> — Edited</span>{/if}</span>
+      <!-- Lucide "chevron-down" (MIT) -->
+      <svg bind:this={chevron} class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </button>
     <div class="actions">{@render previewButton()}</div>
   </header>
 {:else if os === "windows"}
@@ -100,8 +146,35 @@
     justify-content: center;
     font-size: var(--ui-size);
   }
+  /* The title opens the rename popover, so unlike on Windows it takes clicks.
+     The padding keeps it clear of the traffic lights and toolbar buttons. */
   .mac .title {
-    padding: 0 80px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    max-width: calc(100% - 160px);
+    pointer-events: auto;
+    border: 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: default;
+  }
+  .mac .name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mac .chevron {
+    flex-shrink: 0;
+    width: 11px;
+    height: 11px;
+    opacity: 0;
+  }
+  .mac .title:hover .chevron,
+  .mac .title.open .chevron {
+    opacity: 1;
   }
   .mac .edited {
     opacity: 0.7;

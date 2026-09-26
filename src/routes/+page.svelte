@@ -10,8 +10,10 @@
     type ExportFormat,
     baseName,
     cancelQuit,
+    createDocument,
     exportPdf,
     fileName,
+    moveDocument,
     pickExportTarget,
     pickFileToOpen,
     openDocument,
@@ -19,6 +21,8 @@
     printPage,
     setDocumentEdited,
     setDocumentPath,
+    setFileTags,
+    showDocumentInfo,
     takeInitialDocument,
     writeDocument,
   } from "$lib/files";
@@ -40,6 +44,8 @@
   let preview = $state<Preview>();
   let printHtml = $state("");
   let exportFormat: ExportFormat = "html";
+  let renaming = $state(false);
+  let titleBar = $state<TitleBar>();
 
   let host: HTMLElement;
   let view: EditorView;
@@ -146,6 +152,41 @@
     return path ? write(path) : saveAs();
   }
 
+  /**
+   * macOS: the title popover renames, moves and tags the file, keeping unsaved
+   * edits, as NSDocument apps do. An untitled document is saved there instead.
+   */
+  async function rename() {
+    if (os !== "mac" || !titleBar) return;
+    renaming = true;
+    let info;
+    try {
+      info = await showDocumentInfo(titleBar.anchor(), path);
+    } finally {
+      renaming = false;
+    }
+    if (!previewing) view.focus();
+    if (!info) return;
+    const target = `${info.directory.replace(/\/$/, "")}/${info.name}`;
+    try {
+      if (!path) {
+        const text = documentText(view);
+        await createDocument(target, text);
+        noteRecentDocument(target);
+        setDocumentPath(target);
+        savedText = text;
+        dirty = documentText(view) !== savedText;
+      } else if (target !== path) {
+        // Rust updates this window's path and Open Recent.
+        await moveDocument(path, target);
+      }
+      path = target;
+      if (info.tags) await setFileTags(target, info.tags);
+    } catch (err) {
+      await showError(err);
+    }
+  }
+
   /** Returns true when it is safe to close the document. */
   async function confirmDiscard(): Promise<boolean> {
     if (!dirty) return true;
@@ -210,6 +251,7 @@
     open: openFile,
     save,
     save_as: saveAs,
+    rename,
     export: exportDocument,
     print,
     // onCloseRequested handles unsaved changes. New and Quit are handled in Rust.
@@ -279,7 +321,16 @@
 </script>
 
 <div class="app-root flex h-full flex-col bg-surface">
-  <TitleBar {os} {name} {dirty} {previewing} onTogglePreview={togglePreview} />
+  <TitleBar
+    bind:this={titleBar}
+    {os}
+    {name}
+    {dirty}
+    {previewing}
+    {renaming}
+    onTogglePreview={togglePreview}
+    onRename={() => exclusive(rename)}
+  />
   <main class="min-h-0 flex-1" class:hidden={previewing} bind:this={host}></main>
   {#if previewing}
     <div class="min-h-0 flex-1">

@@ -37,6 +37,37 @@ export function writeDocument(path: string, contents: string): Promise<void> {
   return invoke("write_document", { path, contents });
 }
 
+/** Saves an untitled document for the first time; fails rather than overwrite a file. */
+export function createDocument(path: string, contents: string): Promise<void> {
+  return invoke("create_document", { path, contents });
+}
+
+/** What the title popover asked for. `tags` is set only when they changed. */
+export interface DocumentInfo {
+  name: string;
+  directory: string;
+  tags: string[] | null;
+}
+
+/**
+ * macOS: shows the native Name / Tags / Where popover under `anchor`.
+ * Null when cancelled or nothing changed.
+ */
+export function showDocumentInfo(anchor: DOMRect, path: string | null): Promise<DocumentInfo | null> {
+  const { x, y, width, height } = anchor;
+  return invoke("show_document_info", { anchor: { x, y, width, height }, path });
+}
+
+/** Renames or moves this window's file; fails rather than overwrite a file. */
+export function moveDocument(from: string, to: string): Promise<void> {
+  return invoke("move_document", { from, to });
+}
+
+/** Replaces the file's Finder tags (macOS). */
+export function setFileTags(path: string, tags: string[]): Promise<void> {
+  return invoke("set_file_tags", { path, tags });
+}
+
 export async function pickFileToOpen(): Promise<string | null> {
   const path = await open({ multiple: false, directory: false, filters });
   return typeof path === "string" ? path : null;

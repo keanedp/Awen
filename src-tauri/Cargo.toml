@@ -25,11 +25,11 @@ tauri-plugin-dialog = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-opener = "2"
 
-# Native export panel and PDF output (see src/export.rs).
+# Native export panel and PDF output (src/export.rs), title popover (src/rename.rs).
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
 block2 = "0.6"
-objc2-foundation = { version = "0.3", features = ["NSArray", "NSDictionary", "NSGeometry", "NSObject", "NSString", "NSURL"] }
+objc2-foundation = { version = "0.3", features = ["NSArray", "NSDictionary", "NSEnumerator", "NSError", "NSFileManager", "NSGeometry", "NSNotification", "NSObject", "NSString", "NSURL"] }
 objc2-app-kit = { version = "0.3", features = [
   "block2",
   "objc2-uniform-type-identifiers",
@@ -37,15 +37,25 @@ objc2-app-kit = { version = "0.3", features = [
   "NSButton",
   "NSControl",
   "NSDocumentController",
+  "NSImage",
+  "NSMenu",
+  "NSMenuItem",
+  "NSOpenPanel",
   "NSPanel",
+  "NSPopover",
   "NSPopUpButton",
   "NSPrintInfo",
   "NSPrintOperation",
   "NSResponder",
   "NSSavePanel",
+  "NSText",
   "NSTextField",
+  "NSTextView",
+  "NSTokenField",
   "NSView",
+  "NSViewController",
   "NSWindow",
+  "NSWorkspace",
 ] }
 objc2-web-kit = { version = "0.3", features = ["objc2-app-kit", "WKWebView"] }
 objc2-uniform-type-identifiers = { version = "0.3", features = ["UTType", "UTCoreTypes"] }

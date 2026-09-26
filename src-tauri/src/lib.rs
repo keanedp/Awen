@@ -2,6 +2,7 @@ mod documents;
 mod export;
 mod menu;
 mod recent;
+mod rename;
 mod terminate;
 
 use tauri::Manager;
@@ -111,7 +112,11 @@ pub fn run() {
             documents::cancel_quit,
             documents::set_document_edited,
             export::choose_export,
-            export::export_pdf
+            export::export_pdf,
+            rename::show_document_info,
+            rename::move_document,
+            rename::create_document,
+            rename::set_file_tags
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

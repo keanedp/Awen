@@ -23,7 +23,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-042**
+Next free ID: **W-044**
 
 ---
 
@@ -215,6 +215,24 @@ Status: Done · Platforms: macOS
 As a Mac user, I want the dot in the red close button when a document has unsaved changes, like other document apps.
 - [x] `NSWindow.documentEdited` follows the dirty flag
 - [x] Verified by running the app
+
+### W-042 Rename, tag and move from the title
+Status: Needs verification (not yet run) · Platforms: macOS
+As a Mac user, I want to click the document title to rename it, set its Finder tags or move it, like NSDocument apps (`Inspiration/file_name_save.png`).
+- [ ] Hovering the title shows a chevron; clicking it (or File → Rename…) opens a native popover with Name, Tags and Where
+- [ ] Name is selected without its extension; Return or clicking outside applies, Esc cancels
+- [ ] Renaming or moving keeps unsaved edits, updates the title, Open Recent and the window's path; an existing file is never overwritten
+- [ ] Where lists the current folder, Desktop, Documents, Downloads, iCloud Drive and Other…
+- [ ] Tags are read from and written to the file's Finder tags
+- [ ] An untitled document is saved to the chosen name and place
+- [ ] Dragging the window by the title still works
+- [ ] Verified by running the app
+
+### W-043 Lock a document
+Status: Todo · Platforms: macOS
+As a Mac user, I want the Locked checkbox from the title popover (W-042), so I can protect a finished document from edits.
+- [ ] Locked checkbox in the title popover sets the file's locked flag (`NSURLIsUserImmutableKey`)
+- [ ] A locked document is read-only and its title shows "— Locked"; typing offers to unlock or duplicate, as TextEdit does
 
 ---
 

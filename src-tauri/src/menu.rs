@@ -4,7 +4,7 @@ use tauri::{AppHandle, Manager, Runtime};
 /// Menu item ids that are forwarded to the focused window as `menu` events.
 /// New, Quit and (with no window open) Open are handled in Rust.
 pub const FORWARDED: &[&str] = &[
-    "open", "save", "save_as", "close", "undo", "redo", "preview", "export", "print",
+    "open", "save", "save_as", "rename", "close", "undo", "redo", "preview", "export", "print",
 ];
 
 /// View → Preview, kept so the frontend can sync its checkmark
@@ -26,6 +26,9 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             &PredefinedMenuItem::separator(app)?,
             &item("save", "Save", "CmdOrCtrl+S")?,
             &item("save_as", "Save As…", "CmdOrCtrl+Shift+S")?,
+            // Opens the title popover (Name, Tags, Where), as in NSDocument apps.
+            #[cfg(target_os = "macos")]
+            &MenuItem::with_id(app, "rename", "Rename…", true, None::<&str>)?,
             &PredefinedMenuItem::separator(app)?,
             &item("export", "Export…", "CmdOrCtrl+Shift+E")?,
             &item("print", "Print…", "CmdOrCtrl+P")?,

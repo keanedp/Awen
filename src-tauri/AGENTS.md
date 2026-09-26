@@ -8,6 +8,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - `src/documents.rs`: document windows: creating and cascading them, the label → path map, opening files (including from Finder/Explorer: `open_external`), Quit sequencing.
 - `src/terminate.rs`: macOS only: adds `applicationShouldTerminate:` to tao's app delegate so system quit requests prompt about unsaved changes.
 - `src/recent.rs`: File → Open Recent list, persisted to `recent.json` in the app data dir, and mirrored into the Dock menu / Jump List.
+- `src/rename.rs`: the macOS title popover (Name, Tags, Where) and the commands that apply it: `move_document`, `create_document`, `set_file_tags`.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
 - `capabilities/default.json`: permissions for plugin and core APIs used by the frontend.
 - `tauri.conf.json`: window config (Overlay title bar on macOS), CSP, bundle settings.
@@ -26,8 +27,11 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - `define_class!` creates Objective-C target/delegate objects:
   - `FormatTarget` handles the popup action;
   - `PdfDelegate` handles `printOperationDidRun:success:contextInfo:`.
+  - `rename::Controller` is a popover, text field and token field delegate in one.
   - Bring `objc2::DefinedClass` into scope to call `.ivars()`.
+  - A `bool`-returning method can't use an early `return false` inside `define_class!` (it fails with "expected `Bool`, found `bool`"); make the last expression the result.
 - AppKit controls hold their target weakly. The save panel's completion block captures the target to keep it alive.
+- Popovers and text fields hold their delegate weakly too. `rename.rs` keeps the latest controller in a main-thread `thread_local!` until the next popover replaces it.
 - Print operations don't retain their delegate. One `PdfDelegate` lives in a main-thread `thread_local!`, and the per-call `Sender` travels through `contextInfo` as a `Box` that is reclaimed exactly once.
 - wry's own `print_with_options` (`wry/src/wkwebview/mod.rs`) is a useful reference for WKWebView printing.
 
