@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { EditorView } from "@codemirror/view";
 import type { EditorState, TransactionSpec } from "@codemirror/state";
 import { createState, documentText, setSpellcheck } from "./setup";
+import { checksSpelling } from "./spelling";
 
 const open = (text: string) => ({ state: createState(text, () => {}, () => {}) });
 
@@ -41,25 +42,29 @@ describe("line endings", () => {
 });
 
 describe("spell checking", () => {
-  /** The attributes the editor puts on its content element. */
+  /** Attributes added to the editor's content element. CodeMirror's own defaults turn WebKit's checking off. */
   const attributes = (state: EditorState) =>
     Object.assign({}, ...state.facet(EditorView.contentAttributes).filter((a) => typeof a !== "function"));
+  const webKitChecking = (state: EditorState) => ["spellcheck", "autocorrect"].some((a) => a in attributes(state));
 
-  test("is on by default, with autocorrect", () => {
-    expect(attributes(open("Text").state)).toMatchObject({ spellcheck: "true", autocorrect: "on" });
+  test("is on by default, with WebKit's own checking and autocorrect off", () => {
+    const { state } = open("Text");
+    expect(checksSpelling(state)).toBe(true);
+    expect(webKitChecking(state)).toBe(false);
   });
 
   test("can start off", () => {
     const state = createState("Text", () => {}, () => {}, () => {}, { spellcheck: false });
-    expect(attributes(state)).toMatchObject({ spellcheck: "false", autocorrect: "off" });
+    expect(checksSpelling(state)).toBe(false);
   });
 
   test("setSpellcheck switches it in an open editor", () => {
     let state = open("Text").state;
     const view = { dispatch: (spec: TransactionSpec) => (state = state.update(spec).state) } as unknown as EditorView;
     setSpellcheck(view, false);
-    expect(attributes(state)).toMatchObject({ spellcheck: "false", autocorrect: "off" });
+    expect(checksSpelling(state)).toBe(false);
     setSpellcheck(view, true);
-    expect(attributes(state)).toMatchObject({ spellcheck: "true", autocorrect: "on" });
+    expect(checksSpelling(state)).toBe(true);
+    expect(webKitChecking(state)).toBe(false);
   });
 });

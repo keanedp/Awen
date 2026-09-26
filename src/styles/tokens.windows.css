@@ -29,6 +29,9 @@
   --settings-bg: #f3f3f3;
   --group-bg: rgb(255 255 255 / 0.7);
   --group-border: rgb(0 0 0 / 0.06);
+  /* Spelling marks: a red squiggle, as in Edge and Word. */
+  --misspelled: #c42b1c;
+  --misspelled-style: wavy;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -51,6 +54,7 @@
     --settings-bg: #202020;
     --group-bg: rgb(255 255 255 / 0.05);
     --group-border: rgb(0 0 0 / 0.1);
+    --misspelled: #ff99a4;
   }
 }
 

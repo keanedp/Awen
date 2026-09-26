@@ -11,6 +11,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - `src/rename.rs`: the macOS title popover (Name, Tags, Where, Locked) and the commands that apply it: `move_document`, `create_document`, `set_file_tags`, `set_file_locked` / `is_file_locked`.
 - `src/preferences.rs`: app-wide preferences, persisted to `preferences.json` in the app data dir; `set_preference` broadcasts `preference-changed` to every window. Applies the `theme` preference to the app.
 - `src/settings.rs`: the Settings window (`show`, opened hidden; the page shows it once sized).
+- `src/spelling.rs`: the system spell checker for the editor's marks (`NSSpellChecker` / `ISpellChecker`): check, suggestions, learn, ignore. Synchronous commands, so they run on the main thread.
 - `src/accent.rs`: `accent_colors`, the system accent fill and text colours for light and dark (`NSColor.controlAccentColor` / `UISettings`), read by `applyAccent()` in `platform.ts`.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
 - `capabilities/default.json`: permissions for plugin and core APIs used by document windows; `capabilities/settings.json` for the Settings window.
