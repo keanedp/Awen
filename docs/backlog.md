@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-056**
+Next free ID: **W-057**
 
 ---
 
@@ -213,8 +213,14 @@ As a Windows user, I want W-019's word count and W-020's preferences to work in 
 - [ ] Footer looks right in light and dark mode, counts numbers and CRLF files correctly, and View → Word Count toggles it with the checkmark in step across windows
 - [ ] Word-count visibility, last export format, and window size and position survive a relaunch (`preferences.json` in the app data folder)
 
+### W-056 Verify the settings window on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-021's settings window to work in a real build (its Windows theme path and menu code have never been compiled or run).
+- [ ] Edit → Settings… (Ctrl+,) opens it; it sizes to its content and the cards look right in light and dark mode; controls work with mouse and keyboard
+- [ ] Every setting applies live in all windows and survives a relaunch; App theme switches menus, dialogs and every window; View → Bigger / Smaller / Actual Size (Ctrl + / − / 0) change the text size
+
 ### W-021 Settings window
-Status: Needs verification · Platforms: macOS, Windows
+Status: Done · Platforms: macOS (Windows verification moved to W-056)
 As a writer, I want a native-feeling settings window for text size, column width, theme and other options.
 - [x] Opens from the app menu (Settings… Cmd+, on macOS) or Edit/Tools on Windows (Edit → Settings… Ctrl+,)
 - [x] A single pane (no tabs yet), styled like macOS System Settings and Windows 11 settings cards
@@ -225,7 +231,6 @@ As a writer, I want a native-feeling settings window for text size, column width
 - [x] Every setting applies live in all windows and persists between launches (using W-020's preferences store; unit tested in `settings.test.ts`, `preferences.test.ts`, `editor/setup.test.ts`)
 - [x] Built with Bits UI components wrapped in `src/lib/ui/` (`Toggle`, `Choice`, `Slider`)
 - [x] Verified in the app on macOS: the window sizes to its content and looks right in light and dark mode; controls work with mouse and keyboard; text size, width and spacing change live in editor and preview but not in print or PDF; the theme switches menus, dialogs and every window; Cmd+W closes Settings; Open… from Settings shows the Open dialog; a relaunch keeps every setting
-- [ ] Verified on Windows (the Windows theme path and menu code have never been compiled or run)
 
 ### W-022 Find and replace
 Status: Done · Platforms: macOS (Windows verification moved to W-047)
