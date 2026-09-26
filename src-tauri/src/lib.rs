@@ -37,7 +37,16 @@ fn note_recent_document(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    // Windows starts a new process for each file opened from Explorer; this
+    // hands its arguments to the running app and exits. Registered first, so
+    // the second process stops before doing anything else.
+    #[cfg(windows)]
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
+        let paths = documents::paths_from_args(args.into_iter().skip(1), Some(cwd.into()));
+        documents::open_external(app, paths);
+    }));
+    builder
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(
@@ -50,7 +59,15 @@ pub fn run() {
         .menu(menu::build)
         .setup(|app| {
             terminate::install(app.handle());
-            Ok(recent::load(app.handle())?)
+            recent::load(app.handle())?;
+            // macOS passes files as `Opened` events instead of arguments.
+            let args = if cfg!(target_os = "macos") {
+                Vec::new()
+            } else {
+                std::env::args().skip(1).collect()
+            };
+            documents::finish_launching(app.handle(), args);
+            Ok(())
         })
         .on_menu_event(|app, event| {
             let id = event.id().as_ref();
@@ -104,6 +121,16 @@ pub fn run() {
                 code: None, api, ..
             } if documents::keep_running(app) => api.prevent_exit(),
             // Clicking the Dock icon with no windows open starts a new document.
+            // Files opened from Finder, or dropped on the Dock icon.
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Opened { urls } => {
+                let paths = urls
+                    .iter()
+                    .filter_map(|url| url.to_file_path().ok())
+                    .map(|path| path.to_string_lossy().into_owned())
+                    .collect();
+                documents::open_external(app, paths);
+            }
             #[cfg(target_os = "macos")]
             tauri::RunEvent::Reopen { .. } if app.webview_windows().is_empty() => {
                 let _ = documents::new_window(app, None);

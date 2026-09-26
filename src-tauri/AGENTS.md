@@ -5,7 +5,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 ## Layout
 - `src/lib.rs`: app builder (plugins, menu, menu-event forwarding) and the small file/print commands.
 - `src/menu.rs`: native menus. `FORWARDED` lists the ids that are emitted to the focused window as `menu` events.
-- `src/documents.rs`: document windows: creating and cascading them, the label → path map, opening files, Quit sequencing.
+- `src/documents.rs`: document windows: creating and cascading them, the label → path map, opening files (including from Finder/Explorer: `open_external`), Quit sequencing.
 - `src/terminate.rs`: macOS only: adds `applicationShouldTerminate:` to tao's app delegate so system quit requests prompt about unsaved changes.
 - `src/recent.rs`: File → Open Recent list, persisted to `recent.json` in the app data dir.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
@@ -18,7 +18,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - To keep `generate_handler!` free of `cfg` attributes, platform-specific commands exist on every OS. Unsupported OSes get a stub returning `Err`.
 - Platform dependencies are target-scoped in `Cargo.toml`:
   - macOS: `objc2`, `objc2-app-kit`, `objc2-foundation`, `objc2-web-kit`, `objc2-uniform-type-identifiers`, `block2`;
-  - Windows: `webview2-com`, `windows`.
+  - Windows: `webview2-com`, `windows`, `tauri-plugin-single-instance`.
   - Keep their major versions in step with the versions Tauri/wry already use (check `Cargo.lock`), so no second copy gets compiled.
 - Run `cargo fmt` and `cargo clippy` before finishing; clippy must be clean.
 

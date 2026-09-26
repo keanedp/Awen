@@ -52,6 +52,8 @@ objc2-uniform-type-identifiers = { version = "0.3", features = ["UTType", "UTCor
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.38"
 windows = "0.61"
+# Explorer starts a second process per opened file; this forwards it (src/lib.rs).
+tauri-plugin-single-instance = "2"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration

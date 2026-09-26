@@ -23,7 +23,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-040**
+Next free ID: **W-041**
 
 ---
 
@@ -167,11 +167,13 @@ As a writer, I want to find and replace text with the standard shortcuts.
 - [ ] Search panel styled to match the OS, not CodeMirror's default
 
 ### W-023 Recent files and open with
-Status: In progress (agent: Open Recent built, open-with not started) · Platforms: macOS, Windows
+Status: Needs verification · Platforms: macOS, Windows
 As a writer, I want to reopen recent documents and open `.md` files from Finder/Explorer with Writer.
 - [x] File → Open Recent submenu, clearable (not yet verified by running the app on macOS or Windows)
-- [ ] Writer registers as an editor for `.md` files; double-clicking opens the file
+- [x] Writer registers as an editor for `.md` files; double-clicking opens the file (bundle declares the association; not yet verified by double-clicking in Finder or Explorer)
 - [x] Opening a file while another is open opens it in a new window (W-024); an untouched Untitled window is reused
+- [ ] Verified on macOS with a bundled build: double-click with Writer closed (opens in the launch window, no extra Untitled), with Writer running, several files at once, a file already open, dropping on the Dock icon
+- [ ] Verified on Windows installer build: association registered, double-click opens in the running instance (single-instance plugin, never compiled)
 
 ### W-024 Multiple windows
 Status: Needs verification · Platforms: macOS, Windows
@@ -188,6 +190,13 @@ Status: Needs verification · Platforms: macOS
 As a Mac user, I want Quit from the Dock menu, and logging out, to ask about unsaved changes like Quit Writer does.
 - [x] Handle `applicationShouldTerminate:` (tao doesn't forward it) and run the same close-each-window flow
 - [ ] Verified: Dock → Quit with an edited document prompts; Cancel keeps Writer running; logout waits for the prompt
+
+### W-040 Recent documents in the Dock menu and Jump List
+Status: Todo · Platforms: macOS, Windows
+As a writer, I want my recent documents in the Dock menu (macOS) and the taskbar Jump List (Windows), like other document apps.
+- [ ] macOS: opened and saved files are added with `NSDocumentController noteNewRecentDocumentURL:`; the Dock menu lists them and choosing one opens it
+- [ ] Clear Menu in File → Open Recent clears the system list too
+- [ ] Windows: recent files appear in the Jump List (`SHAddToRecentDocs`)
 
 ### W-039 Show unsaved state in the close button
 Status: Needs verification · Platforms: macOS

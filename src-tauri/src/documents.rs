@@ -3,8 +3,9 @@
 //! Rust creates the windows and remembers which file each one shows, so that
 //! opening a file that is already open brings its window forward instead.
 //! Quit closes the windows one by one, letting each ask about unsaved changes.
+//! Files opened from Finder or Explorer arrive through `open_external`.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Mutex;
 
@@ -25,11 +26,18 @@ pub struct Documents {
     paths: Mutex<HashMap<String, Option<String>>>,
     /// Text read by Rust for windows that haven't loaded it yet.
     pending: Mutex<HashMap<String, String>>,
+    /// Windows whose page has mounted and asked for its initial document.
+    ready: Mutex<HashSet<String>>,
+    /// Windows with unsaved changes (see `set_document_edited`).
+    edited: Mutex<HashSet<String>>,
+    /// Set once setup has run; files the system asks to open before then wait in `queued`.
+    launched: AtomicBool,
+    queued: Mutex<Vec<String>>,
     next: AtomicUsize,
     quitting: AtomicBool,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize)]
 pub struct InitialDocument {
     path: String,
     text: String,
@@ -97,6 +105,12 @@ fn forget_window(app: &AppHandle, label: &str) {
     if let Ok(mut pending) = docs.pending.lock() {
         pending.remove(label);
     };
+    if let Ok(mut ready) = docs.ready.lock() {
+        ready.remove(label);
+    }
+    if let Ok(mut edited) = docs.edited.lock() {
+        edited.remove(label);
+    };
 }
 
 /// Opens `path`, in this order:
@@ -144,6 +158,109 @@ pub fn open_path(
     Ok(None)
 }
 
+/// Files opened from outside the app: Finder or Explorer, the Dock icon, or the
+/// command line. Each goes to an empty untitled window if there is one (the
+/// window the app launched with, say), else as `open_path` decides.
+pub fn open_external(app: &AppHandle, paths: Vec<String>) {
+    let docs = documents(app);
+    if !docs.launched.load(Ordering::SeqCst) {
+        // AppKit can deliver the files before setup has run; `finish_launching` opens them.
+        if let Ok(mut queued) = docs.queued.lock() {
+            queued.extend(paths);
+        }
+        return;
+    }
+    for path in paths {
+        if let Err(e) = open_into_blank(app, path) {
+            show_error(app, e);
+        }
+    }
+}
+
+/// Opens the files that arrived while the app was starting, plus any given on
+/// the command line (how Windows passes the file that was double-clicked).
+pub fn finish_launching(app: &AppHandle, args: Vec<String>) {
+    let docs = documents(app);
+    docs.launched.store(true, Ordering::SeqCst);
+    let mut paths = docs
+        .queued
+        .lock()
+        .map(|mut q| std::mem::take(&mut *q))
+        .unwrap_or_default();
+    paths.extend(paths_from_args(args, std::env::current_dir().ok()));
+    open_external(app, paths);
+}
+
+/// File paths among command-line arguments (without the program), made absolute.
+pub fn paths_from_args(
+    args: impl IntoIterator<Item = String>,
+    cwd: Option<std::path::PathBuf>,
+) -> Vec<String> {
+    args.into_iter()
+        .filter(|arg| !arg.starts_with('-'))
+        .map(|arg| match &cwd {
+            Some(cwd) => cwd.join(&arg).to_string_lossy().into_owned(),
+            None => arg,
+        })
+        .collect()
+}
+
+fn open_into_blank(app: &AppHandle, path: String) -> Result<(), String> {
+    let docs = documents(app);
+    // Held throughout, so a blank window can't mount and take its (empty)
+    // initial document between being chosen and being given the file.
+    let ready = docs.ready.lock().map_err(|e| e.to_string())?;
+    let blank = blank_window(app, &docs)?;
+    let Some(text) = open_path(app, path.clone(), blank.as_ref())? else {
+        return Ok(());
+    };
+    let Some(window) = blank else {
+        return Ok(());
+    };
+    let label = window.label().to_string();
+    if ready.contains(&label) {
+        app.emit_to(
+            EventTarget::webview_window(&label),
+            "load-document",
+            InitialDocument { path, text },
+        )
+        .map_err(|e| e.to_string())
+    } else {
+        docs.pending
+            .lock()
+            .map_err(|e| e.to_string())?
+            .insert(label, text);
+        Ok(())
+    }
+}
+
+/// An untitled window without changes or a document on its way, preferring the focused one.
+fn blank_window(app: &AppHandle, docs: &Documents) -> Result<Option<WebviewWindow>, String> {
+    let paths = docs.paths.lock().map_err(|e| e.to_string())?;
+    let pending = docs.pending.lock().map_err(|e| e.to_string())?;
+    let edited = docs.edited.lock().map_err(|e| e.to_string())?;
+    let mut blank: Vec<WebviewWindow> = app
+        .webview_windows()
+        .into_values()
+        .filter(|w| {
+            let label = w.label();
+            paths.get(label).is_none_or(|p| p.is_none())
+                && !pending.contains_key(label)
+                && !edited.contains(label)
+        })
+        .collect();
+    blank.sort_by_key(|w| !w.is_focused().unwrap_or(false));
+    Ok(blank.into_iter().next())
+}
+
+fn show_error(app: &AppHandle, message: String) {
+    app.dialog()
+        .message(message)
+        .title("Writer")
+        .kind(MessageDialogKind::Error)
+        .show(|_| {});
+}
+
 /// Open… or Open Recent with no window to ask: Rust shows the dialogs itself.
 pub fn open_without_window(app: &AppHandle, path: Option<String>) {
     let Some(path) = path else {
@@ -159,11 +276,7 @@ pub fn open_without_window(app: &AppHandle, path: Option<String>) {
         return;
     };
     if let Err(e) = open_path(app, path, None) {
-        app.dialog()
-            .message(e)
-            .title("Writer")
-            .kind(MessageDialogKind::Error)
-            .show(|_| {});
+        show_error(app, e);
     }
 }
 
@@ -211,13 +324,17 @@ pub fn emit_to_focused<S: Serialize + Clone>(app: &AppHandle, event: &str, paylo
         .is_ok()
 }
 
-/// The document Rust read for this window before it existed, if any.
+/// The document Rust read for this window before it existed, if any. The page
+/// calls this once its listeners are in place; later documents for this window
+/// come as `load-document` events.
 #[tauri::command]
 pub fn take_initial_document(
     window: WebviewWindow,
     docs: tauri::State<'_, Documents>,
 ) -> Result<Option<InitialDocument>, String> {
     let label = window.label();
+    let mut ready = docs.ready.lock().map_err(|e| e.to_string())?;
+    ready.insert(label.to_string());
     let text = docs
         .pending
         .lock()
@@ -272,7 +389,18 @@ pub fn cancel_quit(docs: tauri::State<'_, Documents>) {
 
 /// Shows unsaved changes as the dot in the macOS close button.
 #[tauri::command]
-pub fn set_document_edited(window: WebviewWindow, edited: bool) -> Result<(), String> {
+pub fn set_document_edited(
+    window: WebviewWindow,
+    docs: tauri::State<'_, Documents>,
+    edited: bool,
+) -> Result<(), String> {
+    if let Ok(mut set) = docs.edited.lock() {
+        if edited {
+            set.insert(window.label().to_string());
+        } else {
+            set.remove(window.label());
+        }
+    }
     #[cfg(target_os = "macos")]
     {
         let target = window.clone();

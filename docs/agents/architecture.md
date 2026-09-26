@@ -34,6 +34,18 @@ Details:
 - The dot in the macOS close button follows `dirty` via `set_document_edited`.
 - The View → Preview checkmark is app-wide, so each window restates its own state when it gains focus.
 
+## Opening files from outside the app (`documents::open_external`)
+
+- **Registration:** `bundle.fileAssociations` in `tauri.conf.json` (`.md`, `.markdown`, UTI `net.daringfireball.markdown`, role Editor). The bundler turns it into `CFBundleDocumentTypes` on macOS and registry entries in the Windows installers.
+- **How files arrive:**
+  - macOS: `RunEvent::Opened` with `file://` URLs (Finder double-click, Open With, drop on the Dock icon), handled in `lib.rs`'s run loop.
+  - Windows (and Linux): as command-line arguments. `setup` reads them at launch. Later launches are caught by `tauri-plugin-single-instance`, which passes the second process's arguments and working directory to the running app.
+- **Launch ordering:** AppKit can deliver `Opened` before `applicationDidFinishLaunching`, i.e. before Tauri's setup has created `main` or managed `Recent`. `open_external` queues paths until `finish_launching` (called at the end of `setup`) opens them.
+- **Which window:** each file first goes to a *blank* window (untitled, no unsaved changes, no document pending), preferring the focused one, so launching Writer by double-clicking a file doesn't leave an extra Untitled window. Otherwise `open_path` brings forward or opens a new window.
+  - If the blank window's page hasn't mounted yet, the text goes into `pending` for `take_initial_document`; if it has, Rust emits `load-document` to it.
+  - Rust tracks `ready` (the page called `take_initial_document`) and `edited` (from `set_document_edited`) to decide this. The `ready` lock is held across the decision, so a window can't mount in between.
+  - The page registers its event listeners *before* calling `take_initial_document`, so a `load-document` sent after that call is never missed.
+
 ## Open Recent (`src-tauri/src/recent.rs`)
 
 - Rust owns the list (max 10, newest first), stored as a JSON array of paths in `<app data dir>/recent.json`, and rebuilds the File → Open Recent submenu whenever it changes.

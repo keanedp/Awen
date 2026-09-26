@@ -2,6 +2,12 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Opening from Finder/Explorer reuses a blank window; single instance on Windows
+- A file opened from outside the app goes to an untitled window with no changes if there is one, as TextEdit does. Otherwise it follows the Open rules (bring forward, or a new window). Otherwise launching Writer by double-clicking a file would show the file *and* an empty Untitled window.
+- Rust decides this itself instead of forwarding to the focused window like Open Recent does. The frontend drops file commands while `busy` (e.g. a dialog is open), and a Finder open must never be dropped.
+- Windows uses `tauri-plugin-single-instance` so Explorer opens reach the running app. Without it every double-click starts a separate Writer process, and "already open → bring forward" and Quit would only see that process's windows. It is a Windows-only dependency: macOS LaunchServices already keeps one instance.
+- Only `.md` and `.markdown` are registered. The Open dialog also accepts `.txt`, but claiming every text file would be intrusive.
+
 ## 2026-09-25: One window per document; the Mac app outlives its windows
 Following TextEdit and focused editors: New and Open always make a new window. The exception is an untouched Untitled window, which Open reuses, as NSDocument apps do. On macOS closing the last window leaves the app running. Windows keeps its convention of exiting. Rust owns window creation and the label → path map, so it can open files with no window present (needed for Dock reopen and later for open-with, W-023) and bring an already-open file forward. Quit closes windows one by one so each can prompt, rather than using a single "Review changes" dialog.
 

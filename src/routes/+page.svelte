@@ -211,7 +211,6 @@
     os = applyPlatform();
     view = new EditorView({ state: createState("", onChange), parent: host });
     view.focus();
-    takeInitialDocument().then((doc) => doc && load(doc.text, doc.path));
 
     // App chrome has no web context menu, like native UI.
     const blockChromeMenu = (e: MouseEvent) => {
@@ -229,6 +228,10 @@
         return exclusive(actions[payload]);
       }),
       appWindow.listen<string>("open-recent", ({ payload }) => exclusive(() => open(payload))),
+      // A file opened from Finder/Explorer, sent here because this window is untouched.
+      appWindow.listen<{ path: string; text: string }>("load-document", ({ payload }) =>
+        load(payload.text, payload.path),
+      ),
       appWindow.onCloseRequested(async (event) => {
         if (await confirmDiscard()) return;
         event.preventDefault();
@@ -239,6 +242,10 @@
         if (focused) setPreviewChecked(previewing);
       }),
     ];
+    // Only once listening: after this, Rust sends documents as `load-document` events.
+    Promise.all(unlisten)
+      .then(() => takeInitialDocument())
+      .then((doc) => doc && load(doc.text, doc.path));
 
     return () => {
       document.removeEventListener("contextmenu", blockChromeMenu);
