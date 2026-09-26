@@ -298,7 +298,7 @@ fn blank_window(app: &AppHandle, docs: &Documents) -> Result<Option<WebviewWindo
 fn show_error(app: &AppHandle, message: String) {
     app.dialog()
         .message(message)
-        .title("Writer")
+        .title("Awen")
         .kind(MessageDialogKind::Error)
         .show(|_| {});
 }
@@ -483,7 +483,7 @@ pub fn set_document_edited(
     }
     #[cfg(not(target_os = "macos"))]
     {
-        // Windows shows it in the title instead (`*name - Writer`).
+        // Windows shows it in the title instead (`*name - Awen`).
         let _ = (window, edited);
         Ok(())
     }

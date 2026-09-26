@@ -289,10 +289,10 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     {
         let app_menu = Submenu::with_items(
             app,
-            "Writer",
+            "Awen",
             true,
             &[
-                &PredefinedMenuItem::about(app, Some("About Writer"), None)?,
+                &PredefinedMenuItem::about(app, Some("About Awen"), None)?,
                 &PredefinedMenuItem::separator(app)?,
                 &item("settings", "Settings…", "CmdOrCtrl+,")?,
                 &PredefinedMenuItem::separator(app)?,
@@ -303,7 +303,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
                 &PredefinedMenuItem::show_all(app, None)?,
                 &PredefinedMenuItem::separator(app)?,
                 // Custom quit so the frontend can prompt about unsaved changes.
-                &item("quit", "Quit Writer", "CmdOrCtrl+Q")?,
+                &item("quit", "Quit Awen", "CmdOrCtrl+Q")?,
             ],
         )?;
         Menu::with_items(app, &[&app_menu, &file, &edit, &format, &view, &window])

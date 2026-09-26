@@ -104,7 +104,7 @@
   $effect(() => {
     const title =
       os === "windows"
-        ? `${dirty ? "*" : ""}${name} - Writer`
+        ? `${dirty ? "*" : ""}${name} - Awen`
         : `${name}${locked ? " — Locked" : dirty ? " — Edited" : ""}`;
     appWindow.setTitle(title);
   });
@@ -295,7 +295,7 @@
   }
 
   async function showError(err: unknown) {
-    await message(String(err), { title: "Writer", kind: "error" });
+    await message(String(err), { title: "Awen", kind: "error" });
   }
 
   async function write(target: string): Promise<boolean> {

@@ -1,5 +1,5 @@
 //! macOS: routes system quit requests (Dock → Quit, logging out, restarting)
-//! through the same close-each-window flow as Quit Writer, so unsaved changes
+//! through the same close-each-window flow as Quit Awen, so unsaved changes
 //! are asked about. tao's app delegate has no `applicationShouldTerminate:`,
 //! so `install` adds one to its class.
 //!

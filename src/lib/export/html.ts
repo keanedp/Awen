@@ -79,7 +79,7 @@ export async function exportHtml(markdown: string, title: string): Promise<strin
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="generator" content="Writer">
+<meta name="generator" content="Awen">
 <title>${escapeHtml(title)}</title>
 <style>
 ${await embeddedFonts()}
