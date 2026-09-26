@@ -9,6 +9,7 @@
   import { countWords, formatCount } from "$lib/editor/count";
   import { setCodeHighlighting } from "$lib/editor/code";
   import { createState, documentText, setReadOnly, setSpellcheck } from "$lib/editor/setup";
+  import { systemSpellChecker } from "$lib/spellchecker";
   import { taskToggle } from "$lib/editor/tasks";
   import { exportHtml } from "$lib/export/html";
   import {
@@ -164,6 +165,7 @@
     return createState(text, onChange, () => exclusive(askToUnlock), scheduleCount, {
       highlightCode: prefs.codeHighlighting,
       spellcheck: prefs.spellcheck,
+      checker: systemSpellChecker,
     });
   }
 

@@ -65,6 +65,9 @@
   --separator: rgb(0 0 0 / 0.1);
   --find-match: rgb(255 204 0 / 0.3);
   --find-current: rgb(255 204 0 / 0.75);
+  /* Spelling marks: macOS's dotted systemRed. */
+  --misspelled: #ff3b30;
+  --misspelled-style: dotted;
 
   color-scheme: light dark;
 }
@@ -81,6 +84,7 @@
     --separator: rgb(255 255 255 / 0.1);
     --find-match: rgb(255 214 10 / 0.2);
     --find-current: rgb(255 214 10 / 0.5);
+    --misspelled: #ff453a;
   }
 }
 

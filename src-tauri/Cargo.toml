@@ -29,7 +29,7 @@ tauri-plugin-opener = "2"
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
 block2 = "0.6"
-objc2-foundation = { version = "0.3", features = ["NSArray", "NSDictionary", "NSEnumerator", "NSError", "NSFileManager", "NSGeometry", "NSNotification", "NSObject", "NSString", "NSURL", "NSValue"] }
+objc2-foundation = { version = "0.3", features = ["NSArray", "NSDictionary", "NSEnumerator", "NSError", "NSFileManager", "NSGeometry", "NSNotification", "NSObject", "NSRange", "NSString", "NSURL", "NSValue"] }
 objc2-app-kit = { version = "0.3", features = [
   "block2",
   "objc2-uniform-type-identifiers",
@@ -52,6 +52,7 @@ objc2-app-kit = { version = "0.3", features = [
   "NSPrintOperation",
   "NSResponder",
   "NSSavePanel",
+  "NSSpellChecker",
   "NSText",
   "NSTextField",
   "NSTextView",
@@ -66,7 +67,7 @@ objc2-uniform-type-identifiers = { version = "0.3", features = ["UTType", "UTCor
 
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.38"
-windows = { version = "0.61", features = ["Win32_System_Com", "Win32_UI_Shell", "UI", "UI_ViewManagement"] }
+windows = { version = "0.61", features = ["Win32_Globalization", "Win32_System_Com", "Win32_UI_Shell", "UI", "UI_ViewManagement"] }
 # Explorer starts a second process per opened file; this forwards it (src/lib.rs).
 tauri-plugin-single-instance = "2"
 

@@ -6,6 +6,7 @@ mod preferences;
 mod recent;
 mod rename;
 mod settings;
+mod spelling;
 mod terminate;
 
 use tauri::Manager;
@@ -139,7 +140,11 @@ pub fn run() {
             rename::set_file_locked,
             rename::is_file_locked,
             documents::duplicate_document,
-            accent::accent_colors
+            accent::accent_colors,
+            spelling::check_spelling,
+            spelling::spelling_guesses,
+            spelling::learn_spelling,
+            spelling::ignore_spelling
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

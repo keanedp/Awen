@@ -4,6 +4,7 @@ import { EditorView, drawSelection, keymap } from "@codemirror/view";
 import { markdownWithCode } from "./code";
 import { find } from "./find";
 import { markdownStyling } from "./markdownStyling";
+import { spellChecker, spelling, type SpellChecker } from "./spelling";
 
 /** Code highlighting in the editor (W-045): preview's colours, mixed well towards the muted code text. */
 const muted = (name: string) => ({ color: `color-mix(in srgb, var(--code-${name}) 45%, var(--text-muted))` });
@@ -42,6 +43,15 @@ const theme = EditorView.theme({
   ".cm-panels-top": { borderBottom: "none" },
   ".cm-searchMatch": { backgroundColor: "var(--find-match)", borderRadius: "2px" },
   ".cm-searchMatch-selected": { backgroundColor: "var(--find-current)" },
+  // A dotted underline on macOS, a squiggle on Windows (the token files).
+  ".cm-misspelled": {
+    textDecorationLine: "underline",
+    textDecorationStyle: "var(--misspelled-style)",
+    textDecorationColor: "var(--misspelled)",
+    textDecorationThickness: "2px",
+    textDecorationSkipInk: "none",
+    textUnderlineOffset: "3px",
+  },
   ".hl-keyword": muted("keyword"),
   ".hl-string": muted("string"),
   ".hl-literal": muted("literal"),
@@ -70,26 +80,31 @@ const matchLineBreaks = EditorView.clipboardInputFilter.of((text, state) =>
 /** Holds the read-only state of a locked document. */
 const lock = new Compartment();
 
-/** Holds Settings → Check spelling while typing. */
-const spelling = new Compartment();
-
-/** WebKit's autocorrect goes with spell checking: off while drafting means no corrections either. */
-const spellingAttributes = (on: boolean) =>
-  EditorView.contentAttributes.of({ spellcheck: String(on), autocorrect: on ? "on" : "off" });
+/**
+ * Holds Settings → Check spelling while typing. The editor marks misspellings
+ * itself (`spelling.ts`); WebKit's spell checking and autocorrect stay off, as
+ * CodeMirror sets them.
+ */
+const checkSpelling = new Compartment();
 
 /**
  * `onLockedEdit` runs when the user tries to change a locked document: typing,
  * deleting, pasting, cutting or dropping. CodeMirror itself ignores the edit.
  * `onSelect` runs when the text or the selection changes. `highlightCode`
  * turns on muted highlighting in fenced code blocks (`setCodeHighlighting`);
- * `spellcheck` is the system's spell checking (`setSpellcheck`).
+ * `spellcheck` marks misspellings (`setSpellcheck`) found by `spellChecker`,
+ * the system's checker in the app.
  */
 export function createState(
   doc: string,
   onChange: (view: EditorView) => void,
   onLockedEdit: () => void,
   onSelect: (view: EditorView) => void = () => {},
-  { highlightCode = false, spellcheck = true } = {},
+  {
+    highlightCode = false,
+    spellcheck = true,
+    checker,
+  }: { highlightCode?: boolean; spellcheck?: boolean; checker?: SpellChecker } = {},
 ): EditorState {
   const blocked = (_: Event, view: EditorView) => {
     if (!view.state.readOnly) return false;
@@ -117,7 +132,8 @@ export function createState(
       markdownWithCode(highlightCode),
       markdownStyling,
       EditorView.lineWrapping,
-      spelling.of(spellingAttributes(spellcheck)),
+      checker ? spellChecker.of(checker) : [],
+      checkSpelling.of(spellcheck ? spelling : []),
       theme,
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.view);
@@ -132,9 +148,9 @@ export function setReadOnly(view: EditorView, readOnly: boolean) {
   view.dispatch({ effects: lock.reconfigure(EditorState.readOnly.of(readOnly)) });
 }
 
-/** Turns the system's spell checking (and autocorrect) on or off in an open editor. */
+/** Turns spell checking on or off in an open editor. */
 export function setSpellcheck(view: EditorView, on: boolean) {
-  view.dispatch({ effects: spelling.reconfigure(spellingAttributes(on)) });
+  view.dispatch({ effects: checkSpelling.reconfigure(on ? spelling : []) });
 }
 
 /** The document text with its original line endings. */

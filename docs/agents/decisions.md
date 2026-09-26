@@ -2,6 +2,12 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-26: The editor draws spelling marks with the system checker (W-057)
+- WebKit's continuous spell checking kept marks on the text nodes CodeMirror rewrites, and only rechecks the word just typed, so misspellings vanished as you wrote (`screenshots/spellcheck.png`). Neither side can be configured out of that.
+- So Rust asks `NSSpellChecker` / `ISpellChecker` (the same dictionaries, learned words and language settings as other apps), and the editor draws the marks and the suggestions menu. Marks now also behave the same on both OSes.
+- WebKit's autocorrect and automatic capitalisation go with it (CodeMirror's defaults turn them off). In a Markdown file they changed text you didn't ask to change; if they're missed, add a separate setting rather than turning WebKit's checking back on.
+- Only the viewport is checked, after a 400ms pause. Checking the whole document on every edit would cost more than the marks you can't see are worth.
+
 ## 2026-09-26: What the settings window (W-021) holds
 - Text size, column width, line spacing, spell checking, theme (Match System / Light / Dark), plus word count and code highlighting mirrored from the View menu. One pane, no tabs, until later features bring enough settings to group.
 - Column width and line spacing are three named presets rather than free numbers: easier to keep the column looking right, and it's how focused editors offers them.
@@ -36,7 +42,7 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 
 ## 2026-09-26: CodeMirror draws the caret and selection, not WebKit
 - With the native caret, deleting a fence's backticks left a second, stale caret painted at the old spot, sometimes until something else repainted it (`Inspiration/cursor.png`). The text updated at once and the main thread was idle (Web Inspector timeline). Changing the line's syntax makes CodeMirror replace the line's DOM, and WebKit doesn't erase the caret it had drawn there.
-- `drawSelection()` draws both as DOM in the same update as the text, so they can't lag. The trade-off is a less native caret: its colour, width (2px) and blink (CodeMirror's 1.2s cycle) are ours to match. Typing, IME, spell checking and the clipboard stay native. Tried and rejected: keeping the native caret and re-setting the DOM selection whenever a redraw removed the caret's node (what CodeMirror's `forceSelection` does for Chrome and iOS). WebKit redrew the new caret but still left the stale one.
+- `drawSelection()` draws both as DOM in the same update as the text, so they can't lag. The trade-off is a less native caret: its colour, width (2px) and blink (CodeMirror's 1.2s cycle) are ours to match. Typing, IME and the clipboard stay native (spell checking has since moved to the editor for a similar reason, W-057). Tried and rejected: keeping the native caret and re-setting the DOM selection whenever a redraw removed the caret's node (what CodeMirror's `forceSelection` does for Chrome and iOS). WebKit redrew the new caret but still left the stale one.
 
 ## 2026-09-25: Editor code highlighting is muted, not a second palette
 - W-045 reuses preview's `--code-*` colours mixed 45% with `--text-muted` (`color-mix` in `editor/setup.ts`), rather than its own tokens, so the two views stay recognisably the same and one palette change moves both. Comments aren't italic in the editor, and headings or invalid code aren't styled, to keep the column calm.

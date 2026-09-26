@@ -233,14 +233,14 @@ As a writer, I want a native-feeling settings window for text size, column width
 - [x] Verified in the app on macOS: the window sizes to its content and looks right in light and dark mode; controls work with mouse and keyboard; text size, width and spacing change live in editor and preview but not in print or PDF; the theme switches menus, dialogs and every window; Cmd+W closes Settings; Open… from Settings shows the Open dialog; a relaunch keeps every setting
 
 ### W-057 Spelling marks that stay
-Status: Todo · Platforms: macOS, Windows
+Status: Needs verification · Platforms: macOS, Windows
 As a writer, I want every misspelled word underlined until I fix it, not just the word I've just typed.
 WebKit's own checking loses its marks whenever CodeMirror redraws a line (it keeps them on the text nodes CodeMirror rewrites, and only rechecks the word just typed), so misspellings vanish as you write.
-- [ ] The system spell checker finds misspellings through Rust (macOS `NSSpellChecker`, Windows `ISpellChecker`), for the visible text and again after a pause in typing, in the document's language
-- [ ] The editor draws them as its own decoration (red dotted underline on macOS, red squiggle on Windows), so redraws can't remove them; Markdown syntax, code, URLs and link targets are skipped
-- [ ] Right-clicking a misspelled word shows a native menu with suggestions, Learn Spelling and Ignore Spelling
-- [ ] Settings → Check spelling while typing turns this on and off; WebKit's own spell checking and autocorrect are off
-- [ ] Unit tested: which ranges are checked and skipped, mapping results back onto the document, updating marks after edits
+- [x] The system spell checker finds misspellings through Rust (macOS `NSSpellChecker`, Windows `ISpellChecker`), for the visible text and again after a pause in typing, in the system's spelling language
+- [x] The editor draws them as its own decoration (red dotted underline on macOS, red squiggle on Windows), so redraws can't remove them; Markdown syntax, code, URLs and link targets are skipped
+- [x] Right-clicking a misspelled word shows a native menu with suggestions, Learn Spelling and Ignore Spelling
+- [x] Settings → Check spelling while typing turns this on and off; WebKit's own spell checking and autocorrect are off
+- [x] Unit tested: which ranges are checked and skipped, mapping results back onto the document, updating marks after edits (`editor/spelling.test.ts`, `spelling.rs`)
 - [ ] Verified in the app on macOS: marks stay after Return, scrolling and edits elsewhere; typing stays smooth in a long document
 - [ ] Verified on Windows (written against the crate sources; can't be compiled on the dev Mac)
 
