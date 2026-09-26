@@ -157,4 +157,4 @@ AI coding agents (Claude Code, Codex and others) are welcome. [`AGENTS.md`](AGEN
 
 ### Licence
 
-Awen is released under the MIT licence. The bundled Classic Mono font is licensed under the SIL Open Font License (see `static/fonts/LICENSE.md`).
+Awen is released under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later; see `LICENSE`). The bundled Classic Mono font is licensed under the SIL Open Font License (see `static/fonts/LICENSE.md`).
