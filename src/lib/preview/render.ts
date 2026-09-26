@@ -1,10 +1,12 @@
 import MarkdownIt from "markdown-it";
 import taskLists from "markdown-it-task-lists";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { highlight } from "./highlight";
 
 // Raw HTML stays off: the preview runs in a webview with access to Tauri IPC,
-// so a document must never be able to inject scripts or elements.
-const md = new MarkdownIt({ html: false, linkify: true, typographer: true }).use(taskLists);
+// so a document must never be able to inject scripts or elements. The code
+// highlighter escapes its output too.
+const md = new MarkdownIt({ html: false, linkify: true, typographer: true, highlight }).use(taskLists);
 
 /**
  * In the in-app preview: tag each rendered block with its source line, so editor
@@ -65,6 +67,8 @@ md.renderer.rules.image = (tokens, idx, options, env, self) => {
  * task checkboxes for the in-app preview; exports leave them out. `folder` (the
  * document's folder) makes relative image paths load in this webview, for the
  * preview, print and PDF; HTML export leaves them relative to where it's saved.
+ * Code blocks are highlighted only in languages already loaded: await
+ * `loadCodeLanguages(text)` first.
  */
 export function renderMarkdown(
   text: string,

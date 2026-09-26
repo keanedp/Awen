@@ -34,6 +34,7 @@
   import { noteRecentDocument, setPreviewChecked } from "$lib/menu";
   import Preview from "$lib/preview/Preview.svelte";
   import TitleBar from "$lib/ui/TitleBar.svelte";
+  import { loadCodeLanguages } from "$lib/preview/highlight";
   import { renderMarkdown } from "$lib/preview/render";
 
   let os = $state<OS>("mac");
@@ -59,9 +60,17 @@
   const appWindow = getCurrentWebviewWindow();
   const name = $derived(fileName(path));
 
-  /** Renders the document for this webview, with images beside the file loadable. */
+  /**
+   * Renders the document for this webview, with images beside the file loadable.
+   * Code is highlighted in languages already loaded; await `codeLanguages()` first.
+   */
   function render({ preview = false } = {}): string {
     return renderMarkdown(documentText(view), { preview, folder: path && dirName(path) });
+  }
+
+  /** Loads the parsers for the languages the document's code blocks name. */
+  function codeLanguages(): Promise<void> {
+    return loadCodeLanguages(documentText(view));
   }
 
   /** Waits for the print copy's images, so print and PDF don't catch them half-loaded. */
@@ -140,8 +149,11 @@
   }
 
   /** Swaps between editor and rendered preview, keeping the reading position. */
-  function togglePreview() {
+  async function togglePreview() {
     if (!previewing) {
+      // Usually instant: parsers are cached after the first load.
+      await codeLanguages();
+      if (previewing) return;
       const top = view.lineBlockAtHeight(view.scrollDOM.scrollTop);
       previewLine = view.state.doc.lineAt(top.from).number - 1;
       previewHtml = render({ preview: true });
@@ -184,6 +196,10 @@
     }
     if (command(view) && previewing) {
       previewHtml = render({ preview: true });
+      // Undo may bring back a code block in a language not loaded yet.
+      codeLanguages().then(() => {
+        if (previewing) previewHtml = render({ preview: true });
+      });
     }
   }
 
@@ -300,6 +316,7 @@
     try {
       if (target.format === "pdf") {
         // The PDF is printed from the page, so render the print copy first.
+        await codeLanguages();
         printHtml = render();
         await printImagesLoaded();
         await exportPdf(target.path);
@@ -312,6 +329,7 @@
   }
 
   async function print() {
+    await codeLanguages();
     printHtml = render();
     await printImagesLoaded();
     try {

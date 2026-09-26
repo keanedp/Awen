@@ -1,4 +1,5 @@
 import previewCss from "../../styles/preview.css?raw";
+import { loadCodeLanguages } from "$lib/preview/highlight";
 import { renderMarkdown } from "$lib/preview/render";
 
 const fonts = [
@@ -71,6 +72,7 @@ function embeddedFonts(): Promise<string> {
 
 /** A standalone HTML document for the given Markdown. */
 export async function exportHtml(markdown: string, title: string): Promise<string> {
+  await loadCodeLanguages(markdown);
   const body = renderMarkdown(markdown);
   return `<!doctype html>
 <html lang="en">

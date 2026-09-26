@@ -23,7 +23,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-044**
+Next free ID: **W-046**
 
 ---
 
@@ -128,6 +128,23 @@ As a writer, I want to print my document (Cmd/Ctrl+P) with clean paper typograph
 - [x] Prints the rendered document only, black on white, regardless of dark mode
 - [x] Verified that the whole document prints on macOS, not just the visible part
 - [ ] Verified on Windows
+
+### W-044 Syntax highlighting in preview code blocks
+Status: Needs verification (Windows only) · Platforms: all
+As a writer, I want fenced code blocks with a language (```` ```js ````) to be syntax highlighted in preview, so code in my documents is easy to read.
+- [x] Preview highlights fenced code blocks by their info string (name, alias or extension, e.g. `js`, `py`, `rs`); unknown or missing languages show as plain code
+- [x] The same highlighting appears in print, PDF and HTML export (HTML stays self-contained, no scripts)
+- [x] A small, muted palette from `--code-*` tokens, with light, dark and print variants
+- [x] Highlighter output is escaped text only (markdown-it stays `html: false`)
+- [x] Verified on macOS: preview, print, PDF and HTML export in light and dark mode
+- [ ] Verified on Windows (including whether PDF export keeps the code colours)
+
+### W-045 Muted code highlighting in the editor
+Status: Todo · Platforms: all
+As a writer of technical documents, I want code inside fenced blocks to be lightly highlighted in the editor, so I can read it while I write.
+- [ ] Uses the same Lezer parsers and `--code-*` colours as preview (W-044), via CodeMirror's `codeLanguages`
+- [ ] Muted: much lower contrast than preview, so code never competes with the prose or the dimmed Markdown marks
+- [ ] Off by default, toggled from the View menu; the setting persists (using W-020's preferences store)
 
 ### W-019 Word count and reading time
 Status: Todo · Platforms: all

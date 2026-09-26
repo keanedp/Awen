@@ -171,6 +171,39 @@ fn read_file(path: String) -> Result<String, String> {
 }
 ```
 
+Clojure:
+
+```clojure
+(ns writer.words
+  (:require [clojure.string :as str]))
+
+;; Count words, ignoring Markdown marks.
+(defn word-count [text]
+  (->> (str/split text #"\s+")
+       (remove #(re-matches #"[#*_>`-]+" %))
+       count))
+
+(def reading-minutes (comp #(Math/ceil (/ % 200.0)) word-count))
+```
+
+C#:
+
+```csharp
+using System.IO;
+
+public sealed record Document(string? Path, string Text)
+{
+    public bool IsUntitled => Path is null;
+
+    // Save with the original line endings.
+    public async Task SaveAsync(string lineEnding = "\n")
+    {
+        var text = Text.Replace("\r\n", "\n").Replace("\n", lineEnding);
+        await File.WriteAllTextAsync(Path ?? "Untitled.md", text);
+    }
+}
+```
+
 Tilde fence with a very long line to test horizontal scrolling and wrapping in the preview, print, and PDF export:
 
 ~~~bash

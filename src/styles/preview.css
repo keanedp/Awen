@@ -74,6 +74,45 @@
   background: none;
 }
 
+/* Code highlighting (src/lib/preview/highlight.ts). A few muted colours, so code
+   stays calm next to the prose. Defined here rather than in the app tokens
+   because HTML export and print use this file too. */
+.preview {
+  --code-keyword: #9a3f86;
+  --code-string: #3b7a3e;
+  --code-literal: #a8581a;
+  --code-comment: #8f8f8f;
+  --code-type: #2c6f8f;
+  --code-function: #5a4fb0;
+  --code-property: #6a6a2c;
+  --code-inserted: #3b7a3e;
+  --code-deleted: #b3403a;
+}
+@media (prefers-color-scheme: dark) {
+  .preview {
+    --code-keyword: #cf8ec0;
+    --code-string: #9cc190;
+    --code-literal: #dba67a;
+    --code-comment: #737373;
+    --code-type: #85b8d0;
+    --code-function: #aaa2e0;
+    --code-property: #c4c48a;
+    --code-inserted: #9cc190;
+    --code-deleted: #e38d86;
+  }
+}
+.preview .hl-keyword { color: var(--code-keyword); }
+.preview .hl-string { color: var(--code-string); }
+.preview .hl-literal { color: var(--code-literal); }
+.preview .hl-comment { color: var(--code-comment); font-style: italic; }
+.preview .hl-type { color: var(--code-type); }
+.preview .hl-function { color: var(--code-function); }
+.preview .hl-property { color: var(--code-property); }
+.preview .hl-inserted { color: var(--code-inserted); }
+.preview .hl-deleted { color: var(--code-deleted); }
+.preview .hl-heading { font-weight: 700; }
+.preview .hl-invalid { text-decoration: underline wavy var(--code-deleted); }
+
 .preview hr {
   border: 0;
   border-top: 1px solid var(--markup);
@@ -148,6 +187,15 @@
     --text-muted: #555;
     --markup: #bbb;
     --accent: #0a4fa0;
+    --code-keyword: #7a2468;
+    --code-string: #2a5e2d;
+    --code-literal: #86410c;
+    --code-comment: #666;
+    --code-type: #1d5673;
+    --code-function: #433a94;
+    --code-property: #4f4f1c;
+    --code-inserted: #2a5e2d;
+    --code-deleted: #962c27;
     max-width: none;
     padding: 0;
     font-size: 11pt;

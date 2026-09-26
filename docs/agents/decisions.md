@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Code blocks are highlighted in preview only, with Lezer parsers
+- focused editors doesn't highlight code; Typora does. Writer highlights in preview, print and exports, where code is read and shared, and leaves the editor calm. Muted editor highlighting is W-045 and off by default.
+- Lezer parsers (`@codemirror/language-data`) rather than highlight.js or Shiki: the editor already uses Lezer, so W-045 can share the same parsers and `--code-*` colours and the two views match. language-data also gives ~150 languages, loaded on demand as separate chunks.
+- The cost is that loading is async while markdown-it is sync, so callers await `loadCodeLanguages` before rendering (see architecture.md).
+
 ## 2026-09-25: Local images load through the asset protocol, scoped to document folders
 - The preview rewrites image paths to `asset:` URLs instead of reading files into data URIs through a command. This avoids an IPC round trip per image and keeps the rendered HTML small.
 - The scope starts empty. Each opened or saved document's folder is added recursively, from Rust, where document paths are recorded. The webview can't widen the scope itself, so even a compromised preview can only read those folders. `../` images outside the folder don't load; allowing parents would expose too much (for example the whole home folder).
