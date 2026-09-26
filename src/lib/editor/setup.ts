@@ -1,6 +1,6 @@
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { Compartment, EditorState } from "@codemirror/state";
-import { EditorView, keymap } from "@codemirror/view";
+import { EditorView, drawSelection, keymap } from "@codemirror/view";
 import { markdownWithCode } from "./code";
 import { find } from "./find";
 import { markdownStyling } from "./markdownStyling";
@@ -25,14 +25,18 @@ const theme = EditorView.theme({
     maxWidth: "var(--measure)",
     margin: "0 auto",
     padding: "2rem 2rem 40vh",
-    caretColor: "var(--caret)",
   },
   ".cm-line": { position: "relative", padding: "0" },
   ".cm-hanging-mark": {
     position: "absolute",
     transform: "translateX(-100%)",
   },
-  "::selection, .cm-content ::selection": { backgroundColor: "var(--selection)" },
+  // Drawn by CodeMirror (`drawSelection`), not WebKit; see decisions.md.
+  ".cm-cursor, .cm-dropCursor": { borderLeft: "2px solid var(--caret)", marginLeft: "-1px" },
+  ".cm-selectionBackground": { background: "var(--selection-inactive)" },
+  "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
+    background: "var(--selection)",
+  },
   // The find bar draws its own background and separator.
   ".cm-panels": { backgroundColor: "transparent", color: "inherit" },
   ".cm-panels-top": { borderBottom: "none" },
@@ -97,6 +101,8 @@ export function createState(
       }),
       EditorState.lineSeparator.of(detectLineSeparator(doc)),
       matchLineBreaks,
+      // WebKit's own caret can stay behind when a line is redrawn, e.g. deleting a fence's backticks.
+      drawSelection(),
       history(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
       find(onLockedEdit),

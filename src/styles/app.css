@@ -58,6 +58,8 @@
   --text-muted: #9a9a9a;
   --markup: #b8b8b8;
   --selection: rgb(0 122 255 / 0.2);
+  /* The selection when the editor isn't focused, grey as in native text views. */
+  --selection-inactive: rgb(0 0 0 / 0.1);
   --caret: #19a0e6;
   --accent: #0a84ff;
   --separator: rgb(0 0 0 / 0.1);
@@ -75,6 +77,7 @@
     --text-muted: #6e6e6e;
     --markup: #585858;
     --selection: rgb(10 132 255 / 0.3);
+    --selection-inactive: rgb(255 255 255 / 0.12);
     --separator: rgb(255 255 255 / 0.1);
     --find-match: rgb(255 214 10 / 0.2);
     --find-current: rgb(255 214 10 / 0.5);
