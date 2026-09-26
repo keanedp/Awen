@@ -29,6 +29,10 @@ There is no test suite. Verify with `npm run check`, `cargo clippy`, and by runn
 - Style with the CSS tokens (`var(--surface)`, `bg-surface`, …), not hard-coded colours, so per-OS themes and dark mode keep working.
 - Mark app chrome with the `.chrome` class (no selection, no web context menu).
 
+## Backlog
+
+`docs/backlog.md` holds the user stories and their status. Check it before starting feature work. Update the story's status and acceptance checkboxes as you go, following the rules at the top of that file.
+
 ## Knowledge base: read when relevant
 
 - `docs/agents/architecture.md`: how the pieces connect: menu → event → action, editor, preview, print/PDF/HTML export, theming. Read before changing any of those flows.

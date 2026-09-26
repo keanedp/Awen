@@ -43,10 +43,5 @@ The native look comes from Bits UI (headless) + Tailwind, with `data-os` selecti
 - `src-tauri/gen/schemas` is ignored because it is regenerated. `gen/android` and `gen/apple` will be committed once created.
 - Signing keys are always ignored.
 
-## Roadmap (not yet built)
-- **M2 remainder:** focus mode, typewriter scrolling, word count / reading time, Bits UI components.
-- **M3:**
-  - sidebar library + search (Rust `walkdir`);
-  - vibrancy/Mica;
-  - showing local images in preview (needs the asset protocol scope + `convertFileSrc`);
-  - mobile (`tauri ios|android init`, Konsta UI).
+## Roadmap
+Planned work is tracked as user stories in `docs/backlog.md`.
