@@ -32,7 +32,7 @@
     takeInitialDocument,
     writeDocument,
   } from "$lib/files";
-  import { applyPlatform, type OS } from "$lib/platform";
+  import { applyAccent, applyPlatform, type OS } from "$lib/platform";
   import { noteRecentDocument, setPreviewChecked } from "$lib/menu";
   import Preview from "$lib/preview/Preview.svelte";
   import TitleBar from "$lib/ui/TitleBar.svelte";
@@ -162,11 +162,19 @@
       previewing = true;
       return;
     }
-    const line = Math.min((preview?.topLine() ?? 0) + 1, view.state.doc.lines);
+    const top = preview?.topLine() ?? 0;
     previewing = false;
-    view.dispatch({
-      effects: EditorView.scrollIntoView(view.state.doc.line(line).from, { y: "start" }),
-    });
+    if (top === 0) {
+      // Back to the top of the page, padding included, not just the first line.
+      view.dispatch({
+        effects: EditorView.scrollIntoView(0, { y: "start", yMargin: view.documentPadding.top }),
+      });
+    } else {
+      const line = Math.min(top + 1, view.state.doc.lines);
+      view.dispatch({
+        effects: EditorView.scrollIntoView(view.state.doc.line(line).from, { y: "start" }),
+      });
+    }
     view.focus();
   }
 
@@ -396,6 +404,7 @@
 
   onMount(() => {
     os = applyPlatform();
+    applyAccent();
     view = new EditorView({ state: newState(""), parent: host });
     view.focus();
 
@@ -440,6 +449,8 @@
         if (!focused) return;
         setPreviewChecked(previewing);
         refreshLocked();
+        // The user may have changed it in System Settings meanwhile.
+        applyAccent();
       }),
     ];
     // Only once listening: after this, Rust sends documents as `load-document` events.

@@ -21,16 +21,19 @@
     return Array.from(scroller.querySelectorAll<HTMLElement>("[data-line]"));
   }
 
-  /** Source line of the first block visible at the top of the preview. */
+  /** Source line of the first block visible at the top of the preview; 0 if that is the first block. */
   export function topLine(): number {
     const top = scroller.getBoundingClientRect().top;
-    const visible = blocks().find((el) => el.getBoundingClientRect().bottom > top);
-    return visible ? Number(visible.dataset.line) : 0;
+    const all = blocks();
+    const visible = all.find((el) => el.getBoundingClientRect().bottom > top);
+    return visible && visible !== all[0] ? Number(visible.dataset.line) : 0;
   }
 
   onMount(() => {
-    const target = blocks().findLast((el) => Number(el.dataset.line) <= line);
-    if (target) {
+    const all = blocks();
+    const target = all.findLast((el) => Number(el.dataset.line) <= line);
+    // Showing the first block means the top of the page, padding included.
+    if (target && target !== all[0]) {
       scroller.scrollTop =
         target.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
     }

@@ -8,7 +8,8 @@
   --toolbar-button-width: 40px;
   --toolbar-button-height: 28px;
   --toolbar-icon-size: 14px;
-  --accent: #0f6cbd;
+  /* --system-accent is set from UISettings (platform.ts); Fluent's default brand blue until then. */
+  --accent: var(--system-accent, #0f6cbd);
   --focus-ring: #000000;
   --surface: #fafafa;
   --chrome: #f3f3f3;
@@ -24,7 +25,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root[data-os="windows"] {
-    --accent: #479ef5;
+    --accent: var(--system-accent-dark, #479ef5);
     --focus-ring: #ffffff;
     --surface: #1f1f1f;
     --chrome: #202020;

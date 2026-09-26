@@ -1,3 +1,4 @@
+mod accent;
 mod documents;
 mod export;
 mod menu;
@@ -119,7 +120,8 @@ pub fn run() {
             rename::set_file_tags,
             rename::set_file_locked,
             rename::is_file_locked,
-            documents::duplicate_document
+            documents::duplicate_document,
+            accent::accent_colors
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

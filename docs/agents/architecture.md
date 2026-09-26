@@ -77,6 +77,7 @@ Details:
 - `togglePreview()` in `+page.svelte` works in two directions:
   - **Into preview:** reads the editor's top visible line, renders, and mounts `Preview.svelte` in place of the editor.
   - **Back to the editor:** asks the preview for its top `data-line` and scrolls the editor there.
+  - When the first block is at the top, both directions scroll to the very top instead, so the view's top padding stays visible. Scrolling to the first line alone would hide it.
 - The `EditorView` stays mounted and is only hidden (`class:hidden`), so undo history, selection and scroll survive.
 - `Preview.svelte` intercepts every link click:
   - `#anchor` links scroll within the preview;
@@ -102,6 +103,7 @@ Details:
 
 - `platform.ts` sets `<html data-os="mac|windows|linux">`.
 - `app.css` defines the shared tokens and light/dark defaults. `tokens.mac.css` and `tokens.windows.css` override them per OS: UI font, sizes, radii, accent, surfaces, scrollbars.
+  - The accent comes from the OS via `accent_colors` (see gotchas.md). It is re-read whenever the window gains focus, so a change in System Settings shows up when you switch back.
 - Tailwind v4 exposes the tokens as utilities through `@theme inline` (`bg-surface`, `text-muted`, `font-ui`, `font-writing`, `rounded-control`).
 - The writing font is Classic Mono (`static/fonts/`, SIL OFL; keep `LICENSE.md` beside it).
 - **Title bar:** `src/lib/ui/TitleBar.svelte`, used by `+page.svelte`.

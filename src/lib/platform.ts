@@ -1,3 +1,5 @@
+import { invoke } from "@tauri-apps/api/core";
+
 export type OS = "mac" | "windows" | "linux";
 
 export function detectOS(): OS {
@@ -12,4 +14,16 @@ export function applyPlatform(): OS {
   const os = detectOS();
   document.documentElement.dataset.os = os;
   return os;
+}
+
+/**
+ * Feeds the system accent colour to the token files. Read natively (see
+ * src-tauri/src/accent.rs), so call it again when the window comes forward.
+ */
+export async function applyAccent() {
+  const accent = await invoke<{ light: string; dark: string } | null>("accent_colors");
+  if (!accent) return;
+  const root = document.documentElement.style;
+  root.setProperty("--system-accent", accent.light);
+  root.setProperty("--system-accent-dark", accent.dark);
 }
