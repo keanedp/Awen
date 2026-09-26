@@ -22,6 +22,13 @@ Details:
 - Close and Quit both call `appWindow.close()`. `onCloseRequested` runs `confirmDiscard()` (Save / Don't Save / Cancel) and can prevent the close.
 - On macOS, Quit lives in the app menu; on other OSes, File has Exit.
 
+## Open Recent (`src-tauri/src/recent.rs`)
+
+- Rust owns the list (max 10, newest first), stored as a JSON array of paths in `<app data dir>/recent.json`, and rebuilds the File → Open Recent submenu whenever it changes.
+- Document items have the id `recent:<full path>`. Clicking one emits an `open-recent` event with the path (not a `menu` event), and `+page.svelte` runs `openRecent` through the same `busy` guard as other file actions. Clear Menu is handled entirely in Rust.
+- The frontend calls `noteRecentDocument` after a successful open and when Save As writes to a new path, and `forgetRecentDocument` when a recent file fails to open (moved or deleted).
+- Labels are the file name, with ` — folder` added when two entries share a name, as macOS does.
+
 ## Editor (`src/lib/editor/`)
 
 - `setup.ts` creates a fresh `EditorState` per document. Open/New call `view.setState(createState(...))` instead of recreating the `EditorView`.

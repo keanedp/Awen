@@ -20,7 +20,7 @@
     writeDocument,
   } from "$lib/files";
   import { applyPlatform, type OS } from "$lib/platform";
-  import { setPreviewChecked } from "$lib/menu";
+  import { forgetRecentDocument, noteRecentDocument, setPreviewChecked } from "$lib/menu";
   import Preview from "$lib/preview/Preview.svelte";
   import TitleBar from "$lib/ui/TitleBar.svelte";
   import { renderMarkdown } from "$lib/preview/render";
@@ -97,6 +97,7 @@
       await showError(err);
       return false;
     }
+    if (target !== path) noteRecentDocument(target);
     path = target;
     savedText = text;
     dirty = documentText(view) !== savedText;
@@ -131,12 +132,24 @@
   async function openDocument() {
     if (!(await confirmDiscard())) return;
     const target = await pickFileToOpen();
-    if (!target) return;
+    if (target) await openPath(target);
+  }
+
+  async function openRecent(target: string) {
+    // Choosing the open document just leaves it as it is.
+    if (target !== path && (await confirmDiscard())) await openPath(target);
+  }
+
+  async function openPath(target: string) {
     try {
       load(await readDocument(target), target);
     } catch (err) {
+      // Like other Mac apps, a moved or deleted file drops out of Open Recent.
+      forgetRecentDocument(target);
       await showError(err);
+      return;
     }
+    noteRecentDocument(target);
   }
 
   async function exportDocument() {
@@ -183,6 +196,17 @@
     preview: togglePreview,
   };
 
+  /** Runs a file command unless another one is still in progress. */
+  async function exclusive(action: (() => unknown) | undefined) {
+    if (busy || !action) return;
+    busy = true;
+    try {
+      await action();
+    } finally {
+      busy = false;
+    }
+  }
+
   onMount(() => {
     os = applyPlatform();
     view = new EditorView({ state: createState("", onChange), parent: host });
@@ -195,19 +219,14 @@
     document.addEventListener("contextmenu", blockChromeMenu);
 
     const unlisten = [
-      listen<string>("menu", async ({ payload }) => {
+      listen<string>("menu", ({ payload }) => {
         // Editing commands must stay responsive; file commands shouldn't overlap.
         if (payload === "undo" || payload === "redo" || payload === "preview") {
           return actions[payload]();
         }
-        if (busy) return;
-        busy = true;
-        try {
-          await actions[payload]?.();
-        } finally {
-          busy = false;
-        }
+        return exclusive(actions[payload]);
       }),
+      listen<string>("open-recent", ({ payload }) => exclusive(() => openRecent(payload))),
       appWindow.onCloseRequested(async (event) => {
         if (!(await confirmDiscard())) event.preventDefault();
       }),

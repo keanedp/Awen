@@ -2,6 +2,9 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Open Recent is our own list, not NSDocumentController
+The app isn't NSDocument-based, so AppKit's automatic Open Recent menu isn't available. Rust keeps the list and builds the submenu itself, which also works unchanged on Windows. Adding entries to the system recents (Dock menu, `noteNewRecentDocumentURL:`) only makes sense once Writer registers as a `.md` handler and handles open-file events (rest of W-023).
+
 ## 2026-09-25: Title bar toolbar; custom title bar on Windows
 - Preview gets a play button in the title bar, like focused editors. The button, shortcut and menu item all call the same `togglePreview()`. View → Preview is a `CheckMenuItem`, synced from the frontend's state.
 - **Windows:** turns off native decorations (`tauri.windows.conf.json`) and draws its own title bar with Segoe Fluent Icons caption buttons, since the native title bar has no room for app buttons.

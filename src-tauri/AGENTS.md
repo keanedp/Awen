@@ -5,6 +5,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 ## Layout
 - `src/lib.rs`: app builder (plugins, menu, menu-event forwarding) and the small file/print commands.
 - `src/menu.rs`: native menus. `FORWARDED` lists the ids that are emitted to the frontend as `menu` events.
+- `src/recent.rs`: File → Open Recent list, persisted to `recent.json` in the app data dir.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
 - `capabilities/default.json`: permissions for plugin and core APIs used by the frontend.
 - `tauri.conf.json`: window config (Overlay title bar on macOS), CSP, bundle settings.

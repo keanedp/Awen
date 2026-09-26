@@ -167,9 +167,9 @@ As a writer, I want to find and replace text with the standard shortcuts.
 - [ ] Search panel styled to match the OS, not CodeMirror's default
 
 ### W-023 Recent files and open with
-Status: Todo · Platforms: macOS, Windows
+Status: In progress (agent: Open Recent built, open-with not started) · Platforms: macOS, Windows
 As a writer, I want to reopen recent documents and open `.md` files from Finder/Explorer with Writer.
-- [ ] File → Open Recent submenu, clearable
+- [x] File → Open Recent submenu, clearable (not yet verified by running the app on macOS or Windows)
 - [ ] Writer registers as an editor for `.md` files; double-clicking opens the file
 - [ ] Opening a file while another is open follows the unsaved-changes rules (or opens a new window, see W-024)
 

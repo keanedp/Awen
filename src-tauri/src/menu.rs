@@ -21,6 +21,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         &[
             &item("new", "New", "CmdOrCtrl+N")?,
             &item("open", "Open…", "CmdOrCtrl+O")?,
+            &crate::recent::build(app)?,
             &PredefinedMenuItem::separator(app)?,
             &item("save", "Save", "CmdOrCtrl+S")?,
             &item("save_as", "Save As…", "CmdOrCtrl+Shift+S")?,
