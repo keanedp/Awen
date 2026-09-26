@@ -260,13 +260,13 @@ As a Mac or Windows user, I want the sidebar to use the system's translucent mat
 - [ ] Decision recorded on the Mac App Store trade-off (`macOSPrivateApi`), see decisions.md
 
 ### W-033 Show images in preview
-Status: Needs verification · Platforms: all
+Status: Needs verification (Windows, mobile) · Platforms: all
 As a writer, I want `![](photo.png)` images next to my document to show in preview and exports.
 - [x] Relative image paths resolve against the document's folder in preview
 - [x] Images are included in PDF export and resolve in HTML export saved beside the document
 - [x] Only files the user opened or their folder are readable (asset protocol scope)
 
-Built and type-checked, but not yet run on macOS or Windows. Windows (`http://asset.localhost` URLs) and mobile are unverified. Images in a parent folder (`../`) are blocked by the scope.
+Verified in the macOS preview (local, data-URI and missing images). Windows (`http://asset.localhost` URLs) and mobile are unverified. Images in a parent folder (`../`) are blocked by the scope.
 
 ### W-034 Writer on iPhone, iPad and Android
 Status: Todo · Platforms: iOS, Android
