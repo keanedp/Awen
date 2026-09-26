@@ -6,11 +6,11 @@
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
   import { message } from "@tauri-apps/plugin-dialog";
   import { findSelection, openFind } from "$lib/editor/find";
+  import { countWords, formatCount } from "$lib/editor/count";
   import { createState, documentText, setReadOnly } from "$lib/editor/setup";
   import { taskToggle } from "$lib/editor/tasks";
   import { exportHtml } from "$lib/export/html";
   import {
-    type ExportFormat,
     baseName,
     cancelQuit,
     createDocument,
@@ -34,9 +34,17 @@
     writeDocument,
   } from "$lib/files";
   import { applyAccent, applyPlatform, type OS } from "$lib/platform";
-  import { noteRecentDocument, setPreviewChecked } from "$lib/menu";
+  import { noteRecentDocument, setMenuChecked } from "$lib/menu";
+  import {
+    defaults,
+    loadPreferences,
+    onPreferenceChanged,
+    setPreference,
+    type Preferences,
+  } from "$lib/preferences";
   import Preview from "$lib/preview/Preview.svelte";
   import TitleBar from "$lib/ui/TitleBar.svelte";
+  import WordCount from "$lib/ui/WordCount.svelte";
   import { loadCodeLanguages } from "$lib/preview/highlight";
   import { renderMarkdown } from "$lib/preview/render";
 
@@ -53,7 +61,12 @@
   let previewLine = $state(0);
   let preview = $state<Preview>();
   let printHtml = $state("");
-  let exportFormat: ExportFormat = "html";
+  let prefs = $state<Preferences>({ ...defaults });
+  /** Until then `prefs` holds defaults, so a hidden footer would flash up in a new window. */
+  let prefsLoaded = $state(false);
+  /** Words in the document, and in the selection if there is one. */
+  let words = $state(0);
+  let selectedWords = $state<number | null>(null);
   let renaming = $state(false);
   let titleBar = $state<TitleBar>();
 
@@ -97,15 +110,42 @@
 
   // The native menu toggles its own checkmark on click; always restate ours.
   $effect(() => {
-    setPreviewChecked(previewing);
+    setMenuChecked("preview", previewing);
+  });
+  $effect(() => {
+    setMenuChecked("word_count", prefs.wordCount);
   });
 
   function onChange(v: EditorView) {
     dirty = documentText(v) !== savedText;
   }
 
+  let countTimer: ReturnType<typeof setTimeout> | undefined;
+  /** The text the document count was taken from; a selection change alone doesn't recount it. */
+  let countedDoc: unknown = null;
+
+  /** Recounts shortly after typing or selecting stops; only while the count is shown. */
+  function scheduleCount() {
+    clearTimeout(countTimer);
+    if (!prefs.wordCount) return;
+    countTimer = setTimeout(() => {
+      const { state } = view;
+      if (state.doc !== countedDoc) {
+        words = countWords(state);
+        countedDoc = state.doc;
+      }
+      const ranges = state.selection.ranges.filter((r) => !r.empty);
+      selectedWords = ranges.length ? countWords(state, ranges) : null;
+    }, 150);
+  }
+
+  // Showing the count again catches up with edits made while it was hidden.
+  $effect(() => {
+    if (prefs.wordCount) scheduleCount();
+  });
+
   function newState(text: string) {
-    return createState(text, onChange, () => exclusive(askToUnlock));
+    return createState(text, onChange, () => exclusive(askToUnlock), scheduleCount);
   }
 
   /** Shows `text` from `newPath`, or as an unsaved untitled copy if there is no path. */
@@ -117,6 +157,7 @@
     previewing = false;
     view.focus();
     refreshLocked();
+    scheduleCount();
   }
 
   /** Reads the file's locked flag, which Finder can change at any time. */
@@ -322,9 +363,12 @@
   }
 
   async function exportDocument() {
-    const target = await pickExportTarget(path, exportFormat);
+    const target = await pickExportTarget(path, prefs.exportFormat);
     if (!target) return;
-    exportFormat = target.format;
+    if (target.format !== prefs.exportFormat) {
+      prefs.exportFormat = target.format;
+      setPreference("exportFormat", target.format);
+    }
     const text = documentText(view);
     try {
       if (target.format === "pdf") {
@@ -369,6 +413,7 @@
     find_previous: () => inEditor(() => findPrevious(view)),
     find_selection: () => findSelection(view),
     preview: togglePreview,
+    word_count: () => setPreference("wordCount", !prefs.wordCount),
   };
 
   /** Find works on the text, so it leaves preview first. */
@@ -387,6 +432,7 @@
     "find_previous",
     "find_selection",
     "preview",
+    "word_count",
   ]);
 
   /** Runs a file command unless another one is still in progress. */
@@ -425,7 +471,14 @@
     // Load errors don't bubble, so listen in the capture phase.
     document.addEventListener("error", replaceBrokenImage, true);
 
+    loadPreferences().then((saved) => {
+      prefs = saved;
+      prefsLoaded = true;
+    });
+
     const unlisten = [
+      // Preferences are app-wide: every window follows a change made in any of them.
+      onPreferenceChanged((change) => Object.assign(prefs, change)),
       // Rust sends menu commands to the focused window only.
       appWindow.listen<string>("menu", ({ payload }) => {
         // Editing commands must stay responsive; file commands shouldn't overlap.
@@ -445,7 +498,8 @@
       // The Preview checkmark is app-wide; restate this window's state when it comes forward.
       appWindow.onFocusChanged(({ payload: focused }) => {
         if (!focused) return;
-        setPreviewChecked(previewing);
+        setMenuChecked("preview", previewing);
+        setMenuChecked("word_count", prefs.wordCount);
         refreshLocked();
         // The user may have changed it in System Settings meanwhile.
         applyAccent();
@@ -460,6 +514,7 @@
       document.removeEventListener("contextmenu", blockChromeMenu);
       document.removeEventListener("error", replaceBrokenImage, true);
       unlisten.forEach((p) => p.then((fn) => fn()));
+      clearTimeout(countTimer);
       view.destroy();
     };
   });
@@ -488,6 +543,10 @@
         ontoggletask={toggleTask}
       />
     </div>
+  {/if}
+  {#if prefsLoaded && prefs.wordCount}
+    <!-- The editor's selection is hidden in preview, so preview shows the whole document. -->
+    <WordCount text={formatCount(words, previewing ? null : selectedWords)} />
   {/if}
 </div>
 

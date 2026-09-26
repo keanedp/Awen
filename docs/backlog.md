@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-051**
+Next free ID: **W-052**
 
 ---
 
@@ -171,17 +171,25 @@ As a writer of technical documents, I want code inside fenced blocks to be light
 - [ ] Off by default, toggled from the View menu; the setting persists (using W-020's preferences store)
 
 ### W-019 Word count and reading time
-Status: Todo · Platforms: all
+Status: Done · Platforms: macOS (Windows verification moved to W-051)
 As a writer, I want to see word count and reading time, so I can track length without leaving the editor.
-- [ ] Subtle footer showing words and reading time; shows the selection's count when text is selected
-- [ ] Can be hidden from the View menu
-- [ ] Markdown syntax isn't counted as words
+- [x] Subtle footer showing words and reading time; shows the selection's count when text is selected
+- [x] Can be hidden from the View menu (View → Word Count)
+- [x] Markdown syntax isn't counted as words (unit tested in `editor/count.test.ts`)
+- [x] Verified in the app on macOS: footer looks right in light and dark mode, updates while typing and selecting, shows in preview, toggles from the menu with the checkmark in step across windows
 
 ### W-020 Remember preferences
-Status: Todo · Platforms: all
+Status: Done · Platforms: macOS (Windows verification moved to W-051)
 As a writer, I want the app to remember my view settings between launches.
-- [ ] Word-count visibility and last export format persist
-- [ ] Window size and position persist (already handled by window-state; verify)
+- [x] Word-count visibility and last export format persist (`preferences.json`, see architecture.md → Preferences)
+- [x] Window size and position persist (already handled by window-state for the `main` window)
+- [x] Verified in the app on macOS: hide the word count and export as PDF, quit, relaunch; both are remembered, and a second window follows a change made in the first
+
+### W-051 Verify word count and preferences on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-019's word count and W-020's preferences to work in a real build.
+- [ ] Footer looks right in light and dark mode, counts numbers and CRLF files correctly, and View → Word Count toggles it with the checkmark in step across windows
+- [ ] Word-count visibility, last export format, and window size and position survive a relaunch (`preferences.json` in the app data folder)
 
 ### W-021 Settings window
 Status: Todo · Platforms: macOS, Windows

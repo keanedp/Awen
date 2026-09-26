@@ -2,6 +2,18 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Preferences live in a JSON file owned by Rust, typed in the frontend
+- `preferences.json` in the app data folder, like `recent.json`, rather than the webview's `localStorage`. localStorage belongs to the webview's origin, which differs between `make dev` and a bundled build, and its storage and syncing between windows is up to WKWebView and WebView2. A Rust-owned file is one source of truth, easy to find and reset, and Rust can broadcast changes to every window.
+- Rust stores untyped JSON and the frontend validates it (`parsePreferences`), so adding a preference is a frontend-only change.
+- Preferences are app-wide, not per window or per document: the menu checkmark is app-wide too, and focused editors' view settings behave the same way.
+
+## 2026-09-25: How words are counted
+- Words are Unicode word segments (`Intl.Segmenter`) that contain a letter or digit, so "don't" and "3.14" are one word each, punctuation and emoji are none, and CJK text is segmented properly. Hyphenated compounds count once, as in Word and Pages. The segmenter's own `isWordLike` isn't used, because JavaScriptCore and V8 disagree about numbers (gotchas.md).
+- Markdown syntax is left out using the editor's parse tree rather than regexes, so it matches what's highlighted as syntax. URLs, link titles, reference labels and images (alt text too) aren't counted, since a reader doesn't read them as prose. Link text, headings and code are counted.
+- Syntax is removed, not replaced by a space, so the count matches the rendered text: `un*frigging*believable` and `H<sub>2</sub>O` are one word each. The exception is syntax that renders as no text (images, rules), which separates the words around it. A consequence: `end.**Next**` renders as "end.Next" and counts as one word, as Word would count it.
+- Reading time uses 238 words a minute, the average silent reading speed for English non-fiction (Brysbaert, 2019). With a selection, the time is for the selection.
+- The footer is on by default, centered under the column. It isn't an ARIA live region, since it changes with every keystroke.
+
 ## 2026-09-25: Unit tests with Vitest, logic kept in plain modules
 - Vitest, because it reuses the Vite config and `$lib` alias, and runs TypeScript without a separate build. Tests run in Node, not jsdom, so the tested code can't depend on the DOM, and pure modules stay pure.
 - Logic moves out of `+page.svelte` to be tested (task ticking is now `editor/tasks.ts`), rather than testing Svelte components. Component and end-to-end tests would need a Tauri webview driver, which isn't worth it yet.

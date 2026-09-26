@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu, WINDOW_SUBMENU_ID};
 use tauri::{AppHandle, Manager, Runtime};
 
@@ -17,13 +19,14 @@ pub const FORWARDED: &[&str] = &[
     "find_previous",
     "find_selection",
     "preview",
+    "word_count",
     "export",
     "print",
 ];
 
-/// View → Preview, kept so the frontend can sync its checkmark
+/// Items with a checkmark, by id, kept so the frontend can sync them
 /// (`Menu::get` only searches top-level items).
-pub struct PreviewMenuItem<R: Runtime>(pub CheckMenuItem<R>);
+pub struct CheckItems<R: Runtime>(pub HashMap<&'static str, CheckMenuItem<R>>);
 
 pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let item =
@@ -109,7 +112,12 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
 
     let preview =
         CheckMenuItem::with_id(app, "preview", "Preview", true, false, Some("CmdOrCtrl+R"))?;
-    app.manage(PreviewMenuItem(preview.clone()));
+    let word_count =
+        CheckMenuItem::with_id(app, "word_count", "Word Count", true, false, None::<&str>)?;
+    app.manage(CheckItems(HashMap::from([
+        ("preview", preview.clone()),
+        ("word_count", word_count.clone()),
+    ])));
 
     let view = Submenu::with_items(
         app,
@@ -117,6 +125,8 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         true,
         &[
             &preview,
+            &PredefinedMenuItem::separator(app)?,
+            &word_count,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::fullscreen(app, None)?,
         ],

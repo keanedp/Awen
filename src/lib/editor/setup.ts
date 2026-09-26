@@ -57,11 +57,13 @@ const lock = new Compartment();
 /**
  * `onLockedEdit` runs when the user tries to change a locked document: typing,
  * deleting, pasting, cutting or dropping. CodeMirror itself ignores the edit.
+ * `onSelect` runs when the text or the selection changes.
  */
 export function createState(
   doc: string,
   onChange: (view: EditorView) => void,
   onLockedEdit: () => void,
+  onSelect: (view: EditorView) => void = () => {},
 ): EditorState {
   const blocked = (_: Event, view: EditorView) => {
     if (!view.state.readOnly) return false;
@@ -91,6 +93,7 @@ export function createState(
       theme,
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.view);
+        if (update.docChanged || update.selectionSet) onSelect(update.view);
       }),
     ],
   });
