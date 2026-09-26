@@ -2,6 +2,7 @@ mod documents;
 mod export;
 mod menu;
 mod recent;
+mod terminate;
 
 use tauri::Manager;
 
@@ -47,7 +48,10 @@ pub fn run() {
         )
         .manage(documents::Documents::default())
         .menu(menu::build)
-        .setup(|app| Ok(recent::load(app.handle())?))
+        .setup(|app| {
+            terminate::install(app.handle());
+            Ok(recent::load(app.handle())?)
+        })
         .on_menu_event(|app, event| {
             let id = event.id().as_ref();
             match id {
@@ -88,6 +92,7 @@ pub fn run() {
             documents::open_document,
             documents::set_document_path,
             documents::cancel_quit,
+            documents::set_document_edited,
             export::choose_export,
             export::export_pdf
         ])

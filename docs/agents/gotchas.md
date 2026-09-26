@@ -29,6 +29,7 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 - **Creating a window from a synchronous command deadlocks on Windows.** Commands that may open a window (`open_document`) must be `async`. Menu and run-event handlers are fine.
 - JS `listen()` from `@tauri-apps/api/event` hears events emitted to *any* target, so `emit_to` a window doesn't isolate it. Listen with `getCurrentWebviewWindow().listen(...)`.
 - Capabilities apply by window label. New windows are `doc-N`, which `capabilities/default.json` matches with `doc-*`. A window with any other label would get no permissions.
+- tao's macOS app delegate has no `applicationShouldTerminate:`, so Dock Quit and logout terminate immediately unless we add it (`terminate.rs`). tao's own exit uses `NSApp stop:`, not `terminate:`, so the added handler never sees `app.exit`.
 - Tauri app-defined commands need no capability entry. Plugin APIs do: add them to `src-tauri/capabilities/default.json`, e.g. `opener:default` and `dialog:default`.
 - **macOS PDF export, not yet confirmed by running it.** WKWebView print operations can render blank pages unless run with `runOperationModalForWindow…` and the print view's frame set. `export.rs` does both. If PDFs come out blank or as one long page, look here first.
 - **WebView2 `PrintToPdf`** (Windows) prints with default settings, where backgrounds are off. Checked task-list boxes may lose their fill in Windows PDFs.

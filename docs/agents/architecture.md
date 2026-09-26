@@ -30,6 +30,8 @@ Details:
 - **Opening** (`open_path`): brings forward the window already showing the file; otherwise reads it in Rust and loads it into the asking window if that is an untouched Untitled document (`reuse`), or else into a new window. A new window collects its text on mount with `take_initial_document`. Rust notes/forgets Open Recent entries here; the frontend only notes Save As, and reports the new path with `set_document_path`.
 - **Closing the last window:** `RunEvent::ExitRequested` without a code is prevented on macOS, so the app stays in the Dock; `RunEvent::Reopen` (Dock click) opens a new window. On Windows the app exits.
 - **Quit** sets a `quitting` flag and closes windows one at a time (focused first). Each window's close handler may prompt; after each `Destroyed` event Rust closes the next, and exits when none are left. Cancel calls `cancel_quit`, which ends the sequence.
+- **System quit requests** (Dock → Quit, logout, restart) go through `src-tauri/src/terminate.rs`. It adds `applicationShouldTerminate:` to tao's app delegate class at setup, answers `NSTerminateLater`, and runs the same Quit sequence. The end of the sequence calls `replyToApplicationShouldTerminate:` (YES when all windows closed, NO on Cancel) instead of `app.exit`. While that reply is pending, the last window closing doesn't exit the app by itself.
+- The dot in the macOS close button follows `dirty` via `set_document_edited`.
 - The View → Preview checkmark is app-wide, so each window restates its own state when it gains focus.
 
 ## Open Recent (`src-tauri/src/recent.rs`)

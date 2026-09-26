@@ -184,14 +184,16 @@ As a writer, I want each document in its own window, so I can work on several at
 - [ ] Verified on Windows (never compiled there)
 
 ### W-038 Quit from the Dock or on logout asks about unsaved changes
-Status: Todo · Platforms: macOS
+Status: Needs verification · Platforms: macOS
 As a Mac user, I want Quit from the Dock menu, and logging out, to ask about unsaved changes like Quit Writer does.
-- [ ] Handle `applicationShouldTerminate:` (tao doesn't forward it) and run the same close-each-window flow
+- [x] Handle `applicationShouldTerminate:` (tao doesn't forward it) and run the same close-each-window flow
+- [ ] Verified: Dock → Quit with an edited document prompts; Cancel keeps Writer running; logout waits for the prompt
 
 ### W-039 Show unsaved state in the close button
-Status: Todo · Platforms: macOS
+Status: Needs verification · Platforms: macOS
 As a Mac user, I want the dot in the red close button when a document has unsaved changes, like other document apps.
-- [ ] `NSWindow.documentEdited` follows the dirty flag
+- [x] `NSWindow.documentEdited` follows the dirty flag
+- [ ] Verified by running the app
 
 ---
 

@@ -6,6 +6,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - `src/lib.rs`: app builder (plugins, menu, menu-event forwarding) and the small file/print commands.
 - `src/menu.rs`: native menus. `FORWARDED` lists the ids that are emitted to the focused window as `menu` events.
 - `src/documents.rs`: document windows: creating and cascading them, the label → path map, opening files, Quit sequencing.
+- `src/terminate.rs`: macOS only: adds `applicationShouldTerminate:` to tao's app delegate so system quit requests prompt about unsaved changes.
 - `src/recent.rs`: File → Open Recent list, persisted to `recent.json` in the app data dir.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
 - `capabilities/default.json`: permissions for plugin and core APIs used by the frontend.

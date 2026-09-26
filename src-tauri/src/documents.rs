@@ -169,8 +169,10 @@ pub fn open_without_window(app: &AppHandle, path: Option<String>) {
 
 /// Starts quitting: each window is asked to close in turn (see `window_destroyed`).
 pub fn quit(app: &AppHandle) {
-    documents(app).quitting.store(true, Ordering::SeqCst);
-    close_next(app);
+    // Already under way (e.g. Dock Quit while a window asks): let it continue.
+    if !documents(app).quitting.swap(true, Ordering::SeqCst) {
+        close_next(app);
+    }
 }
 
 fn close_next(app: &AppHandle) {
@@ -179,6 +181,8 @@ fn close_next(app: &AppHandle) {
         Some(window) => {
             let _ = window.close();
         }
+        // A system quit request (Dock, logout) is answered; AppKit then terminates.
+        None if crate::terminate::pending() => crate::terminate::reply(true),
         None => app.exit(0),
     }
 }
@@ -193,7 +197,9 @@ pub fn window_destroyed(app: &AppHandle, label: &str) {
 /// Whether the app should stay running now that its last window has closed.
 /// Mac apps do (until Quit); on Windows closing the last window exits.
 pub fn keep_running(app: &AppHandle) -> bool {
-    cfg!(target_os = "macos") && !documents(app).quitting.load(Ordering::SeqCst)
+    // While a system quit request waits, `close_next` answers it instead.
+    cfg!(target_os = "macos")
+        && (!documents(app).quitting.load(Ordering::SeqCst) || crate::terminate::pending())
 }
 
 /// Sends a menu command to the focused window only; every window listens.
@@ -261,4 +267,29 @@ pub fn set_document_path(
 #[tauri::command]
 pub fn cancel_quit(docs: tauri::State<'_, Documents>) {
     docs.quitting.store(false, Ordering::SeqCst);
+    crate::terminate::reply(false);
+}
+
+/// Shows unsaved changes as the dot in the macOS close button.
+#[tauri::command]
+pub fn set_document_edited(window: WebviewWindow, edited: bool) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        let target = window.clone();
+        window
+            .run_on_main_thread(move || {
+                if let Ok(ns_window) = target.ns_window() {
+                    // Safety: on the main thread, with the window alive (`target` holds it).
+                    let ns_window = unsafe { &*(ns_window as *const objc2_app_kit::NSWindow) };
+                    ns_window.setDocumentEdited(edited);
+                }
+            })
+            .map_err(|e| e.to_string())
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        // Windows shows it in the title instead (`*name - Writer`).
+        let _ = (window, edited);
+        Ok(())
+    }
 }

@@ -17,6 +17,7 @@
     openDocument,
     pickSaveLocation,
     printPage,
+    setDocumentEdited,
     setDocumentPath,
     takeInitialDocument,
     writeDocument,
@@ -50,6 +51,10 @@
     const title =
       os === "windows" ? `${dirty ? "*" : ""}${name} - Writer` : `${name}${dirty ? " — Edited" : ""}`;
     appWindow.setTitle(title);
+  });
+
+  $effect(() => {
+    setDocumentEdited(dirty);
   });
 
   // The native menu toggles its own checkmark on click; always restate ours.

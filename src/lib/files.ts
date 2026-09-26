@@ -23,6 +23,11 @@ export function setDocumentPath(path: string): Promise<void> {
   return invoke("set_document_path", { path });
 }
 
+/** Shows unsaved changes as the dot in the macOS close button. */
+export function setDocumentEdited(edited: boolean): Promise<void> {
+  return invoke("set_document_edited", { edited });
+}
+
 /** This window kept its unsaved changes, so an ongoing Quit stops. */
 export function cancelQuit(): Promise<void> {
   return invoke("cancel_quit");
