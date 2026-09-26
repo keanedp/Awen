@@ -8,5 +8,5 @@ CRLF line one
 CRLF line two
 CRLF line three
 
-## Paste CRCRLF text below
+## Paste LF text below
 
