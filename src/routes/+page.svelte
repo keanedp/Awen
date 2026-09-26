@@ -357,6 +357,19 @@
     };
     document.addEventListener("contextmenu", blockChromeMenu);
 
+    // WebKit draws a broken-image icon for an image that fails to load; show its alt text instead.
+    const replaceBrokenImage = (e: Event) => {
+      const img = e.target;
+      if (!(img instanceof HTMLImageElement) || !img.closest(".preview")) return;
+      const alt = document.createElement("span");
+      alt.className = "missing-image";
+      alt.textContent = img.alt || "Image not found";
+      alt.title = img.getAttribute("src") ?? "";
+      img.replaceWith(alt);
+    };
+    // Load errors don't bubble, so listen in the capture phase.
+    document.addEventListener("error", replaceBrokenImage, true);
+
     const unlisten = [
       // Rust sends menu commands to the focused window only.
       appWindow.listen<string>("menu", ({ payload }) => {
@@ -390,6 +403,7 @@
 
     return () => {
       document.removeEventListener("contextmenu", blockChromeMenu);
+      document.removeEventListener("error", replaceBrokenImage, true);
       unlisten.forEach((p) => p.then((fn) => fn()));
       view.destroy();
     };

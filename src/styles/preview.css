@@ -95,6 +95,18 @@
   max-width: 100%;
 }
 
+/* Alt text standing in for an image that failed to load (see +page.svelte). */
+.preview .missing-image {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.preview .missing-image::before {
+  content: "[";
+}
+.preview .missing-image::after {
+  content: "]";
+}
+
 .preview ::selection {
   background: var(--selection);
 }
