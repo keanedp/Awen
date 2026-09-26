@@ -11,6 +11,7 @@
     baseName,
     cancelQuit,
     createDocument,
+    dirName,
     duplicateDocument,
     exportPdf,
     fileName,
@@ -57,6 +58,18 @@
 
   const appWindow = getCurrentWebviewWindow();
   const name = $derived(fileName(path));
+
+  /** Renders the document for this webview, with images beside the file loadable. */
+  function render({ preview = false } = {}): string {
+    return renderMarkdown(documentText(view), { preview, folder: path && dirName(path) });
+  }
+
+  /** Waits for the print copy's images, so print and PDF don't catch them half-loaded. */
+  async function printImagesLoaded() {
+    await tick();
+    const images = document.querySelectorAll<HTMLImageElement>(".print-root img");
+    await Promise.all([...images].map((img) => img.decode().catch(() => {})));
+  }
 
   $effect(() => {
     const title =
@@ -131,7 +144,7 @@
     if (!previewing) {
       const top = view.lineBlockAtHeight(view.scrollDOM.scrollTop);
       previewLine = view.state.doc.lineAt(top.from).number - 1;
-      previewHtml = renderMarkdown(documentText(view), { preview: true });
+      previewHtml = render({ preview: true });
       previewing = true;
       return;
     }
@@ -170,7 +183,7 @@
       return;
     }
     if (command(view) && previewing) {
-      previewHtml = renderMarkdown(documentText(view), { preview: true });
+      previewHtml = render({ preview: true });
     }
   }
 
@@ -287,8 +300,8 @@
     try {
       if (target.format === "pdf") {
         // The PDF is printed from the page, so render the print copy first.
-        printHtml = renderMarkdown(text);
-        await tick();
+        printHtml = render();
+        await printImagesLoaded();
         await exportPdf(target.path);
       } else {
         await writeDocument(target.path, await exportHtml(text, baseName(path)));
@@ -299,8 +312,8 @@
   }
 
   async function print() {
-    printHtml = renderMarkdown(documentText(view));
-    await tick();
+    printHtml = render();
+    await printImagesLoaded();
     try {
       await printPage();
     } catch (err) {

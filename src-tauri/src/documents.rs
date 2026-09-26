@@ -48,6 +48,15 @@ fn documents(app: &AppHandle) -> tauri::State<'_, Documents> {
     app.state::<Documents>()
 }
 
+/// Lets the preview load images from the folder of a document the user opened
+/// or saved (and its subfolders) through the asset protocol. Nothing else is
+/// readable: the scope in `tauri.conf.json` starts empty.
+fn allow_images_beside(app: &AppHandle, path: &str) {
+    if let Some(folder) = std::path::Path::new(path).parent() {
+        let _ = app.asset_protocol_scope().allow_directory(folder, true);
+    }
+}
+
 /// The window menu commands apply to.
 pub fn focused_window(app: &AppHandle) -> Option<WebviewWindow> {
     app.webview_windows()
@@ -77,6 +86,9 @@ fn open_window(app: &AppHandle, path: Option<String>, text: Option<String>) -> R
         let docs = documents(app);
         let mut paths = docs.paths.lock().map_err(|e| e.to_string())?;
         let mut pending = docs.pending.lock().map_err(|e| e.to_string())?;
+        if let Some(path) = &path {
+            allow_images_beside(app, path);
+        }
         paths.insert(label.clone(), path);
         if let Some(text) = text {
             pending.insert(label.clone(), text);
@@ -154,6 +166,7 @@ pub fn open_path(
     let _ = recent.note(app, path.clone());
 
     if let Some(window) = reuse {
+        allow_images_beside(app, &path);
         documents(app)
             .paths
             .lock()
@@ -389,6 +402,7 @@ pub fn set_document_path(
     docs: tauri::State<'_, Documents>,
     path: String,
 ) -> Result<(), String> {
+    allow_images_beside(window.app_handle(), &path);
     docs.paths
         .lock()
         .map_err(|e| e.to_string())?

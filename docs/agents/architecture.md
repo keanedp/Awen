@@ -65,6 +65,7 @@ Details:
 
 - There is one markdown-it instance, shared by preview, print, PDF and HTML export. Settings: `html: false`, `linkify`, `typographer`, plus `markdown-it-task-lists`.
 - `renderMarkdown(text, { preview: true })` is used only by the in-app preview. It adds `data-line="<0-based source line>"` to block tokens (for scroll matching and task toggling) and removes `disabled` from task checkboxes. Exports and print omit both.
+- **Local images (W-033):** `renderMarkdown(text, { folder })` rewrites relative and absolute image paths to asset-protocol URLs (`convertFileSrc`), resolved against the document's folder. Preview, print and PDF pass `folder` (via `render()` in `+page.svelte`); HTML export does not, so its paths stay relative to where it is saved. The asset scope starts empty (`tauri.conf.json`); `documents::allow_images_beside` adds each opened or saved document's folder, recursively, so `../` paths outside it are blocked. Print and PDF wait for the images to decode first.
 
 ## Preview (replace-style)
 

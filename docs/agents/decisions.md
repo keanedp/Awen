@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Local images load through the asset protocol, scoped to document folders
+- The preview rewrites image paths to `asset:` URLs instead of reading files into data URIs through a command. This avoids an IPC round trip per image and keeps the rendered HTML small.
+- The scope starts empty. Each opened or saved document's folder is added recursively, from Rust, where document paths are recorded. The webview can't widen the scope itself, so even a compromised preview can only read those folders. `../` images outside the folder don't load; allowing parents would expose too much (for example the whole home folder).
+- HTML export keeps relative paths (see the export decision below), so it only resolves images when saved beside the document.
+
 ## 2026-09-25: Ticking a task in preview edits the hidden editor; undo works in preview
 - A click on a preview checkbox changes that one character in the editor's document through a normal CodeMirror transaction, so dirty tracking, undo and saving need nothing extra. The preview isn't re-rendered: the box has already flipped itself, and the click is cancelled if the source line doesn't look like a task.
 - Each tick is its own undo step (`isolateHistory`), so Cmd+Z after ticking several boxes steps back one box at a time.
