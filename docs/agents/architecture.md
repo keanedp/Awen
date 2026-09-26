@@ -10,6 +10,15 @@ How the parts of Writer connect. File-level detail is discoverable from the code
   - preview toggling, export and print.
 - **Backend: thin Rust commands** plus native menus and platform code. Frontend wrappers for every command live in `src/lib/files.ts`.
 
+## Tests
+
+- **Vitest** runs `src/**/*.test.ts` in Node, with no DOM or Tauri (`npm test`). Its config is the `test` key in `vite.config.js`, so `$lib` imports resolve. Test files sit next to the module they test.
+- **Rust** unit tests go in a `#[cfg(test)] mod tests` at the bottom of the file they test and run with `cargo test`. `#[cfg(windows)]` code can't be tested here (see gotchas.md).
+- **Every feature or fix ships with tests for its logic.** The story's acceptance criteria are the checklist: each one that can be checked without a window gets a test. Put new logic in a plain module (like `editor/tasks.ts`), not in `+page.svelte` or a component, and keep the page to wiring (dispatching, focus, dialogs). If existing logic you're changing is still in the page, move it out first.
+- What tests can't cover (native menus, dialogs, WebView rendering, print/PDF, platform code) is still verified by running the app, and the story stays `Needs verification` until it has been.
+- Covered so far: line endings round trip (`editor/setup.test.ts`) and task ticking, from a preview checkbox's `data-line` to the source edit (`editor/tasks.test.ts`).
+- A known bug gets a `test.fails` with its story ID, so the suite goes red once it's fixed and someone flips it to `test`.
+
 ## Menu → event → action
 
 1. `src-tauri/src/menu.rs` builds the native menus.
@@ -58,6 +67,7 @@ Details:
 
 - `setup.ts` creates a fresh `EditorState` per document. Loading a document into an existing window calls `view.setState(createState(...))` instead of recreating the `EditorView`.
 - Line endings: `EditorState.lineSeparator` is set to the separator detected in the file, and `documentText(view)` returns `state.sliceDoc()`. Together these make a round trip byte-identical. Always read text through `documentText()`.
+  - With the separator set, CodeMirror splits inserted text only on that separator, so a paste with the other line ending leaves stray `\r` or `\n` inside lines (W-050).
 - `markdownStyling.ts` dims syntax marks via a `HighlightStyle` (`--markup` colour). A `ViewPlugin` decorates leading `#` marks with `.cm-hanging-mark`, which is absolutely positioned and translated left so headings hang into the margin.
 - Layout: a centered column (`max-width: var(--measure)`, 66ch) with bottom padding of 40vh, so the end of the text can scroll up the screen.
 - **Find (W-022):** `find.ts` adds `@codemirror/search` with a `createPanel` that mounts `src/lib/ui/FindBar.svelte` (Svelte `mount`) as a top panel.

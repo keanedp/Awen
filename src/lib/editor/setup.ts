@@ -92,6 +92,6 @@ export function setReadOnly(view: EditorView, readOnly: boolean) {
 }
 
 /** The document text with its original line endings. */
-export function documentText(view: EditorView): string {
+export function documentText(view: { state: EditorState }): string {
   return view.state.sliceDoc();
 }

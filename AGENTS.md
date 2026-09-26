@@ -9,10 +9,11 @@ Writer is a focused Markdown editor in the style of focused editors, built with 
 - `make dev` (`npm run tauri dev`): run the app with hot reload.
 - `make build` (`npm run tauri build`): release bundle (`.app` + `.dmg` on macOS, in `src-tauri/target/release/bundle/`).
 - `npm run check`: svelte-check. Must report 0 errors/warnings.
+- `npm test` (`make test`): Vitest unit tests (`src/**/*.test.ts`). Must pass.
 - `npm run build`: frontend-only static build (fast sanity check).
-- `cd src-tauri && cargo clippy` / `cargo fmt`: keep clippy warning-free.
+- `cd src-tauri && cargo clippy` / `cargo fmt`: keep clippy warning-free. `cargo test` for Rust unit tests.
 
-There is no test suite. Verify with `npm run check`, `cargo clippy`, and by running the app.
+Verify with `npm test`, `npm run check`, `cargo clippy`, and by running the app.
 
 ## Map
 
@@ -28,6 +29,7 @@ There is no test suite. Verify with `npm run check`, `cargo clippy`, and by runn
 - markdown-it stays `html: false`. Rendered content runs in a webview with IPC access.
 - Style with the CSS tokens (`var(--surface)`, `bg-surface`, …), not hard-coded colours, so per-OS themes and dark mode keep working.
 - Mark app chrome with the `.chrome` class (no selection, no web context menu).
+- New features and bug fixes come with unit tests for their logic. Keep that logic out of `+page.svelte` and Svelte components, in plain modules that can be tested. See "Tests" in `docs/agents/architecture.md`.
 
 ## Backlog
 

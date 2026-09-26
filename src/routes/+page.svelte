@@ -7,6 +7,7 @@
   import { message } from "@tauri-apps/plugin-dialog";
   import { findSelection, openFind } from "$lib/editor/find";
   import { createState, documentText, setReadOnly } from "$lib/editor/setup";
+  import { taskToggle } from "$lib/editor/tasks";
   import { exportHtml } from "$lib/export/html";
   import {
     type ExportFormat,
@@ -185,13 +186,10 @@
       exclusive(askToUnlock);
       return false;
     }
-    const { from, text } = view.state.doc.line(line + 1);
-    // Optional blockquote marks, a list marker, then the box.
-    const match = /^(?:\s*>)*\s*(?:[-*+]|\d{1,9}[.)])\s+\[([ xX])\]/.exec(text);
-    if (!match) return false;
-    const at = from + match[0].length - 2;
+    const changes = taskToggle(view.state.doc, line);
+    if (!changes) return false;
     view.dispatch({
-      changes: { from: at, to: at + 1, insert: match[1] === " " ? "x" : " " },
+      changes,
       // Each tick is its own undo step.
       annotations: isolateHistory.of("full"),
     });

@@ -16,6 +16,7 @@ User stories for Writer, grouped by milestone. This file is the single place to 
 **Agents:** when you work on a story:
 - update its status when you start and finish;
 - tick the criteria you've met;
+- add unit tests for the story's logic (see "Tests" in `docs/agents/architecture.md`);
 - move it to `Needs verification` if you couldn't run it on every stated platform, and say what's unverified;
 - add a new story for any follow-up work you discover (use the next free ID; don't reuse IDs).
 
@@ -23,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-050**
+Next free ID: **W-051**
 
 ---
 
@@ -56,6 +57,13 @@ As a Mac or Windows user, I want the app to look and behave like other apps on m
 - [x] macOS: inline traffic lights, draggable title area; Windows: native title bar
 - [x] System UI font, accent colour and scrollbar style per OS
 - [x] No text selection or web context menu on app chrome
+
+### W-050 Pasting keeps the file's line endings
+Status: Todo · Platforms: all
+As a writer, I want pasted text to use my document's line endings, so a file never ends up with mixed or broken lines.
+- [ ] Pasting LF text into a CRLF file, or CRLF text into an LF file, gives proper lines in the file's own line ending, with no stray `\r` or `\n` (a `clipboardInputFilter` that normalises to `state.lineBreak` should do it)
+- [ ] Dropped text is normalised too
+- [ ] The two `test.fails` paste tests in `src/lib/editor/setup.test.ts` pass as ordinary tests
 
 ### W-048 Follow the system accent colour
 Status: Done · Platforms: macOS (Windows verification moved to W-049)

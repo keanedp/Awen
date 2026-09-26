@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-25: Unit tests with Vitest, logic kept in plain modules
+- Vitest, because it reuses the Vite config and `$lib` alias, and runs TypeScript without a separate build. Tests run in Node, not jsdom, so the tested code can't depend on the DOM, and pure modules stay pure.
+- Logic moves out of `+page.svelte` to be tested (task ticking is now `editor/tasks.ts`), rather than testing Svelte components. Component and end-to-end tests would need a Tauri webview driver, which isn't worth it yet.
+- Every new feature and fix comes with tests (AGENTS.md, architecture.md).
+
 ## 2026-09-25: Find uses CodeMirror's search with our own find bar, and each OS's shortcuts
 - `@codemirror/search` provides the query state, match highlighting and find/replace commands. Its default panel looks like a web form, so `createPanel` mounts `FindBar.svelte` instead (W-022).
 - macOS gets a TextEdit/Safari-style find bar under the title bar, and Windows gets a Notepad-style flyout at the top right. Each OS's menu follows its own convention. On macOS that is the Edit → Find submenu with ⌘F, ⌥⌘F, ⌘G, ⇧⌘G and ⌘E. On Windows it is Find/Find Next/Find Previous/Replace in Edit with Ctrl+F, F3, Shift+F3 and Ctrl+H. Windows uses F3, not Ctrl+G, because Ctrl+G is Go To in Notepad and Word.
