@@ -16,6 +16,7 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 - `@hedgedoc/markdown-it-task-lists` crashes with markdown-it 14 (`ERR_PACKAGE_PATH_NOT_EXPORTED` for `markdown-it/lib/token.js`). Use `markdown-it-task-lists`, whose types come from the local `src/lib/preview/markdown-it-task-lists.d.ts`.
 - CSS custom properties can't take a fallback list like a font stack: `--accent: -apple-system-control-accent, #0a84ff` is invalid. Use a single value, which is WebKit-only and follows System Settings on macOS.
 - **Testing a module outside the app:** `ssrLoadModule` resolves `$lib` and `?raw` imports, but it runs in SvelteKit's dev server, which replaces the global `fetch` and rejects relative URLs. Stub `fetch` *after* `createServer()`.
+- **Never style scrollbars on macOS.** Any `::-webkit-scrollbar` rule makes WKWebView swap native overlay scrollbars (hidden until you scroll or hover) for legacy always-visible ones. The mac token file intentionally has none. The Windows token file does style them.
 - Accessibility warnings from svelte-check: prefer a document-level listener (e.g. the `.chrome` context-menu blocker) over handlers on non-interactive elements.
 
 ## Tauri / native

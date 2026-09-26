@@ -12,15 +12,6 @@
   --focus-ring: color-mix(in srgb, #0a84ff 50%, transparent);
 }
 
-/* Thin overlay scrollbars, as macOS draws them. */
-:root[data-os="mac"] ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-:root[data-os="mac"] ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--text) 25%, transparent);
-  border-radius: 4px;
-}
-:root[data-os="mac"] ::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* Scrollbars: deliberately unstyled. Any ::-webkit-scrollbar rule makes WebKit
+   drop native overlay scrollbars for always-visible legacy ones. Unstyled, they
+   follow System Settings → Appearance → "Show scroll bars" like any Mac app. */
