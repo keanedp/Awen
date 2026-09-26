@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-053**
+Next free ID: **W-054**
 
 ---
 
@@ -121,13 +121,17 @@ As a writer, I want `- [ ]` and `- [x]` to show as checkboxes in preview and exp
 - [x] Checked items are visually muted
 
 ### W-012 Tick task checkboxes in preview
-Status: Needs verification · Platforms: all
+Status: Done · Platforms: macOS (Windows verification moved to W-053)
 As a writer, I want to click a checkbox in preview to tick it, so I can use documents as to-do lists.
 - [x] Clicking a checkbox toggles `[ ]` ↔ `[x]` on the matching source line (also nested, ordered and quoted items)
 - [x] The change is undoable and marks the document as edited (Undo/Redo also work while in preview)
 - [x] Checkboxes stay non-interactive in print and exports
-- [ ] Verified by clicking through on macOS
-- [ ] Verified on Windows
+- [x] Verified by clicking through on macOS
+
+### W-053 Verify ticking task checkboxes on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-012's clickable preview checkboxes to work in a real build.
+- [ ] Clicking a box in preview toggles the source line (nested, ordered and quoted items too), is undoable and marks the document as edited
 
 ### W-013 Export to HTML
 Status: Done · Platforms: macOS, Windows
