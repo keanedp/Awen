@@ -51,7 +51,7 @@
     background: color-mix(in srgb, var(--text) 14%, transparent);
   }
   .toolbar-button[aria-pressed="true"] {
-    color: var(--accent);
+    color: var(--accent-text, var(--accent));
     background: color-mix(in srgb, var(--accent) 14%, transparent);
   }
   .toolbar-button :global(svg) {

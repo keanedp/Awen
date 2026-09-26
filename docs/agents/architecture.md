@@ -104,6 +104,7 @@ Details:
 - `platform.ts` sets `<html data-os="mac|windows|linux">`.
 - `app.css` defines the shared tokens and light/dark defaults. `tokens.mac.css` and `tokens.windows.css` override them per OS: UI font, sizes, radii, accent, surfaces, scrollbars.
   - The accent comes from the OS via `accent_colors` (see gotchas.md). It is re-read whenever the window gains focus, so a change in System Settings shows up when you switch back.
+  - Windows follows WinUI's accent roles: `--accent` fills controls (a darker shade in light mode, a lighter one in dark), `--accent-text` colours links and accent glyphs, and in dark mode text on the accent is black (`--check-mark`). macOS uses one colour for all of them. Use `var(--accent-text, var(--accent))` for accent-coloured text.
 - Tailwind v4 exposes the tokens as utilities through `@theme inline` (`bg-surface`, `text-muted`, `font-ui`, `font-writing`, `rounded-control`).
 - The writing font is Classic Mono (`static/fonts/`, SIL OFL; keep `LICENSE.md` beside it).
 - **Title bar:** `src/lib/ui/TitleBar.svelte`, used by `+page.svelte`.

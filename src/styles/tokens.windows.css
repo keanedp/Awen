@@ -8,8 +8,10 @@
   --toolbar-button-width: 40px;
   --toolbar-button-height: 28px;
   --toolbar-icon-size: 14px;
-  /* --system-accent is set from UISettings (platform.ts); Fluent's default brand blue until then. */
-  --accent: var(--system-accent, #0f6cbd);
+  /* WinUI accent roles, set from UISettings (platform.ts); Windows 11's default blue until then.
+     --accent is AccentFillColorDefault, --accent-text AccentTextFillColorPrimary. */
+  --accent: var(--system-accent, #005fb8);
+  --accent-text: var(--system-accent-text, #003e92);
   --focus-ring: #000000;
   --surface: #fafafa;
   --chrome: #f3f3f3;
@@ -25,7 +27,10 @@
 
 @media (prefers-color-scheme: dark) {
   :root[data-os="windows"] {
-    --accent: var(--system-accent-dark, #479ef5);
+    --accent: var(--system-accent-dark, #60cdff);
+    --accent-text: var(--system-accent-text-dark, #99ebff);
+    /* TextOnAccentFillColorPrimary is black in dark mode (see preview.css). */
+    --check-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     --focus-ring: #ffffff;
     --surface: #1f1f1f;
     --chrome: #202020;

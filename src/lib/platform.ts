@@ -21,9 +21,16 @@ export function applyPlatform(): OS {
  * src-tauri/src/accent.rs), so call it again when the window comes forward.
  */
 export async function applyAccent() {
-  const accent = await invoke<{ light: string; dark: string } | null>("accent_colors");
+  const accent = await invoke<{
+    light: string;
+    dark: string;
+    textLight: string;
+    textDark: string;
+  } | null>("accent_colors");
   if (!accent) return;
   const root = document.documentElement.style;
   root.setProperty("--system-accent", accent.light);
   root.setProperty("--system-accent-dark", accent.dark);
+  root.setProperty("--system-accent-text", accent.textLight);
+  root.setProperty("--system-accent-text-dark", accent.textDark);
 }

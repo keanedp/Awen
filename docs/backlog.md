@@ -23,7 +23,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-048**
+Next free ID: **W-050**
 
 ---
 
@@ -56,6 +56,21 @@ As a Mac or Windows user, I want the app to look and behave like other apps on m
 - [x] macOS: inline traffic lights, draggable title area; Windows: native title bar
 - [x] System UI font, accent colour and scrollbar style per OS
 - [x] No text selection or web context menu on app chrome
+
+### W-048 Follow the system accent colour
+Status: Done · Platforms: macOS (Windows verification moved to W-049)
+As a writer, I want the app's highlights to use the accent colour I picked in System Settings / Windows Settings, not a fixed blue.
+- [x] Accent read natively (`accent_colors`: `NSColor.controlAccentColor` / `UISettings`), since WKWebView reports `-apple-system-control-accent` as blue and WebView2 has no CSS for it
+- [x] Used for the pressed Preview button, focus rings (including the preview's top edge), links and checked task boxes, in light and dark mode
+- [x] A change in settings shows up when the window next comes forward
+- [x] Windows: WinUI accent roles (fill, text, and black on the accent in dark mode) (code written, see W-049)
+- [x] Verified on macOS
+
+### W-049 Verify the system accent colour on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want the W-048 accent colours to work in a real build.
+- [ ] Compiles on Windows (`accent::win`, never built; needs the `UI` and `UI_ViewManagement` features)
+- [ ] Pressed Preview button, links, checked task boxes (black tick in dark mode) and the find field underline follow the Windows accent, in light and dark mode
 
 ---
 

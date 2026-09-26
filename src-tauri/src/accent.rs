@@ -6,21 +6,32 @@
 
 use serde::Serialize;
 
-/// CSS colours for the light and dark appearance.
+/// CSS colours for the light and dark appearance: `light`/`dark` fill controls,
+/// `text_*` colour accent text such as links. macOS uses one colour for both;
+/// Windows 11 uses different shades of the accent (WinUI's `AccentFillColorDefault`
+/// and `AccentTextFillColorPrimary`).
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Accent {
     light: String,
     dark: String,
+    text_light: String,
+    text_dark: String,
 }
 
 /// The accent colour from System Settings / Windows Settings. None elsewhere.
 #[tauri::command]
 pub fn accent_colors() -> Option<Accent> {
     #[cfg(target_os = "macos")]
-    return Some(Accent {
-        light: macos::accent(false)?,
-        dark: macos::accent(true)?,
-    });
+    {
+        let (light, dark) = (macos::accent(false)?, macos::accent(true)?);
+        Some(Accent {
+            text_light: light.clone(),
+            text_dark: dark.clone(),
+            light,
+            dark,
+        })
+    }
     #[cfg(windows)]
     return win::accent().ok();
     #[cfg(not(any(target_os = "macos", windows)))]
@@ -72,7 +83,7 @@ mod macos {
 mod win {
     use windows::UI::ViewManagement::{UIColorType, UISettings};
 
-    /// Fluent uses the darker accent shade on light surfaces and a lighter one on dark.
+    /// WinUI uses darker accent shades on light surfaces and lighter ones on dark.
     pub fn accent() -> windows::core::Result<super::Accent> {
         let settings = UISettings::new()?;
         let color = |kind| -> windows::core::Result<String> {
@@ -82,6 +93,8 @@ mod win {
         Ok(super::Accent {
             light: color(UIColorType::AccentDark1)?,
             dark: color(UIColorType::AccentLight2)?,
+            text_light: color(UIColorType::AccentDark2)?,
+            text_dark: color(UIColorType::AccentLight3)?,
         })
     }
 }

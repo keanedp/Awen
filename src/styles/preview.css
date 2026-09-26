@@ -42,7 +42,7 @@
 .preview em { font-style: italic; }
 
 .preview a {
-  color: var(--accent);
+  color: var(--accent-text, var(--accent));
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -170,10 +170,14 @@
   border-radius: 3px;
   background: transparent;
 }
+/* --check-mark swaps in a dark tick where text on the accent is dark (Windows dark mode). */
 .preview .task-list-item-checkbox:checked {
   border-color: var(--accent);
   background: var(--accent)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    var(
+      --check-mark,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    )
     center / 100% no-repeat;
 }
 .preview .task-list-item:has(> .task-list-item-checkbox:checked) {
@@ -187,6 +191,8 @@
     --text-muted: #555;
     --markup: #bbb;
     --accent: #0a4fa0;
+    --accent-text: var(--accent);
+    --check-mark: initial;
     --code-keyword: #7a2468;
     --code-string: #2a5e2d;
     --code-literal: #86410c;
