@@ -214,11 +214,18 @@ As a Windows user, I want W-019's word count and W-020's preferences to work in 
 - [ ] Word-count visibility, last export format, and window size and position survive a relaunch (`preferences.json` in the app data folder)
 
 ### W-021 Settings window
-Status: Todo · Platforms: macOS, Windows
-As a writer, I want a native-feeling settings window for font size, line width and other options.
-- [ ] Opens from the app menu (Settings… Cmd+, on macOS) or Edit/Tools on Windows
-- [ ] Font size and column width adjust live
-- [ ] Built with the planned Bits UI components wrapped in `src/lib/ui/`
+Status: Needs verification · Platforms: macOS, Windows
+As a writer, I want a native-feeling settings window for text size, column width, theme and other options.
+- [x] Opens from the app menu (Settings… Cmd+, on macOS) or Edit/Tools on Windows (Edit → Settings… Ctrl+,)
+- [x] A single pane (no tabs yet), styled like macOS System Settings and Windows 11 settings cards
+- [x] Editor: text size (slider with a stop per size), column width (Narrow / Medium / Wide, 58 / 66 / 80 characters), line spacing (Tight / Normal / Loose), check spelling while typing
+- [x] View → Bigger / Smaller / Actual Size (Cmd/Ctrl + / − / 0) change the same text size setting
+- [x] Appearance: Match System / Light / Dark (Windows: "App theme", "Use system setting")
+- [x] Word count and code highlighting, the same preferences the View menu toggles, with the menu checkmarks kept in step
+- [x] Every setting applies live in all windows and persists between launches (using W-020's preferences store; unit tested in `settings.test.ts`, `preferences.test.ts`, `editor/setup.test.ts`)
+- [x] Built with Bits UI components wrapped in `src/lib/ui/` (`Toggle`, `Choice`, `Slider`)
+- [x] Verified in the app on macOS: the window sizes to its content and looks right in light and dark mode; controls work with mouse and keyboard; text size, width and spacing change live in editor and preview but not in print or PDF; the theme switches menus, dialogs and every window; Cmd+W closes Settings; Open… from Settings shows the Open dialog; a relaunch keeps every setting
+- [ ] Verified on Windows (the Windows theme path and menu code have never been compiled or run)
 
 ### W-022 Find and replace
 Status: Done · Platforms: macOS (Windows verification moved to W-047)

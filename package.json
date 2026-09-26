@@ -28,6 +28,7 @@
     "@tauri-apps/plugin-dialog": "^2.7.3",
     "@tauri-apps/plugin-opener": "^2.5.5",
     "@tauri-apps/plugin-window-state": "^2.4.1",
+    "bits-ui": "^2.19.3",
     "codemirror": "^6.0.2",
     "markdown-it": "^15.0.2",
     "markdown-it-task-lists": "^2.1.1"

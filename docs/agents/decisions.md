@@ -2,6 +2,16 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-26: What the settings window (W-021) holds
+- Text size, column width, line spacing, spell checking, theme (Match System / Light / Dark), plus word count and code highlighting mirrored from the View menu. One pane, no tabs, until later features bring enough settings to group.
+- Column width and line spacing are three named presets rather than free numbers: easier to keep the column looking right, and it's how focused editors offers them.
+- Text size is also on View → Bigger / Smaller / Actual Size, as in TextEdit and focused editors, since that's where Mac and Windows users look for it.
+- A separate window, as settings are in Mac and Windows apps, not a sheet inside a document window: it applies to every window, and stays open while you watch a document change.
+- The theme is applied natively (`AppHandle::set_theme`) rather than by overriding CSS tokens with a `data-theme` attribute: menus, dialogs, the title popover and scrollbars follow it too, and it applies before any window draws.
+- Text size, width and spacing apply to the screen only (the tokens sit on `.app-root`). Print, PDF and HTML export keep their paper typography, as focused editors' templates do.
+- The controls are Bits UI (per the 2026-09-23 components decision), not native `<select>`: WKWebView would show a real macOS menu, but WebView2's popup looks like Chrome, not Windows 11.
+- Left out: font choice (the design depends on Classic Mono, and focused editors doesn't offer one either), the export format (the export dialog already remembers the last one), and reading speed (too niche for now). Focus mode and typewriter scrolling (W-017, W-018) add their settings here once they're built.
+
 ## 2026-09-25: Preferences live in a JSON file owned by Rust, typed in the frontend
 - `preferences.json` in the app data folder, like `recent.json`, rather than the webview's `localStorage`. localStorage belongs to the webview's origin, which differs between `make dev` and a bundled build, and its storage and syncing between windows is up to WKWebView and WebView2. A Rust-owned file is one source of truth, easy to find and reset, and Rust can broadcast changes to every window.
 - Rust stores untyped JSON and the frontend validates it (`parsePreferences`), so adding a preference is a frontend-only change.

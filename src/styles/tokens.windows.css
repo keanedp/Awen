@@ -23,6 +23,12 @@
   --flyout: #f9f9f9;
   --flyout-border: rgb(0 0 0 / 0.06);
   --flyout-shadow: 0 8px 16px rgb(0 0 0 / 0.14);
+  /* TextOnAccentFillColorPrimary, e.g. a toggle switch's knob when on. */
+  --text-on-accent: #ffffff;
+  /* Settings: cards on the window background, as in Windows 11 Settings. */
+  --settings-bg: #f3f3f3;
+  --group-bg: rgb(255 255 255 / 0.7);
+  --group-border: rgb(0 0 0 / 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -41,6 +47,10 @@
     --flyout: #2c2c2c;
     --flyout-border: rgb(0 0 0 / 0.2);
     --flyout-shadow: 0 8px 16px rgb(0 0 0 / 0.26);
+    --text-on-accent: #000000;
+    --settings-bg: #202020;
+    --group-bg: rgb(255 255 255 / 0.05);
+    --group-border: rgb(0 0 0 / 0.1);
   }
 }
 

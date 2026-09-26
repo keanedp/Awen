@@ -24,7 +24,9 @@ How the parts of Writer connect. File-level detail is discoverable from the code
   - `editor/count.test.ts`: word counting (Markdown syntax left out, selections, hyphenated words) and the footer text.
   - `editor/code.test.ts`: editor code highlighting (fences parsed only when on, preview's language names and classes, Markdown never styled as code, word count unchanged).
   - `preferences.test.ts`: saved values are checked and fall back to defaults (mocks `invoke` and `listen`).
-  - Rust: `rename.rs` (create and move never overwrite, case-only renames, name checks, using a temporary folder), `recent.rs` (list order and limit, menu labels) and `preferences.rs` (missing or corrupt file, round trip).
+  - `settings.test.ts`: text size steps (Bigger / Smaller stop at the ends), the writing tokens each setting sets, and which View commands change which preference.
+  - `editor/setup.test.ts` also covers spell checking on, off and switched in an open editor.
+  - Rust: `rename.rs` (create and move never overwrite, case-only renames, name checks, using a temporary folder), `recent.rs` (list order and limit, menu labels), `preferences.rs` (missing or corrupt file, round trip, theme values) and `documents.rs` (which labels are document windows).
 - Test logic, not glue: when a Tauri command mixes file work with app state, split the file work into a plain function (`rename::move_file`, `recent::move_to_top`) and test that.
 - A known bug gets a `test.fails` with its story ID, so the suite goes red once it's fixed and someone flips it to `test`.
 - Test through the extension the editor actually registers (e.g. run text through `state.facet(EditorView.clipboardInputFilter)`), not a copy of its logic, so the test fails if the extension is dropped from `createState`.
@@ -32,24 +34,27 @@ How the parts of Writer connect. File-level detail is discoverable from the code
 ## Menu → event → action
 
 1. `src-tauri/src/menu.rs` builds the native menus.
-2. When a menu item whose id is in `FORWARDED` is clicked, `lib.rs` emits a `menu` event with the id as its payload **to the focused window only** (`documents::emit_to_focused`).
+2. When a menu item whose id is in `FORWARDED` is clicked, `lib.rs` emits a `menu` event with the id as its payload **to the focused window only** (`documents::emit_to_focused`). That may be the Settings window, which handles Close and the View commands that set preferences and ignores the rest. Open and Open Recent go only to a focused *document* (`emit_to_focused_document`); otherwise Rust handles them.
 3. `+page.svelte` listens with `appWindow.listen` (not the global `listen`, which would hear every window's events) and dispatches through its `actions` map.
 
 Details:
 - File actions are serialized by a `busy` flag. Undo/redo, find, Preview and Word Count bypass it (the `immediate` set) so they stay responsive.
 - Undo/redo are custom menu items rather than `PredefinedMenuItem`s. They call CodeMirror's `undo`/`redo` (see decisions.md).
 - Close calls `appWindow.close()`. `onCloseRequested` runs `confirmDiscard()` (Save / Don't Save / Cancel) and can prevent the close.
-- New and Quit never reach the frontend (see Document windows). Open does, unless no window is focused; then Rust shows the Open dialog itself.
+- New, Quit and Settings… never reach the frontend (see Document windows and Settings window). Open does, unless no document is focused; then Rust shows the Open dialog itself.
 - On macOS, Quit lives in the app menu; on other OSes, File has Exit.
 - **Checkmarks** (View → Preview, Word Count, Code Highlighting) are `CheckMenuItem`s kept by id in `menu::CheckItems`. The menu bar is app-wide but the state is the frontend's, so a window restates them with `setMenuChecked(id, …)` (`set_menu_checked`) whenever the state changes and when it comes forward. A new check item needs adding to `CheckItems` and to the `id` type in `src/lib/menu.ts`.
 
 ## Preferences (`src/lib/preferences.ts`, `src-tauri/src/preferences.rs`)
 
-- App-wide settings kept between launches (W-020): today `wordCount`, `codeHighlighting` and `exportFormat`.
+- App-wide settings kept between launches (W-020): `wordCount`, `codeHighlighting` and `exportFormat`, plus the settings window's (W-021) `textSize`, `columnWidth`, `lineSpacing`, `spellcheck` and `theme`.
 - Rust stores them as untyped JSON in `preferences.json` in the app data folder, beside `recent.json`, loaded in `setup`. The frontend owns names, types and defaults: `parsePreferences` checks every saved value and falls back to the default, so an old, newer or hand-edited file can't break the app.
 - `setPreference(key, value)` saves and emits `preference-changed` to every window. Each page listens with the global `listen` (deliberately, unlike menu events) and applies it to its `prefs` state, so all windows follow a change made in one.
 - A new window renders with defaults until `loadPreferences()` resolves. Anything a preference hides waits for `prefsLoaded`, so it doesn't flash up.
 - To add a preference: add it to `Preferences`, `defaults` and `valid` in `preferences.ts`, with a test. Nothing changes in Rust.
+- **Theme** is the exception: Rust applies it (`preferences::apply_theme`, calling `AppHandle::set_theme`) when it loads the file in `setup` and whenever it changes. The theme belongs to the app: on macOS it sets `NSApp.appearance`, so menus, dialogs and every webview's `prefers-color-scheme` follow it, windows opened later included. CSS keeps using `prefers-color-scheme`; nothing in the frontend reads `theme`.
+- **Writing tokens:** `writingStyle(prefs)` (`settings.ts`) turns text size, column width and line spacing into `--writing-size`, `--measure` and `--writing-line-height`, set inline on `.app-root`. Not on `:root`, so the print copy (outside `.app-root`) and HTML export keep the paper defaults.
+- View → Bigger / Smaller / Actual Size and the Word Count / Code Highlighting toggles go through `viewChange` (`settings.ts`), which both document windows and Settings use. They update the local `prefs` first, so a held-down shortcut steps from the new value rather than waiting for `preference-changed`.
 - Window size and position are not preferences: the window-state plugin restores them, for the `main` window only.
 
 ## Document windows (`src-tauri/src/documents.rs`)
@@ -61,7 +66,16 @@ Details:
 - **Quit** sets a `quitting` flag and closes windows one at a time (focused first). Each window's close handler may prompt; after each `Destroyed` event Rust closes the next, and exits when none are left. Cancel calls `cancel_quit`, which ends the sequence.
 - **System quit requests** (Dock → Quit, logout, restart) go through `src-tauri/src/terminate.rs`. It adds `applicationShouldTerminate:` to tao's app delegate class at setup, answers `NSTerminateLater`, and runs the same Quit sequence. The end of the sequence calls `replyToApplicationShouldTerminate:` (YES when all windows closed, NO on Cancel) instead of `app.exit`. While that reply is pending, the last window closing doesn't exit the app by itself.
 - The dot in the macOS close button follows `dirty` via `set_document_edited`.
+- Settings is not a document window: `documents::is_document` (`main` or `doc-N`) keeps it out of blank-window reuse, cascading and Open. Quit still closes it along with the rest; the Dock click reopens a document when only Settings is open.
 - The View → Preview checkmark is app-wide, so each window restates its own state when it gains focus.
+
+## Settings window (`src-tauri/src/settings.rs`, `src/routes/settings/+page.svelte`)
+
+- One app-wide window, label `settings`, opened by the `settings` menu item (Writer → Settings… on macOS, Edit → Settings… on Windows), handled in Rust. A second click brings it forward.
+- It loads the `/settings` route. Tauri serves the SPA fallback `index.html` for it, and SvelteKit routes it client-side. Its permissions are in `capabilities/settings.json`.
+- Rust builds it hidden and fixed-size, with native decorations on both OSes (no custom title bar). On macOS it uses the Overlay title bar style, like document windows: the page runs under the title bar (top padding of `--titlebar-height`, plus a `data-tauri-drag-region` strip), so `setSize` and the page's height measure the same thing. The page loads the preferences, waits for fonts, sets the window's height to its content (`setSize`), then shows and focuses it, so it never jumps or flashes defaults. A `ResizeObserver` refits it if the content's height changes later, since a single measurement right after the first render came out short.
+- Controls are Bits UI wrapped in `src/lib/ui/`: `Toggle` (Switch), `Choice` (Select; its menu is portalled to `<body>`, so its styles are global) and `Slider` (with a tick per stop). Each is styled per OS with `[data-os]` selectors and tokens: `--menu-*`, `--settings-bg`, `--group-*` and, on Windows, `--text-on-accent`.
+- Every control calls `setPreference`; document windows apply the change through `preference-changed` like any other preference. Settings also restates the Word Count and Code Highlighting checkmarks, since it may be the only window open.
 
 ## Opening files from outside the app (`documents::open_external`)
 
@@ -130,7 +144,7 @@ Details:
     - On other OSes it uses the dialog plugin's save dialog, with HTML/PDF filters ("Save as type") and the format taken from the extension.
   - **PDF:** renders the print copy, then `export_pdf` prints the page straight to the file. This does not go through the print dialog.
   - **HTML:** `src/lib/export/html.ts` builds a single self-contained file. It includes `preview.css` imported via `?raw`, its own light/dark tokens, and the Classic Mono fonts fetched from `/fonts` and embedded as base64 (~235 KB for a small document).
-- The export format last used is remembered only for the session (`exportFormat` in `+page.svelte`).
+- The export format last used is a preference (`exportFormat`), so it's remembered between launches.
 
 ## Theming
 
@@ -157,4 +171,4 @@ Details:
   - They cancel `mousedown` so they never steal focus from the editor.
   - Toggle buttons pass `pressed`.
   - A toolbar toggle that also has a menu item should use a `CheckMenuItem`, synced from frontend state the way Preview is (see Checkmarks under Menu → event → action).
-- **Planned:** Bits UI headless components wrapped in `src/lib/ui/`, themed by the tokens. Konsta UI on mobile.
+- **Components:** Bits UI headless components wrapped in `src/lib/ui/`, themed by the tokens (first used by Settings: `Toggle`, `Choice`, `Slider`). Konsta UI is planned for mobile.

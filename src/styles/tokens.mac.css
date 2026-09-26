@@ -15,6 +15,12 @@
   --control-bg: #ffffff;
   --control-border: rgb(0 0 0 / 0.15);
   --field-bg: #ffffff;
+  /* Menus (pop-up buttons) and the grouped form in Settings, as in System Settings. */
+  --menu-bg: rgb(246 246 246 / 0.85);
+  --menu-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.15), 0 8px 24px rgb(0 0 0 / 0.2);
+  --settings-bg: #ececec;
+  --group-bg: rgb(0 0 0 / 0.03);
+  --group-border: rgb(0 0 0 / 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,6 +29,11 @@
     --control-bg: rgb(255 255 255 / 0.2);
     --control-border: rgb(0 0 0 / 0.3);
     --field-bg: rgb(255 255 255 / 0.06);
+    --menu-bg: rgb(40 40 40 / 0.85);
+    --menu-shadow: 0 0 0 0.5px rgb(255 255 255 / 0.15), 0 8px 24px rgb(0 0 0 / 0.4);
+    --settings-bg: #1e1e1e;
+    --group-bg: rgb(255 255 255 / 0.04);
+    --group-border: rgb(255 255 255 / 0.06);
   }
 }
 

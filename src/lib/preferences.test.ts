@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { defaults, loadPreferences, onPreferenceChanged, parsePreferences, setPreference } from "./preferences";
+import {
+  defaults,
+  loadPreferences,
+  onPreferenceChanged,
+  parsePreferences,
+  setPreference,
+  setPreferences,
+} from "./preferences";
 
 const ipc = vi.hoisted(() => ({
   invoke: vi.fn(),
@@ -24,16 +31,37 @@ describe("parsePreferences", () => {
   });
 
   test("saved values replace the defaults", () => {
-    expect(parsePreferences({ wordCount: false, codeHighlighting: true, exportFormat: "pdf" })).toEqual({
+    const saved = {
       wordCount: false,
       codeHighlighting: true,
       exportFormat: "pdf",
-    });
+      textSize: 22,
+      columnWidth: "wide",
+      lineSpacing: "loose",
+      spellcheck: false,
+      theme: "dark",
+    };
+    expect(parsePreferences(saved)).toEqual(saved);
   });
 
   test("invalid values fall back to the default", () => {
     expect(parsePreferences({ wordCount: "no", codeHighlighting: 1, exportFormat: "docx" })).toEqual(defaults);
     expect(parsePreferences({ wordCount: null, exportFormat: 1 })).toEqual(defaults);
+    expect(
+      parsePreferences({ textSize: "18", columnWidth: "huge", lineSpacing: 1.6, spellcheck: "on", theme: "sepia" }),
+    ).toEqual(defaults);
+  });
+
+  test("text sizes outside the slider's range fall back to the default", () => {
+    expect(parsePreferences({ textSize: 4 }).textSize).toBe(defaults.textSize);
+    expect(parsePreferences({ textSize: 200 }).textSize).toBe(defaults.textSize);
+    expect(parsePreferences({ textSize: Number.NaN }).textSize).toBe(defaults.textSize);
+    // Hand-edited, between two stops: kept.
+    expect(parsePreferences({ textSize: 19 }).textSize).toBe(19);
+  });
+
+  test("option names inherited from Object aren't valid choices", () => {
+    expect(parsePreferences({ columnWidth: "toString", lineSpacing: "constructor" })).toEqual(defaults);
   });
 
   test("unknown keys, e.g. from a newer version, are ignored", () => {
@@ -56,6 +84,15 @@ test("setPreference sends the key and value", async () => {
   ipc.invoke.mockResolvedValue(undefined);
   await setPreference("exportFormat", "pdf");
   expect(ipc.invoke).toHaveBeenCalledWith("set_preference", { key: "exportFormat", value: "pdf" });
+});
+
+test("setPreferences sends each key and value", async () => {
+  ipc.invoke.mockResolvedValue(undefined);
+  await setPreferences({ textSize: 20, theme: "dark" });
+  expect(ipc.invoke.mock.calls).toEqual([
+    ["set_preference", { key: "textSize", value: 20 }],
+    ["set_preference", { key: "theme", value: "dark" }],
+  ]);
 });
 
 test("onPreferenceChanged passes on valid changes only", async () => {
