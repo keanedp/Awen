@@ -1,4 +1,5 @@
-@import "tailwindcss";
+/* Only src/ is scanned for classes, so saving a Markdown file elsewhere in the repo doesn't reload the dev app. */
+@import "tailwindcss" source("../");
 @import "./preview.css";
 @import "./tokens.mac.css";
 @import "./tokens.windows.css";

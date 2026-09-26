@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-052**
+Next free ID: **W-053**
 
 ---
 
@@ -59,12 +59,17 @@ As a Mac or Windows user, I want the app to look and behave like other apps on m
 - [x] No text selection or web context menu on app chrome
 
 ### W-050 Pasting keeps the file's line endings
-Status: Needs verification · Platforms: all
+Status: Done · Platforms: macOS (Windows verification moved to W-052)
 As a writer, I want pasted text to use my document's line endings, so a file never ends up with mixed or broken lines.
 - [x] Pasting LF text into a CRLF file, or CRLF text into an LF file, gives proper lines in the file's own line ending, with no stray `\r` or `\n` (`matchLineBreaks`, a `clipboardInputFilter` in `editor/setup.ts`)
 - [x] Dropped text is normalised too (CodeMirror runs drops through the same filter)
 - [x] The paste tests in `src/lib/editor/setup.test.ts` pass as ordinary tests
-- [ ] Verified in the app: paste CRLF text into an LF file and LF into a CRLF file, save, and check the bytes (e.g. `od -c`) on macOS and Windows
+- [x] Verified in the app: paste CRLF text into an LF file and LF into a CRLF file, save, and check the bytes (e.g. `od -c`) on macOS (`test_files/lf.md` and `crlf.md`)
+
+### W-052 Verify pasting line endings on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-050's paste fix to work in a real build.
+- [ ] Paste CRLF text into `test_files/lf.md` and LF text into `test_files/crlf.md`, save, and check neither file has mixed endings (e.g. `Format-Hex`, or `git diff` showing no `^M` changes)
 
 ### W-048 Follow the system accent colour
 Status: Done · Platforms: macOS (Windows verification moved to W-049)
