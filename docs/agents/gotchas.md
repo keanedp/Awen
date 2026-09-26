@@ -26,6 +26,9 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 - `Menu::get(id)` only searches top-level items. To reach a nested item later (e.g. the View → Preview checkmark), keep its handle in managed state (`menu::PreviewMenuItem`).
 - Windows custom title bar: HTML caption buttons don't trigger the Snap Layouts flyout (W-037). Win+Z and dragging to screen edges still work.
 - A native menu accelerator consumes the key before the webview sees it. Any shortcut CodeMirror must handle has to be a custom menu item that calls into the editor, as undo/redo do.
+- **Creating a window from a synchronous command deadlocks on Windows.** Commands that may open a window (`open_document`) must be `async`. Menu and run-event handlers are fine.
+- JS `listen()` from `@tauri-apps/api/event` hears events emitted to *any* target, so `emit_to` a window doesn't isolate it. Listen with `getCurrentWebviewWindow().listen(...)`.
+- Capabilities apply by window label. New windows are `doc-N`, which `capabilities/default.json` matches with `doc-*`. A window with any other label would get no permissions.
 - Tauri app-defined commands need no capability entry. Plugin APIs do: add them to `src-tauri/capabilities/default.json`, e.g. `opener:default` and `dialog:default`.
 - **macOS PDF export, not yet confirmed by running it.** WKWebView print operations can render blank pages unless run with `runOperationModalForWindow…` and the print view's frame set. `export.rs` does both. If PDFs come out blank or as one long page, look here first.
 - **WebView2 `PrintToPdf`** (Windows) prints with default settings, where backgrounds are off. Checked task-list boxes may lose their fill in Windows PDFs.

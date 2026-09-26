@@ -23,7 +23,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-038**
+Next free ID: **W-040**
 
 ---
 
@@ -171,13 +171,27 @@ Status: In progress (agent: Open Recent built, open-with not started) · Platfor
 As a writer, I want to reopen recent documents and open `.md` files from Finder/Explorer with Writer.
 - [x] File → Open Recent submenu, clearable (not yet verified by running the app on macOS or Windows)
 - [ ] Writer registers as an editor for `.md` files; double-clicking opens the file
-- [ ] Opening a file while another is open follows the unsaved-changes rules (or opens a new window, see W-024)
+- [x] Opening a file while another is open opens it in a new window (W-024); an untouched Untitled window is reused
 
 ### W-024 Multiple windows
-Status: Todo · Platforms: macOS, Windows
+Status: Needs verification · Platforms: macOS, Windows
 As a writer, I want each document in its own window, so I can work on several at once.
-- [ ] New/Open create new windows; closing the last window follows platform conventions
-- [ ] Unsaved-changes prompts work per window
+- [x] New/Open create new windows; closing the last window follows platform conventions (macOS keeps running, Dock click or New/Open brings a window back; Windows exits)
+- [x] Unsaved-changes prompts work per window; Quit asks each edited window in turn and Cancel stops it
+- [x] Opening a file that is already open brings its window forward
+- [x] macOS Window menu lists the open windows
+- [ ] Verified by running the app on macOS (only startup checked so far)
+- [ ] Verified on Windows (never compiled there)
+
+### W-038 Quit from the Dock or on logout asks about unsaved changes
+Status: Todo · Platforms: macOS
+As a Mac user, I want Quit from the Dock menu, and logging out, to ask about unsaved changes like Quit Writer does.
+- [ ] Handle `applicationShouldTerminate:` (tao doesn't forward it) and run the same close-each-window flow
+
+### W-039 Show unsaved state in the close button
+Status: Todo · Platforms: macOS
+As a Mac user, I want the dot in the red close button when a document has unsaved changes, like other document apps.
+- [ ] `NSWindow.documentEdited` follows the dirty flag
 
 ---
 

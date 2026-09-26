@@ -1,13 +1,9 @@
+mod documents;
 mod export;
 mod menu;
 mod recent;
 
-use tauri::{Emitter, Manager};
-
-#[tauri::command]
-fn read_document(path: String) -> Result<String, String> {
-    std::fs::read_to_string(&path).map_err(|e| format!("Could not open {path}: {e}"))
-}
+use tauri::Manager;
 
 #[tauri::command]
 fn write_document(path: String, contents: String) -> Result<(), String> {
@@ -38,44 +34,75 @@ fn note_recent_document(
     recent.note(&app, path)
 }
 
-/// Removes a document from File → Open Recent, e.g. one that no longer exists.
-#[tauri::command]
-fn forget_recent_document(
-    app: tauri::AppHandle,
-    recent: tauri::State<'_, recent::Recent<tauri::Wry>>,
-    path: String,
-) -> Result<(), String> {
-    recent.forget(&app, &path)
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(
+            tauri_plugin_window_state::Builder::new()
+                // Later windows cascade from the focused one instead.
+                .with_filter(|label| label == documents::MAIN)
+                .build(),
+        )
+        .manage(documents::Documents::default())
         .menu(menu::build)
         .setup(|app| Ok(recent::load(app.handle())?))
         .on_menu_event(|app, event| {
             let id = event.id().as_ref();
-            if menu::FORWARDED.contains(&id) {
-                let _ = app.emit("menu", id);
-            } else if let Some(path) = id.strip_prefix(recent::OPEN_PREFIX) {
-                let _ = app.emit("open-recent", path);
-            } else if id == recent::CLEAR_ID {
-                let _ = app.state::<recent::Recent<tauri::Wry>>().clear(app);
+            match id {
+                "new" => {
+                    let _ = documents::new_window(app, None);
+                }
+                "quit" => documents::quit(app),
+                // With no window to ask, Rust shows the Open dialog itself.
+                "open" if !documents::emit_to_focused(app, "menu", id) => {
+                    documents::open_without_window(app, None)
+                }
+                recent::CLEAR_ID => {
+                    let _ = app.state::<recent::Recent<tauri::Wry>>().clear(app);
+                }
+                _ if menu::FORWARDED.contains(&id) => {
+                    documents::emit_to_focused(app, "menu", id);
+                }
+                _ => {
+                    if let Some(path) = id.strip_prefix(recent::OPEN_PREFIX) {
+                        if !documents::emit_to_focused(app, "open-recent", path) {
+                            documents::open_without_window(app, Some(path.to_string()));
+                        }
+                    }
+                }
+            }
+        })
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::Destroyed = event {
+                documents::window_destroyed(window.app_handle(), window.label());
             }
         })
         .invoke_handler(tauri::generate_handler![
-            read_document,
             write_document,
             print_page,
             set_preview_checked,
             note_recent_document,
-            forget_recent_document,
+            documents::take_initial_document,
+            documents::open_document,
+            documents::set_document_path,
+            documents::cancel_quit,
             export::choose_export,
             export::export_pdf
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| match event {
+            // Mac apps keep running with no windows open, until Quit.
+            tauri::RunEvent::ExitRequested {
+                code: None, api, ..
+            } if documents::keep_running(app) => api.prevent_exit(),
+            // Clicking the Dock icon with no windows open starts a new document.
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Reopen { .. } if app.webview_windows().is_empty() => {
+                let _ = documents::new_window(app, None);
+            }
+            _ => {}
+        });
 }

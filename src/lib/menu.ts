@@ -9,8 +9,3 @@ export function setPreviewChecked(checked: boolean): Promise<void> {
 export function noteRecentDocument(path: string): Promise<void> {
   return invoke("note_recent_document", { path });
 }
-
-/** Removes a document from File → Open Recent. */
-export function forgetRecentDocument(path: string): Promise<void> {
-  return invoke("forget_recent_document", { path });
-}

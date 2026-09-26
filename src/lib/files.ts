@@ -4,8 +4,28 @@ import { detectOS } from "./platform";
 
 const filters = [{ name: "Markdown", extensions: ["md", "markdown", "txt"] }];
 
-export function readDocument(path: string): Promise<string> {
-  return invoke<string>("read_document", { path });
+/**
+ * Opens a document: brings forward the window already showing it, or opens a
+ * new window. If `reuse` (this window is an untouched untitled document), the
+ * text is returned for this window to show instead.
+ */
+export function openDocument(path: string, reuse: boolean): Promise<string | null> {
+  return invoke<string | null>("open_document", { path, reuse });
+}
+
+/** The document Rust opened this window for, if any. */
+export function takeInitialDocument(): Promise<{ path: string; text: string } | null> {
+  return invoke("take_initial_document");
+}
+
+/** Tells Rust which file this window now shows (after Save As). */
+export function setDocumentPath(path: string): Promise<void> {
+  return invoke("set_document_path", { path });
+}
+
+/** This window kept its unsaved changes, so an ongoing Quit stops. */
+export function cancelQuit(): Promise<void> {
+  return invoke("cancel_quit");
 }
 
 export function writeDocument(path: string, contents: string): Promise<void> {

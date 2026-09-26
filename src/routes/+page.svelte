@@ -2,25 +2,27 @@
   import { onMount, tick } from "svelte";
   import { EditorView } from "@codemirror/view";
   import { redo, undo } from "@codemirror/commands";
-  import { listen } from "@tauri-apps/api/event";
-  import { getCurrentWindow } from "@tauri-apps/api/window";
+  import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
   import { message } from "@tauri-apps/plugin-dialog";
   import { createState, documentText } from "$lib/editor/setup";
   import { exportHtml } from "$lib/export/html";
   import {
     type ExportFormat,
     baseName,
+    cancelQuit,
     exportPdf,
     fileName,
     pickExportTarget,
     pickFileToOpen,
+    openDocument,
     pickSaveLocation,
     printPage,
-    readDocument,
+    setDocumentPath,
+    takeInitialDocument,
     writeDocument,
   } from "$lib/files";
   import { applyPlatform, type OS } from "$lib/platform";
-  import { forgetRecentDocument, noteRecentDocument, setPreviewChecked } from "$lib/menu";
+  import { noteRecentDocument, setPreviewChecked } from "$lib/menu";
   import Preview from "$lib/preview/Preview.svelte";
   import TitleBar from "$lib/ui/TitleBar.svelte";
   import { renderMarkdown } from "$lib/preview/render";
@@ -41,7 +43,7 @@
   let host: HTMLElement;
   let view: EditorView;
 
-  const appWindow = getCurrentWindow();
+  const appWindow = getCurrentWebviewWindow();
   const name = $derived(fileName(path));
 
   $effect(() => {
@@ -97,7 +99,10 @@
       await showError(err);
       return false;
     }
-    if (target !== path) noteRecentDocument(target);
+    if (target !== path) {
+      noteRecentDocument(target);
+      setDocumentPath(target);
+    }
     path = target;
     savedText = text;
     dirty = documentText(view) !== savedText;
@@ -113,9 +118,12 @@
     return path ? write(path) : saveAs();
   }
 
-  /** Returns true when it is safe to replace or close the current document. */
+  /** Returns true when it is safe to close the document. */
   async function confirmDiscard(): Promise<boolean> {
     if (!dirty) return true;
+    // Quit may be closing a window in the background; show which one is asking.
+    await appWindow.unminimize();
+    await appWindow.setFocus();
     const choice = await message(`Do you want to save the changes you made to “${name}”?`, {
       title: "Unsaved changes",
       kind: "warning",
@@ -125,31 +133,20 @@
     return choice === "Don't Save" || choice === "No";
   }
 
-  async function newDocument() {
-    if (await confirmDiscard()) load("", null);
-  }
-
-  async function openDocument() {
-    if (!(await confirmDiscard())) return;
+  async function openFile() {
     const target = await pickFileToOpen();
-    if (target) await openPath(target);
+    if (target) await open(target);
   }
 
-  async function openRecent(target: string) {
-    // Choosing the open document just leaves it as it is.
-    if (target !== path && (await confirmDiscard())) await openPath(target);
-  }
-
-  async function openPath(target: string) {
+  /** Opens `target` here if this window is an untouched untitled document, else elsewhere. */
+  async function open(target: string) {
+    const reuse = !path && !dirty && view.state.doc.length === 0;
     try {
-      load(await readDocument(target), target);
+      const text = await openDocument(target, reuse);
+      if (text !== null) load(text, target);
     } catch (err) {
-      // Like other Mac apps, a moved or deleted file drops out of Open Recent.
-      forgetRecentDocument(target);
       await showError(err);
-      return;
     }
-    noteRecentDocument(target);
   }
 
   async function exportDocument() {
@@ -182,15 +179,13 @@
   }
 
   const actions: Record<string, () => unknown> = {
-    new: newDocument,
-    open: openDocument,
+    open: openFile,
     save,
     save_as: saveAs,
     export: exportDocument,
     print,
-    // Closing the only window quits the app; onCloseRequested handles unsaved changes.
+    // onCloseRequested handles unsaved changes. New and Quit are handled in Rust.
     close: () => appWindow.close(),
-    quit: () => appWindow.close(),
     undo: () => previewing || undo(view),
     redo: () => previewing || redo(view),
     preview: togglePreview,
@@ -211,6 +206,7 @@
     os = applyPlatform();
     view = new EditorView({ state: createState("", onChange), parent: host });
     view.focus();
+    takeInitialDocument().then((doc) => doc && load(doc.text, doc.path));
 
     // App chrome has no web context menu, like native UI.
     const blockChromeMenu = (e: MouseEvent) => {
@@ -219,16 +215,23 @@
     document.addEventListener("contextmenu", blockChromeMenu);
 
     const unlisten = [
-      listen<string>("menu", ({ payload }) => {
+      // Rust sends menu commands to the focused window only.
+      appWindow.listen<string>("menu", ({ payload }) => {
         // Editing commands must stay responsive; file commands shouldn't overlap.
         if (payload === "undo" || payload === "redo" || payload === "preview") {
           return actions[payload]();
         }
         return exclusive(actions[payload]);
       }),
-      listen<string>("open-recent", ({ payload }) => exclusive(() => openRecent(payload))),
+      appWindow.listen<string>("open-recent", ({ payload }) => exclusive(() => open(payload))),
       appWindow.onCloseRequested(async (event) => {
-        if (!(await confirmDiscard())) event.preventDefault();
+        if (await confirmDiscard()) return;
+        event.preventDefault();
+        cancelQuit();
+      }),
+      // The Preview checkmark is app-wide; restate this window's state when it comes forward.
+      appWindow.onFocusChanged(({ payload: focused }) => {
+        if (focused) setPreviewChecked(previewing);
       }),
     ];
 

@@ -1,9 +1,10 @@
-use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu};
+use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu, WINDOW_SUBMENU_ID};
 use tauri::{AppHandle, Manager, Runtime};
 
-/// Menu item ids that are forwarded to the frontend as `menu` events.
+/// Menu item ids that are forwarded to the focused window as `menu` events.
+/// New, Quit and (with no window open) Open are handled in Rust.
 pub const FORWARDED: &[&str] = &[
-    "new", "open", "save", "save_as", "close", "quit", "undo", "redo", "preview", "export", "print",
+    "open", "save", "save_as", "close", "undo", "redo", "preview", "export", "print",
 ];
 
 /// View → Preview, kept so the frontend can sync its checkmark
@@ -70,8 +71,10 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         ],
     )?;
 
-    let window = Submenu::with_items(
+    // This id makes it the macOS Window menu, which lists the open windows.
+    let window = Submenu::with_id_and_items(
         app,
+        WINDOW_SUBMENU_ID,
         "Window",
         true,
         &[
