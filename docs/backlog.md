@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-066**
+Next free ID: **W-068**
 
 ---
 
@@ -231,6 +231,21 @@ As a writer, I want a native-feeling settings window for text size, column width
 - [x] Every setting applies live in all windows and persists between launches (using W-020's preferences store; unit tested in `settings.test.ts`, `preferences.test.ts`, `editor/setup.test.ts`)
 - [x] Built with Bits UI components wrapped in `src/lib/ui/` (`Toggle`, `Choice`, `Slider`)
 - [x] Verified in the app on macOS: the window sizes to its content and looks right in light and dark mode; controls work with mouse and keyboard; text size, width and spacing change live in editor and preview but not in print or PDF; the theme switches menus, dialogs and every window; Cmd+W closes Settings; Open… from Settings shows the Open dialog; a relaunch keeps every setting
+
+### W-067 Verify hanging heading marks on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-066's heading marks to work in a real build.
+- [ ] Resize from wide to narrow at small and large text sizes and in each font, with the scrollbar showing; markers hang whole, partly or not at all as there is room, and never reach the window's edge; caret, selection and clicking on a heading line still land in the right place
+
+### W-066 Heading marks hang only as far as there is room
+Status: Done · Platforms: macOS (Windows verification moved to W-067)
+As a writer, I want heading markers to behave like focused editors' when the window is narrow (`screenshots/headers_narrow.png`, `headers_medium.png`, `headers_wide.png`), so they're never cut off at the window's edge.
+- [x] Wide window: every marker, `#` to `######`, hangs whole and heading text lines up with body text
+- [x] Narrower: a marker hangs only as far as the space beside the column, pushing its heading text in
+- [x] Column fills the window: no marker hangs; heading text follows its marker
+- [x] The editor's side padding is back to 2rem, the same as the preview
+- [x] Which headings hang, and by how many characters, is unit tested (`editor/markdownStyling.test.ts`)
+- [x] Verified in the app on macOS: resize from wide to narrow at small and large text sizes and in each font; caret, selection and clicking on a heading line still land in the right place
 
 ### W-065 Monaspace Neon as the default font
 Status: Done · Platforms: macOS (Windows verification moved to W-064)
