@@ -45,7 +45,7 @@ export const defaults: Preferences = {
   wordCount: true,
   codeHighlighting: false,
   exportFormat: "html",
-  writingFont: "classic",
+  writingFont: "neon",
   textSize: defaultTextSize,
   columnWidth: "medium",
   lineSpacing: "normal",

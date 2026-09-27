@@ -4,35 +4,17 @@
 @import "./tokens.mac.css";
 @import "./tokens.windows.css";
 
-@font-face {
-  font-family: "Classic Mono";
-  src: url("/fonts/ClassicMono-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Classic Mono";
-  src: url("/fonts/ClassicMono-Italic.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-}
-@font-face {
-  font-family: "Classic Mono";
-  src: url("/fonts/ClassicMono-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Classic Mono";
-  src: url("/fonts/ClassicMono-BoldItalic.woff2") format("woff2");
-  font-weight: 700;
-  font-style: italic;
-}
 /* Settings → Font (W-063). Variable: one file each for every weight and slant. The ranges
    must be declared, or the regular weight renders at the file's default, ExtraLight. */
 @font-face {
   font-family: "Monaspace Neon";
   src: url("/fonts/monaspace/MonaspaceNeon-Var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: oblique 0deg 11deg;
+}
+@font-face {
+  font-family: "Monaspace Argon";
+  src: url("/fonts/monaspace/MonaspaceArgon-Var.woff2") format("woff2");
   font-weight: 200 800;
   font-style: oblique 0deg 11deg;
 }
@@ -57,7 +39,7 @@
 
 /* Shared defaults; each platform file overrides what differs. */
 :root {
-  --font-writing: "Classic Mono", ui-monospace, monospace;
+  --font-writing: "Monaspace Neon", ui-monospace, monospace;
   --font-preview: system-ui, sans-serif;
   --writing-size: 18px;
   --writing-line-height: 1.6;

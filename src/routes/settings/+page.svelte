@@ -33,8 +33,8 @@
   const appWindow = getCurrentWebviewWindow();
 
   const writingFonts: { value: WritingFont; label: string }[] = [
-    { value: "classic", label: "Classic Mono" },
     { value: "neon", label: "Monaspace Neon" },
+    { value: "argon", label: "Monaspace Argon" },
     { value: "radon", label: "Monaspace Radon" },
     { value: "system", label: "System Monospace" },
   ];
