@@ -2,17 +2,11 @@ import previewCss from "../../styles/preview.css?raw";
 import { loadCodeLanguages } from "$lib/preview/highlight";
 import { renderMarkdown } from "$lib/preview/render";
 
-const fonts = [
-  { file: "ClassicMono-Regular.woff2", weight: 400, style: "normal" },
-  { file: "ClassicMono-Italic.woff2", weight: 400, style: "italic" },
-  { file: "ClassicMono-Bold.woff2", weight: 700, style: "normal" },
-  { file: "ClassicMono-BoldItalic.woff2", weight: 700, style: "italic" },
-];
-
 // The exported page carries its own colour tokens so it looks the same in any browser.
+// It is set in the reader's system font: nothing is embedded, since SF and Segoe UI can't be redistributed.
 const pageCss = `
 :root {
-  --font-writing: "Classic Mono", ui-monospace, monospace;
+  --font-preview: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --writing-size: 18px;
   --writing-line-height: 1.6;
   --measure: 66ch;
@@ -47,33 +41,6 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 }
 
-async function toDataUrl(url: string): Promise<string> {
-  const blob = await (await fetch(url)).blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(blob);
-  });
-}
-
-// The export redistributes the fonts, so the OFL wants their copyright and licence with them.
-export const fontNotice = `/* Classic Mono: Copyright © 2018 Information Architects Inc., based on IBM Plex © 2017 IBM Corp.
-   Licensed under the SIL Open Font License 1.1: https://openfontlicense.org */`;
-
-let fontCss: Promise<string> | undefined;
-
-/** @font-face rules with the fonts embedded, so the export is a single file. */
-function embeddedFonts(): Promise<string> {
-  fontCss ??= Promise.all(
-    fonts.map(async ({ file, weight, style }) => {
-      const src = await toDataUrl(`/fonts/${file}`);
-      return `@font-face { font-family: "Classic Mono"; src: url("${src}") format("woff2"); font-weight: ${weight}; font-style: ${style}; }`;
-    }),
-  ).then((rules) => [fontNotice, ...rules].join("\n"));
-  return fontCss;
-}
-
 /** A standalone HTML document for the given Markdown. */
 export async function exportHtml(markdown: string, title: string): Promise<string> {
   await loadCodeLanguages(markdown);
@@ -86,7 +53,6 @@ export async function exportHtml(markdown: string, title: string): Promise<strin
 <meta name="generator" content="Awen">
 <title>${escapeHtml(title)}</title>
 <style>
-${await embeddedFonts()}
 ${pageCss}
 ${previewCss}
 </style>

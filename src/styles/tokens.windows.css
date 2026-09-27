@@ -1,6 +1,7 @@
 /* Windows 11: Segoe UI Variable chrome, Fluent 2 palette, native title bar. */
 :root[data-os="windows"] {
   --font-ui: "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --font-preview: "Segoe UI Variable Text", "Segoe UI", sans-serif;
   --ui-size: 14px;
   --radius-control: 4px;
   --control-height: 32px;

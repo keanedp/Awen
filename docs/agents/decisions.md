@@ -2,7 +2,14 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-26: Preview, print and exports are set in the system font
+- The editor stays in Classic Mono, but the rendered document uses the OS's own text font (`--font-preview`): SF on macOS, Segoe UI Variable on Windows. The design goal is to look native, and the finished page reads better in a proportional face than in the draft's semi-monospace. `preview.css` styles preview, print, PDF and HTML export alike, so they all follow.
+- Inter was tried first (it's close to SF and would look the same on every OS). Dropped because it made HTML exports ~620 KB, and on macOS static Inter lacks SF's automatic optical sizes.
+- Trade-off accepted: output isn't identical everywhere. A PDF carries the font of the machine that made it, and an HTML export shows in the reader's system font, because SF and Segoe UI can't be embedded (their licences forbid redistribution).
+- The export's stack names fonts explicitly (`-apple-system`, `"Segoe UI"`, Roboto…) rather than starting with `system-ui`: on Windows, `system-ui` can resolve to a locale-specific UI font (e.g. Yu Gothic UI in Japanese) with poor Latin text, which is why GitHub dropped it.
+
 ## 2026-09-26: HTML export carries the font licence notice
+- Superseded: the export no longer embeds any fonts (see above), so there's no notice. If fonts are ever embedded again, the reasoning below still applies.
 - The export embeds the Classic Mono files as data URLs, and anyone can pull them back out, so each export arguably redistributes the fonts. OFL 1.1 condition 2 wants the copyright notice and licence with every copy, and allows a human-readable header. So a short CSS comment (`fontNotice` in `export/html.ts`) with both copyright holders and a link to the OFL goes before the `@font-face` rules. The OFL FAQ says a link is enough for web fonts, so the full licence text isn't embedded.
 - The document itself needs no credit: the OFL doesn't cover documents made with the fonts. Don't remove the notice to save bytes (~200 of ~235 KB). If the fonts are ever subset or modified, the Reserved Font Name can no longer be used for the family name.
 

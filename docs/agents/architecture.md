@@ -153,7 +153,7 @@ Details:
     - On macOS it calls `choose_export`: a native NSSavePanel sheet with an "Export To: HTML/PDF" popup, modelled on `Inspiration/export.png`.
     - On other OSes it uses the dialog plugin's save dialog, with HTML/PDF filters ("Save as type") and the format taken from the extension.
   - **PDF:** renders the print copy, then `export_pdf` prints the page straight to the file. This does not go through the print dialog.
-  - **HTML:** `src/lib/export/html.ts` builds a single self-contained file. It includes `preview.css` imported via `?raw`, its own light/dark tokens, and the Classic Mono fonts fetched from `/fonts` and embedded as base64 (~235 KB for a small document).
+  - **HTML:** `src/lib/export/html.ts` builds a single self-contained file. It includes `preview.css` imported via `?raw`, and its own light/dark tokens, including a cross-platform system font stack. No fonts are embedded, so it shows in the reader's system font.
 - The export format last used is a preference (`exportFormat`), so it's remembered between launches.
 
 ## Theming
@@ -163,7 +163,7 @@ Details:
   - The accent comes from the OS via `accent_colors` (see gotchas.md). It is re-read whenever the window gains focus, so a change in System Settings shows up when you switch back.
   - Windows follows WinUI's accent roles: `--accent` fills controls (a darker shade in light mode, a lighter one in dark), `--accent-text` colours links and accent glyphs, and in dark mode text on the accent is black (`--check-mark`). macOS uses one colour for all of them. Use `var(--accent-text, var(--accent))` for accent-coloured text.
 - Tailwind v4 exposes the tokens as utilities through `@theme inline` (`bg-surface`, `text-muted`, `font-ui`, `font-writing`, `rounded-control`).
-- The writing font is Classic Mono (`static/fonts/`, SIL OFL; keep `LICENSE.md` beside it).
+- The writing font (editor, `--font-writing`) is Classic Mono (`static/fonts/`, SIL OFL; keep `LICENSE.md` beside it). The preview font (preview, print and exports, `--font-preview`) is the system font, set per OS in the token files.
 - **Title bar:** `src/lib/ui/TitleBar.svelte`, used by `+page.svelte`.
   - **macOS:** `titleBarStyle: "Overlay"` + `hiddenTitle` puts the traffic lights inline over our draggable header, which shows "name — Edited" centered and toolbar buttons at the trailing edge.
   - **Windows:** `decorations: false` (in `tauri.windows.conf.json`). `TitleBar` draws the whole bar: title `*name - Awen`, toolbar buttons, then minimize/maximize/close using Segoe Fluent Icons glyphs. It tracks maximized/focused state to swap the restore icon and dim when inactive.

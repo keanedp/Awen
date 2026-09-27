@@ -1,9 +1,9 @@
-/* Rendered Markdown, set in the same column and type as the editor. */
+/* Rendered Markdown, set in the editor's column but in the system font, so it reads as the finished page. */
 .preview {
   max-width: var(--measure);
   margin: 0 auto;
   padding: 2rem 2rem 40vh;
-  font-family: var(--font-writing);
+  font-family: var(--font-preview);
   font-size: var(--writing-size);
   line-height: var(--writing-line-height);
   color: var(--text);
@@ -33,7 +33,7 @@
   padding-left: 1.5em;
 }
 .preview ul { list-style: disc; }
-/* Markers hang in the padding. WebKit draws "10. " (2.25em in the writing font);
+/* Markers hang in the padding. WebKit draws "10. " (about 1.65em in SF and Segoe UI);
    anything wider is cut off by the page edge in print and PDF, where .preview has no padding. */
 .preview ol { list-style: decimal; padding-left: 2.5em; }
 .preview li > :is(ul, ol) { margin-bottom: 0; }
@@ -226,6 +226,20 @@
   }
   .preview pre {
     white-space: pre-wrap;
+  }
+  /* Paper can't scroll, so a wide table shrinks to the page instead of clipping at its edge.
+     Words hyphenate before they overflow; links and code, which can't, break anywhere. */
+  .preview table {
+    display: table;
+    font-size: 0.85em;
+    hyphens: auto;
+  }
+  .preview :is(th, td) {
+    padding: 0.3em 0.5em;
+  }
+  .preview :is(td, th) :is(a, code) {
+    overflow-wrap: anywhere;
+    hyphens: manual; /* a hyphen inside an address reads as part of it */
   }
   .preview :is(.task-list-item-checkbox, mark) {
     print-color-adjust: exact;
