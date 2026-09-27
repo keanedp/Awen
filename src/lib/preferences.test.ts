@@ -49,6 +49,8 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ wordCount: "no", codeHighlighting: 1, exportFormat: "docx" })).toEqual(defaults);
     expect(parsePreferences({ wordCount: null, exportFormat: 1 })).toEqual(defaults);
     expect(parsePreferences({ writingFont: "Monaspace Neon" })).toEqual(defaults);
+    // Classic Mono, no longer offered: back to the default.
+    expect(parsePreferences({ writingFont: "classic" })).toEqual(defaults);
     expect(
       parsePreferences({ textSize: "18", columnWidth: "huge", lineSpacing: 1.6, spellcheck: "on", theme: "sepia" }),
     ).toEqual(defaults);

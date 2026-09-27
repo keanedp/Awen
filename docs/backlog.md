@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-065**
+Next free ID: **W-066**
 
 ---
 
@@ -232,11 +232,19 @@ As a writer, I want a native-feeling settings window for text size, column width
 - [x] Built with Bits UI components wrapped in `src/lib/ui/` (`Toggle`, `Choice`, `Slider`)
 - [x] Verified in the app on macOS: the window sizes to its content and looks right in light and dark mode; controls work with mouse and keyboard; text size, width and spacing change live in editor and preview but not in print or PDF; the theme switches menus, dialogs and every window; Cmd+W closes Settings; Open… from Settings shows the Open dialog; a relaunch keeps every setting
 
+### W-065 Monaspace Neon as the default font
+Status: Done · Platforms: macOS (Windows verification moved to W-064)
+As a writer, I want the editor set in Monaspace Neon, with Argon as another choice, now that Classic Mono is gone.
+- [x] Settings → Font: Monaspace Neon (the default), Monaspace Argon, Monaspace Radon or System Monospace
+- [x] Classic Mono is removed from the app and the repo; a saved Classic Mono choice falls back to Neon (unit tested in `preferences.test.ts`)
+- [x] Verified in the app on macOS: Neon shows on first launch and after upgrading from a Classic Mono choice; Argon shows with bold, italic and bold italic; heading marks still hang clear of the edge
+
 ### W-064 Verify the editor font on Windows
 Status: Needs verification · Platforms: Windows
-As a Windows user, I want W-063's font setting to work in a real build.
+As a Windows user, I want W-063's font setting and W-065's fonts to work in a real build.
 - [ ] Each font shows in the editor, including bold, italic (Monaspace's slant axis) and bold italic; the column stays the chosen width in characters; hanging heading marks line up; a relaunch keeps the choice
 - [ ] System Monospace shows Cascadia Mono (Consolas before Windows 11)
+- [ ] Neon shows on first launch and after upgrading from a Classic Mono choice
 
 ### W-063 Choose the editor font
 Status: Done · Platforms: macOS (Windows verification moved to W-064)

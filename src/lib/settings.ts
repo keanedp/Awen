@@ -19,8 +19,8 @@ export type LineSpacing = keyof typeof lineSpacings;
 
 /** Writing fonts, as font stacks. The Monaspace faces are bundled; see `app.css`. */
 export const writingFonts = {
-  classic: `"Classic Mono", ui-monospace, monospace`,
   neon: `"Monaspace Neon", ui-monospace, monospace`,
+  argon: `"Monaspace Argon", ui-monospace, monospace`,
   radon: `"Monaspace Radon", ui-monospace, monospace`,
   // WebView2 has no `ui-monospace`, so Windows gets Cascadia Mono, or Consolas before Windows 11.
   system: `ui-monospace, "SF Mono", Menlo, "Cascadia Mono", Consolas, monospace`,

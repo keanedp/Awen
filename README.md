@@ -8,7 +8,7 @@ Awen is built to feel like it belongs on your computer. On a Mac it looks and be
 
 ## Why Awen
 
-- **Distraction-free by design.** Text sits in a centred column about 66 characters wide, set in the Classic Mono typeface. Markdown marks like `#` and `*` fade into the background, and headings hang into the margin, so the page reads like prose and not like code.
+- **Distraction-free by design.** Text sits in a centred column about 66 characters wide, set in GitHub's Monaspace Neon typeface (or Argon, Radon or the system monospace, in Settings). Markdown marks like `#` and `*` fade into the background, and headings hang into the margin, so the page reads like prose and not like code.
 - **Plain files, no lock-in.** Awen opens and saves ordinary Markdown files. It even keeps each file's original line endings, so saving never rewrites a file you didn't change.
 - **Never lose your work.** Awen asks before closing a document with unsaved changes, including when you quit, log out or restart.
 - **Native on every platform.** Awen uses real system menus, your system accent colour, light and dark mode, and your platform's keyboard shortcuts.
@@ -157,4 +157,4 @@ AI coding agents (Claude Code, Codex and others) are welcome. [`AGENTS.md`](AGEN
 
 ### Licence
 
-Awen is released under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later; see `LICENSE`). The bundled Classic Mono font is licensed under the SIL Open Font License (see `static/fonts/LICENSE.md`).
+Awen is released under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later; see `LICENSE`). The bundled Monaspace fonts are licensed under the SIL Open Font License (see `static/fonts/monaspace/LICENSE`).

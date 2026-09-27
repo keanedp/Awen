@@ -2,6 +2,12 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-27: Monaspace Neon replaces Classic Mono
+- Settings → Font now offers Monaspace Neon (the default), Argon and Radon, and the system monospace. Classic Mono is gone from the app and the repo. Supersedes the font list and default in "The editor font is a setting" below.
+- A saved `"classic"` is no longer a valid choice, so it falls back to Neon.
+- Argon is a humanist sans, softer than Neon. Xenon (slab serif) and Krypton (mechanical) are still left out.
+- The three Monaspace files add ~1.8 MB to the app (Neon ~510 KB, Argon ~540 KB, Radon ~800 KB); Classic Mono's four files (~170 KB) are gone.
+
 ## 2026-09-27: The editor font is a setting
 - Reverses the W-021 entry's "font choice left out": Settings → Font offers Classic Mono (still the default), Monaspace Neon, Monaspace Radon and the system monospace. Neon is a clean grotesque, Radon a handwriting face; the other three Monaspace families (Argon, Xenon, Krypton) were left out to keep the menu short and the bundle small.
 - Settings only, no View menu item: it's set once, not toggled while writing.
