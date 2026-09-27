@@ -53,6 +53,7 @@
   import { loadCodeLanguages } from "$lib/preview/highlight";
   import { renderMarkdown } from "$lib/preview/render";
   import { fitTables } from "$lib/preview/fit-tables";
+  import { prefersReducedMotion, previewFade } from "$lib/preview/transition";
 
   let os = $state<OS>("mac");
   let path = $state<string | null>(null);
@@ -66,6 +67,8 @@
   let previewHtml = $state("");
   let previewLine = $state(0);
   let preview = $state<Preview>();
+  /** Preview has finished fading in over the editor, which can then stop painting. */
+  let covered = $state(false);
   let printHtml = $state("");
   let printArticle: HTMLElement;
   let prefs = $state<Preferences>({ ...defaults });
@@ -233,11 +236,12 @@
       const top = view.lineBlockAtHeight(view.scrollDOM.scrollTop);
       previewLine = view.state.doc.lineAt(top.from).number - 1;
       previewHtml = render({ preview: true });
+      covered = false;
       previewing = true;
       return;
     }
     const top = preview?.topLine() ?? 0;
-    previewing = false;
+    // Scroll the editor before the preview fades off it, so it doesn't jump into place.
     if (top === 0) {
       // Back to the top of the page, padding included, not just the first line.
       view.dispatch({
@@ -249,6 +253,9 @@
         effects: EditorView.scrollIntoView(view.state.doc.line(line).from, { y: "start" }),
       });
     }
+    previewing = false;
+    // The editor can't take focus until it's no longer inert.
+    await tick();
     view.focus();
   }
 
@@ -596,18 +603,26 @@
     onTogglePreview={togglePreview}
     onRename={() => exclusive(rename)}
   />
-  <main class="min-h-0 flex-1" class:hidden={previewing} bind:this={host}></main>
-  {#if previewing}
-    <div class="min-h-0 flex-1">
-      <Preview
-        bind:this={preview}
-        html={previewHtml}
-        line={previewLine}
-        onexit={togglePreview}
-        ontoggletask={toggleTask}
-      />
-    </div>
-  {/if}
+  <!-- Preview dissolves in over the editor, which stays laid out beneath so its scroll can be set. -->
+  <div class="relative min-h-0 flex-1">
+    <main class="h-full" class:invisible={previewing && covered} inert={previewing} bind:this={host}></main>
+    {#if previewing}
+      <div
+        class="absolute inset-0 bg-surface"
+        in:previewFade={{ entering: true, reduceMotion: prefersReducedMotion() }}
+        out:previewFade={{ entering: false, reduceMotion: prefersReducedMotion() }}
+        onintroend={() => (covered = true)}
+      >
+        <Preview
+          bind:this={preview}
+          html={previewHtml}
+          line={previewLine}
+          onexit={togglePreview}
+          ontoggletask={toggleTask}
+        />
+      </div>
+    {/if}
+  </div>
   {#if prefsLoaded && prefs.wordCount}
     <!-- The editor's selection is hidden in preview, so preview shows the whole document. -->
     <WordCount text={formatCount(words, previewing ? null : selectedWords)} />

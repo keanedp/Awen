@@ -19,6 +19,7 @@ How the parts of Awen connect. File-level detail is discoverable from the code; 
 - Covered so far:
   - `editor/setup.test.ts`: line endings round trip, and pasted text takes the file's line endings.
   - `editor/tasks.test.ts`: task ticking, from a preview checkbox's `data-line` to the source edit.
+  - `preview/transition.test.ts`: the preview's fade, with and without Reduce Motion.
   - `preview/render.test.ts`: raw HTML and `javascript:` links never survive rendering; highlighted code is escaped; `localImage` path resolution, including Windows paths (mocks `convertFileSrc`).
   - `files.test.ts`: path helpers and the export dialog's default path and chosen format.
   - `editor/count.test.ts`: word counting (Markdown syntax left out, selections, hyphenated words) and the footer text.
@@ -135,7 +136,8 @@ Details:
   - **Into preview:** reads the editor's top visible line, renders, and mounts `Preview.svelte` in place of the editor.
   - **Back to the editor:** asks the preview for its top `data-line` and scrolls the editor there.
   - When the first block is at the top, both directions scroll to the very top instead, so the view's top padding stays visible. Scrolling to the first line alone would hide it.
-- The `EditorView` stays mounted and is only hidden (`class:hidden`), so undo history, selection and scroll survive.
+- The `EditorView` stays mounted, so undo history, selection and scroll survive. It stays laid out under the preview too: the preview is an opaque layer on top, which lets the two dissolve into each other (`preview/transition.ts`, W-068). While previewing, the editor is `inert`; once the fade-in ends (`covered`) it is also `invisible`, so it stops painting.
+- Leaving preview scrolls the editor *before* `previewing` goes false, so the fade-out reveals it already in place; focus waits a `tick()` for `inert` to come off.
 - `Preview.svelte` intercepts every link click:
   - `#anchor` links scroll within the preview;
   - http(s)/mailto links open via `@tauri-apps/plugin-opener`;
