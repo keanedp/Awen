@@ -1,6 +1,7 @@
 /* macOS: SF Pro chrome, system accent, inline traffic lights (Overlay title bar). */
 :root[data-os="mac"] {
   --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  --font-preview: -apple-system, BlinkMacSystemFont, sans-serif;
   --ui-size: 13px;
   --radius-control: 6px;
   --control-height: 22px;
