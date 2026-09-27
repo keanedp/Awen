@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-064**
+Next free ID: **W-065**
 
 ---
 
@@ -232,16 +232,21 @@ As a writer, I want a native-feeling settings window for text size, column width
 - [x] Built with Bits UI components wrapped in `src/lib/ui/` (`Toggle`, `Choice`, `Slider`)
 - [x] Verified in the app on macOS: the window sizes to its content and looks right in light and dark mode; controls work with mouse and keyboard; text size, width and spacing change live in editor and preview but not in print or PDF; the theme switches menus, dialogs and every window; Cmd+W closes Settings; Open… from Settings shows the Open dialog; a relaunch keeps every setting
 
+### W-064 Verify the editor font on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-063's font setting to work in a real build.
+- [ ] Each font shows in the editor, including bold, italic (Monaspace's slant axis) and bold italic; the column stays the chosen width in characters; hanging heading marks line up; a relaunch keeps the choice
+- [ ] System Monospace shows Cascadia Mono (Consolas before Windows 11)
+
 ### W-063 Choose the editor font
-Status: Needs verification · Platforms: macOS, Windows
+Status: Done · Platforms: macOS (Windows verification moved to W-064)
 As a writer, I want to pick the editor's font, so I can write in the face I like best.
 - [x] Settings → Font: Classic Mono (the default), Monaspace Neon, Monaspace Radon or System Monospace (SF Mono on macOS, Cascadia Mono or Consolas on Windows); in Settings only, not the View menu
 - [x] Monaspace Neon and Radon are bundled as variable fonts (`static/fonts/monaspace/`, SIL OFL, licence beside them)
 - [x] Only the editor changes; preview, print, PDF and HTML export keep the system font
 - [x] Monaspace's code ligatures (`!=`, `...`, `://`) are off so the Markdown source stays visible; texture healing stays on
 - [x] Applies live in all windows and persists between launches (unit tested in `settings.test.ts`, `preferences.test.ts`)
-- [ ] Verified in the app on macOS: each font shows in the editor, including bold, italic (Monaspace's slant axis) and bold italic; the column stays the chosen width in characters; hanging heading marks line up; a relaunch keeps the choice
-- [ ] Verified in the app on Windows: the same, and System Monospace shows Cascadia Mono
+- [x] Verified in the app on macOS: each font shows in the editor, including bold, italic (Monaspace's slant axis) and bold italic; the column stays the chosen width in characters; hanging heading marks line up; a relaunch keeps the choice
 
 ### W-059 Verify spelling marks on Windows
 Status: Needs verification · Platforms: Windows
