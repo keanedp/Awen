@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-068**
+Next free ID: **W-069**
 
 ---
 
@@ -231,6 +231,14 @@ As a writer, I want a native-feeling settings window for text size, column width
 - [x] Every setting applies live in all windows and persists between launches (using W-020's preferences store; unit tested in `settings.test.ts`, `preferences.test.ts`, `editor/setup.test.ts`)
 - [x] Built with Bits UI components wrapped in `src/lib/ui/` (`Toggle`, `Choice`, `Slider`)
 - [x] Verified in the app on macOS: the window sizes to its content and looks right in light and dark mode; controls work with mouse and keyboard; text size, width and spacing change live in editor and preview but not in print or PDF; the theme switches menus, dialogs and every window; Cmd+W closes Settings; Open… from Settings shows the Open dialog; a relaunch keeps every setting
+
+### W-068 Animate showing and hiding the preview
+Status: Needs verification (Windows only) · Platforms: macOS, Windows
+As a writer, I want the preview to dissolve in and out rather than cut, so the switch feels like one document changing form.
+- [x] Preview fades in over the editor, rising slightly, and fades out to reveal the editor already scrolled to where I was reading
+- [x] Reduce Motion keeps the fade but drops the movement (unit tested in `preview/transition.test.ts`)
+- [x] Verified in the app on macOS: button, Cmd+R, Esc and the menu; light and dark; caret back in the editor after leaving
+- [ ] Verified on Windows
 
 ### W-067 Verify hanging heading marks on Windows
 Status: Needs verification · Platforms: Windows
