@@ -7,9 +7,11 @@ import {
   isTextSize,
   lineSpacings,
   themes,
+  writingFonts,
   type ColumnWidth,
   type LineSpacing,
   type Theme,
+  type WritingFont,
 } from "./settings";
 
 /**
@@ -25,6 +27,8 @@ export interface Preferences {
   codeHighlighting: boolean;
   /** The format the export dialog starts with: the last one used. */
   exportFormat: ExportFormat;
+  /** Settings → Font: the editor's; preview, print and exports keep the system font. */
+  writingFont: WritingFont;
   /** Settings → Text size, in CSS pixels; also View → Bigger / Smaller / Actual Size. */
   textSize: number;
   /** Settings → Column width. */
@@ -41,6 +45,7 @@ export const defaults: Preferences = {
   wordCount: true,
   codeHighlighting: false,
   exportFormat: "html",
+  writingFont: "classic",
   textSize: defaultTextSize,
   columnWidth: "medium",
   lineSpacing: "normal",
@@ -59,6 +64,7 @@ const valid: { [K in keyof Preferences]: (value: unknown) => value is Preference
   wordCount: (value) => typeof value === "boolean",
   codeHighlighting: (value) => typeof value === "boolean",
   exportFormat: (value) => value === "html" || value === "pdf",
+  writingFont: oneOf(Object.keys(writingFonts) as WritingFont[]),
   textSize: isTextSize,
   columnWidth: oneOf(Object.keys(columnWidths) as ColumnWidth[]),
   lineSpacing: oneOf(Object.keys(lineSpacings) as LineSpacing[]),

@@ -12,7 +12,14 @@
     setPreferences,
     type Preferences,
   } from "$lib/preferences";
-  import { textSizes, viewChange, type ColumnWidth, type LineSpacing, type Theme } from "$lib/settings";
+  import {
+    textSizes,
+    viewChange,
+    type ColumnWidth,
+    type LineSpacing,
+    type Theme,
+    type WritingFont,
+  } from "$lib/settings";
   import Choice from "$lib/ui/Choice.svelte";
   import Slider from "$lib/ui/Slider.svelte";
   import Toggle from "$lib/ui/Toggle.svelte";
@@ -25,6 +32,12 @@
 
   const appWindow = getCurrentWebviewWindow();
 
+  const writingFonts: { value: WritingFont; label: string }[] = [
+    { value: "classic", label: "Classic Mono" },
+    { value: "neon", label: "Monaspace Neon" },
+    { value: "radon", label: "Monaspace Radon" },
+    { value: "system", label: "System Monospace" },
+  ];
   const columnWidths: { value: ColumnWidth; label: string }[] = [
     { value: "narrow", label: "Narrow" },
     { value: "medium", label: "Medium" },
@@ -126,6 +139,10 @@
     <section>
       <h2>Editor</h2>
       <div class="group">
+        <div class="row">
+          <span>Font</span>
+          <Choice value={prefs.writingFont} options={writingFonts} label="Font" onchange={(v) => set("writingFont", v)} />
+        </div>
         <div class="row">
           <span>Text size</span>
           <Slider value={prefs.textSize} steps={textSizes} label="Text size" onchange={(v) => set("textSize", v)}>

@@ -2,6 +2,13 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-27: The editor font is a setting
+- Reverses the W-021 entry's "font choice left out": Settings → Font offers Classic Mono (still the default), Monaspace Neon, Monaspace Radon and the system monospace. Neon is a clean grotesque, Radon a handwriting face; the other three Monaspace families (Argon, Xenon, Krypton) were left out to keep the menu short and the bundle small.
+- Settings only, no View menu item: it's set once, not toggled while writing.
+- Editor only. The rendered document keeps the system font (see "Preview, print and exports are set in the system font").
+- Monaspace ships as one variable file per family (~510 KB Neon, ~800 KB Radon) rather than four static files each. Italic comes from its `slnt` axis, declared as `font-style: oblique 0deg 11deg`, so `*emphasis*` is a slant, not a separate italic design.
+- Monaspace's `liga` feature joins `!=`, `...` and `://`, hiding the Markdown source, so the editor sets `font-variant-ligatures: no-common-ligatures`. Texture healing is in `calt` and stays on. Classic Mono has no `liga` substitutions, so it isn't affected.
+
 ## 2026-09-27: Wide tables shrink to fit the printed page
 - Print and PDF can't scroll, so a table wider than the page shrinks its text (to 8pt, like Word and Pages) before wrapping, and wraps only between words. Hyphenation was tried and dropped: WebKit split short words like "Sta-tus" even when shrinking would have kept them whole.
 - Landscape pages for wide tables were left out: WebKit and WebView2 can't reliably rotate a single page.
@@ -45,7 +52,7 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 - The theme is applied natively (`AppHandle::set_theme`) rather than by overriding CSS tokens with a `data-theme` attribute: menus, dialogs, the title popover and scrollbars follow it too, and it applies before any window draws.
 - Text size, width and spacing apply to the screen only (the tokens sit on `.app-root`). Print, PDF and HTML export keep their paper typography, as focused editors' templates do.
 - The controls are Bits UI (per the 2026-09-23 components decision), not native `<select>`: WKWebView would show a real macOS menu, but WebView2's popup looks like Chrome, not Windows 11.
-- Left out: font choice (the design depends on Classic Mono, and focused editors doesn't offer one either), the export format (the export dialog already remembers the last one), and reading speed (too niche for now). Focus mode and typewriter scrolling (W-017, W-018) add their settings here once they're built.
+- Left out: font choice (the design depends on Classic Mono, and focused editors doesn't offer one either; superseded 2026-09-27, see "The editor font is a setting"), the export format (the export dialog already remembers the last one), and reading speed (too niche for now). Focus mode and typewriter scrolling (W-017, W-018) add their settings here once they're built.
 
 ## 2026-09-25: Preferences live in a JSON file owned by Rust, typed in the frontend
 - `preferences.json` in the app data folder, like `recent.json`, rather than the webview's `localStorage`. localStorage belongs to the webview's origin, which differs between `make dev` and a bundled build, and its storage and syncing between windows is up to WKWebView and WebView2. A Rust-owned file is one source of truth, easy to find and reset, and Rust can broadcast changes to every window.

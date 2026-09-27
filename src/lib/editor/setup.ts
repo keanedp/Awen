@@ -16,6 +16,9 @@ const theme = EditorView.theme({
     color: "var(--text)",
     fontFamily: "var(--font-writing)",
     fontSize: "var(--writing-size)",
+    // Monaspace joins `!=`, `...` and `://` in `liga`, hiding the Markdown source.
+    // Its texture healing is in `calt`, which this leaves on.
+    fontVariantLigatures: "no-common-ligatures",
   },
   "&.cm-focused": { outline: "none" },
   ".cm-scroller": {
@@ -23,9 +26,13 @@ const theme = EditorView.theme({
     lineHeight: "var(--writing-line-height)",
   },
   ".cm-content": {
-    maxWidth: "var(--measure)",
+    // Room for a hanging "#### " plus a gap at any text size, since it reaches the
+    // window's edge when the window is narrower than the column. `max-width`
+    // grows by the same amount, so the text keeps its width (`--measure` less 2rem each side).
+    "--gutter": "calc(5ch + 0.5rem)",
+    maxWidth: "calc(var(--measure) - 4rem + 2 * var(--gutter))",
     margin: "0 auto",
-    padding: "2rem 2rem 40vh",
+    padding: "2rem var(--gutter) 40vh",
   },
   ".cm-line": { position: "relative", padding: "0" },
   ".cm-hanging-mark": {

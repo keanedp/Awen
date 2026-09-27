@@ -17,6 +17,16 @@ export type ColumnWidth = keyof typeof columnWidths;
 export const lineSpacings = { tight: 1.4, normal: 1.6, loose: 1.8 };
 export type LineSpacing = keyof typeof lineSpacings;
 
+/** Writing fonts, as font stacks. The Monaspace faces are bundled; see `app.css`. */
+export const writingFonts = {
+  classic: `"Classic Mono", ui-monospace, monospace`,
+  neon: `"Monaspace Neon", ui-monospace, monospace`,
+  radon: `"Monaspace Radon", ui-monospace, monospace`,
+  // WebView2 has no `ui-monospace`, so Windows gets Cascadia Mono, or Consolas before Windows 11.
+  system: `ui-monospace, "SF Mono", Menlo, "Cascadia Mono", Consolas, monospace`,
+};
+export type WritingFont = keyof typeof writingFonts;
+
 export const themes = ["system", "light", "dark"] as const;
 export type Theme = (typeof themes)[number];
 
@@ -39,8 +49,11 @@ export function smallerText(size: number): number {
  * The writing tokens for these preferences, as an inline style. Set on the
  * app, not `:root`, so print and PDF keep `preview.css`'s paper typography.
  */
-export function writingStyle(prefs: Pick<Preferences, "textSize" | "columnWidth" | "lineSpacing">): string {
+export function writingStyle(
+  prefs: Pick<Preferences, "writingFont" | "textSize" | "columnWidth" | "lineSpacing">,
+): string {
   return [
+    `--font-writing: ${writingFonts[prefs.writingFont]}`,
     `--writing-size: ${prefs.textSize}px`,
     `--writing-line-height: ${lineSpacings[prefs.lineSpacing]}`,
     `--measure: ${columnWidths[prefs.columnWidth]}ch`,

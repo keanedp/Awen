@@ -35,6 +35,7 @@ describe("parsePreferences", () => {
       wordCount: false,
       codeHighlighting: true,
       exportFormat: "pdf",
+      writingFont: "radon",
       textSize: 22,
       columnWidth: "wide",
       lineSpacing: "loose",
@@ -47,6 +48,7 @@ describe("parsePreferences", () => {
   test("invalid values fall back to the default", () => {
     expect(parsePreferences({ wordCount: "no", codeHighlighting: 1, exportFormat: "docx" })).toEqual(defaults);
     expect(parsePreferences({ wordCount: null, exportFormat: 1 })).toEqual(defaults);
+    expect(parsePreferences({ writingFont: "Monaspace Neon" })).toEqual(defaults);
     expect(
       parsePreferences({ textSize: "18", columnWidth: "huge", lineSpacing: 1.6, spellcheck: "on", theme: "sepia" }),
     ).toEqual(defaults);
@@ -61,7 +63,7 @@ describe("parsePreferences", () => {
   });
 
   test("option names inherited from Object aren't valid choices", () => {
-    expect(parsePreferences({ columnWidth: "toString", lineSpacing: "constructor" })).toEqual(defaults);
+    expect(parsePreferences({ columnWidth: "toString", lineSpacing: "constructor", writingFont: "valueOf" })).toEqual(defaults);
   });
 
   test("unknown keys, e.g. from a newer version, are ignored", () => {

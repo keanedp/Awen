@@ -14,6 +14,8 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 
 ## Frontend
 - `@hedgedoc/markdown-it-task-lists` crashes with markdown-it 14 (`ERR_PACKAGE_PATH_NOT_EXPORTED` for `markdown-it/lib/token.js`). Use `markdown-it-task-lists`, whose types come from the local `src/lib/preview/markdown-it-task-lists.d.ts`.
+- In Vitest, importing a `.css` file gives an empty string, even with `?raw`, so tests can't read `app.css` (`html.test.ts` only checks the export's own CSS).
+- **Monaspace's variable files default to weight 200 (ExtraLight).** An `@font-face` without `font-weight: 200 800` renders body text that thin. The same goes for `font-style: oblique 0deg 11deg`, which italic needs.
 - CSS custom properties can't take a fallback list like a font stack: `--accent: -apple-system-control-accent, #0a84ff` is invalid. Use a single value (or `var(--x, fallback)`).
 - **`-apple-system-control-accent` is always blue in a Tauri WKWebView.** It only follows System Settings when WebKit's private system-appearance mode is on. WebView2 has no CSS for the Windows accent at all. So `src-tauri/src/accent.rs` reads it natively and `applyAccent()` sets `--system-accent` / `--system-accent-dark`, which the token files use.
 - **Testing a module outside the app:** `ssrLoadModule` resolves `$lib` and `?raw` imports, but it runs in SvelteKit's dev server, which replaces the global `fetch` and rejects relative URLs. Stub `fetch` *after* `createServer()`.
