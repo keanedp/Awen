@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-27: Wide tables shrink to fit the printed page
+- Print and PDF can't scroll, so a table wider than the page shrinks its text (to 8pt, like Word and Pages) before wrapping, and wraps only between words. Hyphenation was tried and dropped: WebKit split short words like "Sta-tus" even when shrinking would have kept them whole.
+- Landscape pages for wide tables were left out: WebKit and WebView2 can't reliably rotate a single page.
+- The 6pt floor and links breaking only past it are there so a table never overflows the margin, since that shrinks the whole PDF (see gotchas).
+
 ## 2026-09-26: Preview, print and exports are set in the system font
 - The editor stays in Classic Mono, but the rendered document uses the OS's own text font (`--font-preview`): SF on macOS, Segoe UI Variable on Windows. The design goal is to look native, and the finished page reads better in a proportional face than in the draft's semi-monospace. `preview.css` styles preview, print, PDF and HTML export alike, so they all follow.
 - Inter was tried first (it's close to SF and would look the same on every OS). Dropped because it made HTML exports ~620 KB, and on macOS static Inter lacks SF's automatic optical sizes.
