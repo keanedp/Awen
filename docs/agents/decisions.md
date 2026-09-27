@@ -2,6 +2,10 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-27: Heading marks hang as far as there is room, like focused editors
+- A fixed margin can't fit `###### ` at large sizes without eating a narrow window, and capping how far deep markers hang indented levels 5 and 6 even in wide windows (tried and reverted). focused editors instead hangs each marker by the room beside the column, down to none when the column fills the window, and so does Awen now.
+- Done in CSS with a line decoration and `text-indent`, using container query units for the room, rather than an absolutely positioned mark span: nothing to measure or recompute on resize, and `text-indent` moves only the first line of a wrapped heading.
+
 ## 2026-09-27: Monaspace Neon replaces Classic Mono
 - Settings → Font now offers Monaspace Neon (the default), Argon and Radon, and the system monospace. Classic Mono is gone from the app and the repo. Supersedes the font list and default in "The editor font is a setting" below.
 - A saved `"classic"` is no longer a valid choice, so it falls back to Neon.

@@ -24,20 +24,22 @@ const theme = EditorView.theme({
   ".cm-scroller": {
     fontFamily: "inherit",
     lineHeight: "var(--writing-line-height)",
+    // For `.cm-hanging-heading`: 100cqw is the width the column is centred in.
+    containerType: "inline-size",
   },
   ".cm-content": {
-    // Room for a hanging "#### " plus a gap at any text size, since it reaches the
-    // window's edge when the window is narrower than the column. `max-width`
-    // grows by the same amount, so the text keeps its width (`--measure` less 2rem each side).
-    "--gutter": "calc(5ch + 0.5rem)",
-    maxWidth: "calc(var(--measure) - 4rem + 2 * var(--gutter))",
+    maxWidth: "var(--measure)",
     margin: "0 auto",
-    padding: "2rem var(--gutter) 40vh",
+    padding: "2rem 2rem 40vh",
   },
   ".cm-line": { position: "relative", padding: "0" },
-  ".cm-hanging-mark": {
-    position: "absolute",
-    transform: "translateX(-100%)",
+  // As focused editors does: a heading's marker hangs into the space beside the column, but
+  // only as far as there is room, so in a narrow window it pushes the heading text in
+  // rather than reaching the edge. The column is `--measure` wide at most (border-box),
+  // so the room is what's left of the width either side of it. `--hang` is the marker's
+  // length in characters, set per line (`markdownStyling.ts`).
+  ".cm-hanging-heading": {
+    textIndent: "calc(-1 * min(var(--hang) * 1ch, max(0px, (100cqw - var(--measure)) / 2)))",
   },
   // Drawn by CodeMirror (`drawSelection`), not WebKit; see decisions.md.
   ".cm-cursor, .cm-dropCursor": { borderLeft: "2px solid var(--caret)", marginLeft: "-1px" },

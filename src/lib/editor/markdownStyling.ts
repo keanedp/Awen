@@ -1,5 +1,5 @@
 import { HighlightStyle, syntaxHighlighting, syntaxTree } from "@codemirror/language";
-import { RangeSetBuilder } from "@codemirror/state";
+import { RangeSetBuilder, type EditorState } from "@codemirror/state";
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
 import { IterMode } from "@lezer/common";
 import { tags as t } from "@lezer/highlight";
@@ -20,14 +20,21 @@ const style = HighlightStyle.define([
   { tag: t.contentSeparator, color: "var(--markup)" },
 ]);
 
-const hangingMark = Decoration.mark({ class: "cm-hanging-mark" });
+/** A heading line whose marker ("## ") hangs, and the marker's length in characters. */
+export interface HangingHeading {
+  line: number;
+  chars: number;
+}
 
-/** Hang heading markers ("## ") in the left margin so heading text aligns with body text. */
-function hangingHeaders(view: EditorView): DecorationSet {
-  const builder = new RangeSetBuilder<Decoration>();
-  const doc = view.state.doc;
-  for (const { from, to } of view.visibleRanges) {
-    syntaxTree(view.state).iterate({
+/**
+ * The headings in `ranges` whose leading marker hangs in the left margin.
+ * How far it hangs is up to the theme (`.cm-hanging-heading` in `setup.ts`).
+ */
+export function hangingHeadings(state: EditorState, ranges: readonly { from: number; to: number }[]) {
+  const headings: HangingHeading[] = [];
+  const doc = state.doc;
+  for (const { from, to } of ranges) {
+    syntaxTree(state).iterate({
       from,
       to,
       // Not headings inside a highlighted ```md code block (W-045).
@@ -38,10 +45,28 @@ function hangingHeaders(view: EditorView): DecorationSet {
         // Only the leading ATX marker; closing "##" and setext underlines stay put.
         if (node.from !== line.from || line.text[0] !== "#") return;
         const end = doc.sliceString(node.to, node.to + 1) === " " ? node.to + 1 : node.to;
-        builder.add(node.from, end, hangingMark);
+        headings.push({ line: line.from, chars: end - node.from });
       },
     });
   }
+  return headings;
+}
+
+/** One line decoration per marker length, which the theme reads as `--hang`. */
+const hangingLines = new Map<number, Decoration>();
+function hangingLine(chars: number) {
+  let deco = hangingLines.get(chars);
+  if (!deco) {
+    deco = Decoration.line({ class: "cm-hanging-heading", attributes: { style: `--hang: ${chars}` } });
+    hangingLines.set(chars, deco);
+  }
+  return deco;
+}
+
+/** Hang heading markers ("## ") in the left margin so heading text aligns with body text. */
+function hangingHeaders(view: EditorView): DecorationSet {
+  const builder = new RangeSetBuilder<Decoration>();
+  for (const { line, chars } of hangingHeadings(view.state, view.visibleRanges)) builder.add(line, line, hangingLine(chars));
   return builder.finish();
 }
 
