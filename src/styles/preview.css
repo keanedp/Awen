@@ -227,22 +227,38 @@
   .preview pre {
     white-space: pre-wrap;
   }
-  /* Paper can't scroll, so a wide table shrinks to the page instead of clipping at its edge.
-     Words hyphenate before they overflow; links and code, which can't, break anywhere. */
+  /* Paper can't scroll, so a wide table wraps to the page instead of clipping at its edge.
+     Links and code have no spaces to wrap at, so they break anywhere. */
   .preview table {
     display: table;
-    font-size: 0.85em;
-    hyphens: auto;
-  }
-  .preview :is(th, td) {
-    padding: 0.3em 0.5em;
   }
   .preview :is(td, th) :is(a, code) {
     overflow-wrap: anywhere;
-    hyphens: manual; /* a hyphen inside an address reads as part of it */
   }
   .preview :is(.task-list-item-checkbox, mark) {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
+}
+
+/* Print and PDF copy (.paper, see fit-tables.ts). A wide table's text shrinks to fit the
+   page on one line per cell, down to 8pt. Past that it stays at 8pt and wraps between words,
+   and only if even that is too wide does it go smaller (to 6pt, `floorPt` in fit-tables.ts)
+   rather than split words.
+   Outside @media print so fitTables can measure a table laid out the same way.
+   100cqi is the page width (.print-root). */
+.paper table {
+  display: table;
+  font-size: 0.85em; /* WebKit without container units */
+  font-size: min(
+    0.85em,
+    max(6pt, 100cqi / var(--table-ems, 1), min(8pt, 100cqi / var(--table-min-ems, 1)))
+  );
+}
+.paper :is(th, td) {
+  padding: 0.3em 0.5em;
+}
+/* Links and code stay whole; fitTables lets them break only in a table too wide for 6pt. */
+.paper :is(td, th) :is(a, code) {
+  overflow-wrap: normal;
 }

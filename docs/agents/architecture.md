@@ -147,6 +147,7 @@ Details:
 
 - **Print copy.** `+page.svelte` renders the document into a hidden `<div class="print-root">`. Under `@media print`, `app.css` hides `.app-root` and shows only `.print-root`.
 - **Paper typography.** The `@media print` block in `preview.css` sets black on white, full width, and page-break rules.
+- **Wide tables in print** (`src/lib/preview/fit-tables.ts`). The print copy's `<article>` has the `paper` class, and `.print-root` is a size container, so `100cqi` is the page width. Once the copy's images have loaded, `fitTables` lays each table out in an offscreen probe and sets `--table-ems` (all cells on one line) and `--table-min-ems` (no word broken) in the table's own ems. CSS then picks the font size: one line per cell if that's 8pt or more, else 8pt with wrapping between words, else down to 6pt. The page width isn't known until the print layout, so the comparison has to happen in CSS. `fitTables` also writes a `@container` rule per table (`<style id="fit-tables">`) that lets links and code break only when the table is wider than the page even at 6pt. `.paper` rules sit outside `@media print` so the probe matches the print layout. HTML export doesn't use `.paper`; printed from a browser, its tables only wrap.
 - **Print… (Cmd+P).** Renders the print copy, then calls the `print_page` command, which opens the system print dialog.
 - **Export… (Cmd+Shift+E):**
   - `pickExportTarget()` in `files.ts` returns `{ path, format }`.

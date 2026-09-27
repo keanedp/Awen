@@ -52,6 +52,7 @@
   import WordCount from "$lib/ui/WordCount.svelte";
   import { loadCodeLanguages } from "$lib/preview/highlight";
   import { renderMarkdown } from "$lib/preview/render";
+  import { fitTables } from "$lib/preview/fit-tables";
 
   let os = $state<OS>("mac");
   let path = $state<string | null>(null);
@@ -66,6 +67,7 @@
   let previewLine = $state(0);
   let preview = $state<Preview>();
   let printHtml = $state("");
+  let printArticle: HTMLElement;
   let prefs = $state<Preferences>({ ...defaults });
   /** Until then `prefs` holds defaults, so a hidden footer would flash up in a new window. */
   let prefsLoaded = $state(false);
@@ -94,11 +96,15 @@
     return loadCodeLanguages(documentText(view));
   }
 
-  /** Waits for the print copy's images, so print and PDF don't catch them half-loaded. */
-  async function printImagesLoaded() {
+  /**
+   * Waits for the print copy's images, so print and PDF don't catch them half-loaded,
+   * then fits wide tables to the page (their width depends on the images).
+   */
+  async function printCopyReady() {
     await tick();
     const images = document.querySelectorAll<HTMLImageElement>(".print-root img");
     await Promise.all([...images].map((img) => img.decode().catch(() => {})));
+    fitTables(printArticle);
   }
 
   $effect(() => {
@@ -412,7 +418,7 @@
         // The PDF is printed from the page, so render the print copy first.
         await codeLanguages();
         printHtml = render();
-        await printImagesLoaded();
+        await printCopyReady();
         await exportPdf(target.path);
       } else {
         await writeDocument(target.path, await exportHtml(text, baseName(path)));
@@ -425,7 +431,7 @@
   async function print() {
     await codeLanguages();
     printHtml = render();
-    await printImagesLoaded();
+    await printCopyReady();
     try {
       await printPage();
     } catch (err) {
@@ -609,5 +615,5 @@
 </div>
 
 <div class="print-root" aria-hidden="true">
-  <article class="preview">{@html printHtml}</article>
+  <article class="preview paper" bind:this={printArticle}>{@html printHtml}</article>
 </div>
