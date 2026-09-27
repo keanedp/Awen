@@ -39,5 +39,10 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - Print operations don't retain their delegate. One `PdfDelegate` lives in a main-thread `thread_local!`, and the per-call `Sender` travels through `contextInfo` as a `Box` that is reclaimed exactly once.
 - wry's own `print_with_options` (`wry/src/wkwebview/mod.rs`) is a useful reference for WKWebView printing.
 
+## App icon
+- `src-tauri/icons/` is generated from a rounded source in the repo's `icons/` folder: `npm run tauri icon icons/<name>_rounded.png`.
+- A rounded source comes from a square, full-bleed 1254px artwork. It follows the macOS icon grid: the art is scaled to 824px, masked to a rounded rectangle with a 185px radius, then centred on a transparent 1024 canvas (100px margin):
+  `magick in.png -resize 824x824 \( -size 824x824 xc:black -fill white -draw "roundrectangle 0,0 823,823 185,185" \) -alpha off -compose CopyOpacity -composite -compose Over -background none -gravity center -extent 1024x1024 out_rounded.png`
+
 ## Windows
 - This code cannot be compiled on the dev Mac (see `docs/agents/gotchas.md`). After touching `#[cfg(windows)]` code, say it's unverified. Fixes from a real Windows build should be recorded in gotchas.md.
