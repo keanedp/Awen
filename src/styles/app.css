@@ -28,6 +28,20 @@
   font-weight: 700;
   font-style: italic;
 }
+/* Settings → Font (W-063). Variable: one file each for every weight and slant. The ranges
+   must be declared, or the regular weight renders at the file's default, ExtraLight. */
+@font-face {
+  font-family: "Monaspace Neon";
+  src: url("/fonts/monaspace/MonaspaceNeon-Var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: oblique 0deg 11deg;
+}
+@font-face {
+  font-family: "Monaspace Radon";
+  src: url("/fonts/monaspace/MonaspaceRadon-Var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: oblique 0deg 11deg;
+}
 
 /* Expose platform tokens to Tailwind utilities (bg-surface, text-muted, rounded-control…). */
 @theme inline {

@@ -1,6 +1,15 @@
 import { describe, expect, test } from "vitest";
 import { defaults } from "./preferences";
-import { biggerText, defaultTextSize, isTextSize, smallerText, textSizes, viewChange, writingStyle } from "./settings";
+import {
+  biggerText,
+  defaultTextSize,
+  isTextSize,
+  smallerText,
+  textSizes,
+  viewChange,
+  writingFonts,
+  writingStyle,
+} from "./settings";
 
 describe("text size steps", () => {
   test("the default is one of the stops", () => {
@@ -34,17 +43,29 @@ describe("text size steps", () => {
 });
 
 describe("writingStyle", () => {
+  const classic = `--font-writing: ${writingFonts.classic}`;
+
   test("the defaults match the tokens in app.css", () => {
-    expect(writingStyle(defaults)).toBe("--writing-size: 18px; --writing-line-height: 1.6; --measure: 66ch");
+    expect(writingStyle(defaults)).toBe(`${classic}; --writing-size: 18px; --writing-line-height: 1.6; --measure: 66ch`);
   });
 
   test("each choice sets its token", () => {
-    expect(writingStyle({ textSize: 22, columnWidth: "narrow", lineSpacing: "loose" })).toBe(
-      "--writing-size: 22px; --writing-line-height: 1.8; --measure: 58ch",
+    expect(writingStyle({ writingFont: "classic", textSize: 22, columnWidth: "narrow", lineSpacing: "loose" })).toBe(
+      `${classic}; --writing-size: 22px; --writing-line-height: 1.8; --measure: 58ch`,
     );
-    expect(writingStyle({ textSize: 14, columnWidth: "wide", lineSpacing: "tight" })).toBe(
-      "--writing-size: 14px; --writing-line-height: 1.4; --measure: 80ch",
+    expect(writingStyle({ writingFont: "classic", textSize: 14, columnWidth: "wide", lineSpacing: "tight" })).toBe(
+      `${classic}; --writing-size: 14px; --writing-line-height: 1.4; --measure: 80ch`,
     );
+  });
+
+  test("each font sets its stack", () => {
+    expect(writingStyle({ ...defaults, writingFont: "neon" })).toContain(`--font-writing: "Monaspace Neon", `);
+    expect(writingStyle({ ...defaults, writingFont: "radon" })).toContain(`--font-writing: "Monaspace Radon", `);
+    expect(writingStyle({ ...defaults, writingFont: "system" })).toContain("--font-writing: ui-monospace, ");
+  });
+
+  test("every stack ends in a generic monospace", () => {
+    for (const stack of Object.values(writingFonts)) expect(stack).toMatch(/, monospace$/);
   });
 });
 
