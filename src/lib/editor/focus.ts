@@ -2,7 +2,7 @@ import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import { Compartment, StateField, type EditorState, type Extension } from "@codemirror/state";
 import { Decoration, EditorView, type DecorationSet } from "@codemirror/view";
 import type { SyntaxNode } from "@lezer/common";
-import type { FocusUnit } from "../settings";
+import type { DimmedUnit } from "../settings";
 
 /**
  * Focus mode (W-017): everything but the sentence or paragraph at the caret is
@@ -89,7 +89,7 @@ function sentenceAt(state: EditorState, pos: number): { from: number; to: number
 }
 
 /** The range left undimmed: the units at both ends of the main selection, and everything between. */
-export function focusedRange(state: EditorState, unit: FocusUnit): { from: number; to: number } {
+export function focusedRange(state: EditorState, unit: DimmedUnit): { from: number; to: number } {
   const at = unit === "sentence" ? sentenceAt : paragraphAt;
   const { from, to } = state.selection.main;
   return { from: at(state, from).from, to: at(state, to).to };
@@ -97,7 +97,7 @@ export function focusedRange(state: EditorState, unit: FocusUnit): { from: numbe
 
 const unfocused = Decoration.mark({ class: "cm-unfocused" });
 
-function dim(state: EditorState, unit: FocusUnit): DecorationSet {
+function dim(state: EditorState, unit: DimmedUnit): DecorationSet {
   const { from, to } = focusedRange(state, unit);
   const ranges = [];
   if (from > 0) ranges.push(unfocused.range(0, from));
@@ -105,7 +105,7 @@ function dim(state: EditorState, unit: FocusUnit): DecorationSet {
   return Decoration.set(ranges);
 }
 
-function focusField(unit: FocusUnit) {
+function focusField(unit: DimmedUnit) {
   return StateField.define<DecorationSet>({
     create: (state) => dim(state, unit),
     // Paragraphs come from the parse tree, so also when parsing catches up.
@@ -132,12 +132,12 @@ const focus = new Compartment();
 const off: Extension = [];
 
 /** Focus mode on the given unit, or off (`null`). */
-export function focusMode(unit: FocusUnit | null): Extension {
+export function focusMode(unit: DimmedUnit | null): Extension {
   return focus.of(unit ? fields[unit] : off);
 }
 
 /** Turns focus mode on or off, or changes its unit, in an open editor. */
-export function setFocusMode(view: EditorView, unit: FocusUnit | null) {
+export function setFocusMode(view: EditorView, unit: DimmedUnit | null) {
   const wanted = unit ? fields[unit] : off;
   if (focus.get(view.state) === wanted) return;
   view.dispatch({ effects: focus.reconfigure(wanted) });

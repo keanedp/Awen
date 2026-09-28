@@ -27,9 +27,14 @@ export const writingFonts = {
 };
 export type WritingFont = keyof typeof writingFonts;
 
-/** What focus mode (W-017) keeps undimmed. */
-export const focusUnits = ["sentence", "paragraph"] as const;
+/**
+ * View → Focus On: what focus mode does. Sentence and Paragraph dim all but
+ * that (W-017); Typewriter keeps the caret's line in the middle (W-018).
+ */
+export const focusUnits = ["sentence", "paragraph", "typewriter"] as const;
 export type FocusUnit = (typeof focusUnits)[number];
+/** The focus units that dim the rest of the text. */
+export type DimmedUnit = Exclude<FocusUnit, "typewriter">;
 
 export const themes = ["system", "light", "dark"] as const;
 export type Theme = (typeof themes)[number];
@@ -64,9 +69,13 @@ export function writingStyle(
   ].join("; ");
 }
 
-/** What focus mode keeps undimmed, or `null` when it's off. */
-export function activeFocusUnit(prefs: Pick<Preferences, "focusMode" | "focusUnit">): FocusUnit | null {
-  return prefs.focusMode ? prefs.focusUnit : null;
+/** What focus mode keeps undimmed (`null` for none), and whether it keeps the line centred. */
+export function activeFocus(prefs: Pick<Preferences, "focusMode" | "focusUnit">): {
+  dim: DimmedUnit | null;
+  typewriter: boolean;
+} {
+  const unit = prefs.focusMode ? prefs.focusUnit : null;
+  return unit === "typewriter" ? { dim: null, typewriter: true } : { dim: unit, typewriter: false };
 }
 
 /**
@@ -86,6 +95,8 @@ export function viewChange(id: string, prefs: Preferences): Partial<Preferences>
       return { focusMode: true, focusUnit: "sentence" };
     case "focus_paragraph":
       return { focusMode: true, focusUnit: "paragraph" };
+    case "focus_typewriter":
+      return { focusMode: true, focusUnit: "typewriter" };
     case "text_bigger":
       return { textSize: biggerText(prefs.textSize) };
     case "text_smaller":

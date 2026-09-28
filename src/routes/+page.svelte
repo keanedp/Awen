@@ -9,6 +9,7 @@
   import { countWords, formatCount } from "$lib/editor/count";
   import { setCodeHighlighting } from "$lib/editor/code";
   import { setFocusMode } from "$lib/editor/focus";
+  import { setTypewriterScrolling } from "$lib/editor/typewriter";
   import { createState, documentText, setReadOnly, setSpellcheck } from "$lib/editor/setup";
   import { systemSpellChecker } from "$lib/spellchecker";
   import { taskToggle } from "$lib/editor/tasks";
@@ -47,7 +48,7 @@
     setPreferences,
     type Preferences,
   } from "$lib/preferences";
-  import { activeFocusUnit, viewChange, writingStyle } from "$lib/settings";
+  import { activeFocus, viewChange, writingStyle } from "$lib/settings";
   import Preview from "$lib/preview/Preview.svelte";
   import TitleBar from "$lib/ui/TitleBar.svelte";
   import WordCount from "$lib/ui/WordCount.svelte";
@@ -151,8 +152,10 @@
     if (view) setSpellcheck(view, on);
   });
   $effect(() => {
-    const unit = activeFocusUnit(prefs);
-    if (view) setFocusMode(view, unit);
+    const { dim, typewriter } = activeFocus(prefs);
+    if (!view) return;
+    setFocusMode(view, dim);
+    setTypewriterScrolling(view, typewriter);
   });
 
   function onChange(v: EditorView) {
@@ -184,11 +187,13 @@
   });
 
   function newState(text: string) {
+    const { dim, typewriter } = activeFocus(prefs);
     return createState(text, onChange, () => exclusive(askToUnlock), scheduleCount, {
       highlightCode: prefs.codeHighlighting,
       spellcheck: prefs.spellcheck,
       checker: systemSpellChecker,
-      focus: activeFocusUnit(prefs),
+      focus: dim,
+      typewriter,
     });
   }
 
@@ -477,6 +482,7 @@
     focus_mode: () => changeView("focus_mode"),
     focus_sentence: () => changeView("focus_sentence"),
     focus_paragraph: () => changeView("focus_paragraph"),
+    focus_typewriter: () => changeView("focus_typewriter"),
     text_bigger: () => changeView("text_bigger"),
     text_smaller: () => changeView("text_smaller"),
     text_actual: () => changeView("text_actual"),
@@ -512,6 +518,7 @@
     "focus_mode",
     "focus_sentence",
     "focus_paragraph",
+    "focus_typewriter",
     "text_bigger",
     "text_smaller",
     "text_actual",

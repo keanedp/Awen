@@ -3,10 +3,11 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, drawSelection, keymap } from "@codemirror/view";
 import { markdownWithCode } from "./code";
 import { find } from "./find";
-import type { FocusUnit } from "../settings";
+import type { DimmedUnit } from "../settings";
 import { focusMode } from "./focus";
 import { markdownStyling } from "./markdownStyling";
 import { spellChecker, spelling, type SpellChecker } from "./spelling";
+import { typewriterScrolling } from "./typewriter";
 
 /** Code highlighting in the editor (W-045): preview's colours, mixed well towards the muted code text. */
 const muted = (name: string) => ({ color: `color-mix(in srgb, var(--code-${name}) 45%, var(--text-muted))` });
@@ -33,6 +34,11 @@ const theme = EditorView.theme({
     maxWidth: "var(--measure)",
     margin: "0 auto",
     padding: "2rem 2rem 40vh",
+  },
+  // Typewriter scrolling (W-018): room for the first and last lines to reach the middle.
+  "&.cm-typewriter .cm-content": {
+    paddingTop: "var(--typewriter-inset, 2rem)",
+    paddingBottom: "var(--typewriter-inset, 40vh)",
   },
   ".cm-line": { position: "relative", padding: "0" },
   // A heading's marker hangs into the space beside the column, but
@@ -107,7 +113,8 @@ const checkSpelling = new Compartment();
  * turns on muted highlighting in fenced code blocks (`setCodeHighlighting`);
  * `spellcheck` marks misspellings (`setSpellcheck`) found by `spellChecker`,
  * the system's checker in the app. `focus` dims all but the sentence or
- * paragraph at the caret (`setFocusMode`).
+ * paragraph at the caret (`setFocusMode`); `typewriter` keeps the caret's
+ * line in the middle (`setTypewriterScrolling`).
  */
 export function createState(
   doc: string,
@@ -119,7 +126,14 @@ export function createState(
     spellcheck = true,
     checker,
     focus = null,
-  }: { highlightCode?: boolean; spellcheck?: boolean; checker?: SpellChecker; focus?: FocusUnit | null } = {},
+    typewriter = false,
+  }: {
+    highlightCode?: boolean;
+    spellcheck?: boolean;
+    checker?: SpellChecker;
+    focus?: DimmedUnit | null;
+    typewriter?: boolean;
+  } = {},
 ): EditorState {
   const blocked = (_: Event, view: EditorView) => {
     if (!view.state.readOnly) return false;
@@ -150,6 +164,7 @@ export function createState(
       checker ? spellChecker.of(checker) : [],
       checkSpelling.of(spellcheck ? spelling : []),
       focusMode(focus),
+      typewriterScrolling(typewriter),
       theme,
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.view);

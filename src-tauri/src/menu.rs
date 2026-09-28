@@ -22,6 +22,7 @@ pub const FORWARDED: &[&str] = &[
     "focus_mode",
     "focus_sentence",
     "focus_paragraph",
+    "focus_typewriter",
     "word_count",
     "code_highlighting",
     "text_bigger",
@@ -259,8 +260,20 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         false,
         None::<&str>,
     )?;
-    let focus_unit =
-        Submenu::with_items(app, "Focus On", true, &[&focus_sentence, &focus_paragraph])?;
+    let focus_typewriter = CheckMenuItem::with_id(
+        app,
+        "focus_typewriter",
+        "Typewriter",
+        true,
+        false,
+        None::<&str>,
+    )?;
+    let focus_unit = Submenu::with_items(
+        app,
+        "Focus On",
+        true,
+        &[&focus_sentence, &focus_paragraph, &focus_typewriter],
+    )?;
     let word_count =
         CheckMenuItem::with_id(app, "word_count", "Word Count", true, false, None::<&str>)?;
     let code_highlighting = CheckMenuItem::with_id(
@@ -276,6 +289,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         ("focus_mode", focus_mode.clone()),
         ("focus_sentence", focus_sentence.clone()),
         ("focus_paragraph", focus_paragraph.clone()),
+        ("focus_typewriter", focus_typewriter.clone()),
         ("word_count", word_count.clone()),
         ("code_highlighting", code_highlighting.clone()),
     ])));

@@ -35,7 +35,7 @@ describe("parsePreferences", () => {
       wordCount: false,
       codeHighlighting: true,
       focusMode: true,
-      focusUnit: "paragraph",
+      focusUnit: "typewriter",
       exportFormat: "pdf",
       writingFont: "radon",
       textSize: 22,
@@ -72,7 +72,7 @@ describe("parsePreferences", () => {
   });
 
   test("unknown keys, e.g. from a newer version, are ignored", () => {
-    expect(parsePreferences({ typewriterScrolling: true, toString: 1 })).toEqual(defaults);
+    expect(parsePreferences({ readingSpeed: 250, toString: 1 })).toEqual(defaults);
   });
 
   test("defaults are never changed", () => {
