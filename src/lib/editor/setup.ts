@@ -33,7 +33,7 @@ const theme = EditorView.theme({
     padding: "2rem 2rem 40vh",
   },
   ".cm-line": { position: "relative", padding: "0" },
-  // As focused editors does: a heading's marker hangs into the space beside the column, but
+  // A heading's marker hangs into the space beside the column, but
   // only as far as there is room, so in a narrow window it pushes the heading text in
   // rather than reaching the edge. The column is `--measure` wide at most (border-box),
   // so the room is what's left of the width either side of it. `--hang` is the marker's

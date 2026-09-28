@@ -3,11 +3,11 @@
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
 ## 2026-09-27: Preview dissolves in and out
-- Preview fades in over the editor (180ms, rising 6px) and fades out to reveal it (140ms). A dissolve reads as the same document changing form, as focused editors' does; a slide would suggest a separate page. Leaving is quicker because the writer wants to get back to typing.
+- Preview fades in over the editor (180ms, rising 6px) and fades out to reveal it (140ms). A dissolve reads as the same document changing form; a slide would suggest a separate page. Leaving is quicker because the writer wants to get back to typing.
 - Reduce Motion keeps the fade and drops the rise, as macOS and Windows themselves swap movement for dissolves rather than cutting.
 
-## 2026-09-27: Heading marks hang as far as there is room, like focused editors
-- A fixed margin can't fit `###### ` at large sizes without eating a narrow window, and capping how far deep markers hang indented levels 5 and 6 even in wide windows (tried and reverted). focused editors instead hangs each marker by the room beside the column, down to none when the column fills the window, and so does Awen now.
+## 2026-09-27: Heading marks hang as far as there is room
+- A fixed margin can't fit `###### ` at large sizes without eating a narrow window, and capping how far deep markers hang indented levels 5 and 6 even in wide windows (tried and reverted). Awen instead hangs each marker by the room beside the column, down to none when the column fills the window.
 - Done in CSS with a line decoration and `text-indent`, using container query units for the room, rather than an absolutely positioned mark span: nothing to measure or recompute on resize, and `text-indent` moves only the first line of a wrapped heading.
 
 ## 2026-09-27: Monaspace Neon replaces Classic Mono
@@ -37,18 +37,18 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 ## 2026-09-26: HTML export carries the font licence notice
 - Superseded: the export no longer embeds any fonts (see above), so there's no notice. If fonts are ever embedded again, the reasoning below still applies.
 - The export embeds the Classic Mono files as data URLs, and anyone can pull them back out, so each export arguably redistributes the fonts. OFL 1.1 condition 2 wants the copyright notice and licence with every copy, and allows a human-readable header. So a short CSS comment (`fontNotice` in `export/html.ts`) with both copyright holders and a link to the OFL goes before the `@font-face` rules. The OFL FAQ says a link is enough for web fonts, so the full licence text isn't embedded.
-- The document itself needs no credit: the OFL doesn't cover documents made with the fonts. Don't remove the notice to save bytes (~200 of ~235 KB). If the fonts are ever subset or modified, the Reserved Font Name can no longer be used for the family name.
+- The document itself needs no credit: the OFL doesn't cover documents made with the fonts. Don't remove the notice to save bytes (~200 of ~235 KB). If the fonts are ever subset or modified, its Reserved Font Name can no longer be used for the family name.
 
 ## 2026-09-26: The app is called Awen
 - "Writer" was too generic to search for or trademark. Awen is Welsh for poetic inspiration: short, rare, and it means something to writers. The other candidates are in `ideas/names.md`.
 - The bundle identifier changed with it (`com.danielkeane.awen`). `app_data_dir` follows the identifier, so preferences and recent documents saved under the old name don't carry over. That was acceptable before the first release; don't change the identifier again once there are users.
-- The repo folder, the `W-` story ids and "focused editors" references keep their names.
+- The repo folder and the `W-` story ids keep their names.
 
 ## 2026-09-26: Format menu (W-060)
-- Modelled on focused editors' (`screenshots/format_menu.png`), with its shortcuts. The Headings and Lists submenus weren't in the screenshot: headings take ⌘1–⌘6 (as in Bear and Typora; ⌘0 is Actual Size), lists have no shortcuts yet. Blockquote is ⌘> on macOS, as in focused editors; on Windows, Ctrl+Shift+. .
+- The groups and shortcuts are listed under W-060 in `backlog.md`. Headings take ⌘1–⌘6 (as in Bear and Typora; ⌘0 is Actual Size), lists have no shortcuts yet. Blockquote is ⌘> on macOS; on Windows, Ctrl+Shift+. .
 - Italic writes `*`, bold `**`, as the preview's markdown-it reads them anywhere, even inside a word (`_` doesn't work there). Both `*` and `_` are recognised when removing a style.
 - Every style is a toggle, and runs of `*` are read by count (three = bold and italic), so bold and italic can be added and removed independently.
-- Highlight writes `==text==`, rendered by `markdown-it-mark`. It isn't CommonMark, but it's what focused editors, Obsidian and Bear write.
+- Highlight writes `==text==`, rendered by `markdown-it-mark`. It isn't CommonMark, but it's what Obsidian and Bear write.
 - The menu is disabled in preview and on a locked document, rather than offering to unlock as typing does: a menu command the user can see is greyed out explains itself.
 - On Windows, Strikethrough and Clear Styles use Ctrl+Alt, which is AltGr on some keyboard layouts. Check this in W-060's Windows verification.
 
@@ -60,18 +60,18 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 
 ## 2026-09-26: What the settings window (W-021) holds
 - Text size, column width, line spacing, spell checking, theme (Match System / Light / Dark), plus word count and code highlighting mirrored from the View menu. One pane, no tabs, until later features bring enough settings to group.
-- Column width and line spacing are three named presets rather than free numbers: easier to keep the column looking right, and it's how focused editors offers them.
-- Text size is also on View → Bigger / Smaller / Actual Size, as in TextEdit and focused editors, since that's where Mac and Windows users look for it.
+- Column width and line spacing are three named presets rather than free numbers: easier to keep the column looking right.
+- Text size is also on View → Bigger / Smaller / Actual Size, as in TextEdit, since that's where Mac and Windows users look for it.
 - A separate window, as settings are in Mac and Windows apps, not a sheet inside a document window: it applies to every window, and stays open while you watch a document change.
 - The theme is applied natively (`AppHandle::set_theme`) rather than by overriding CSS tokens with a `data-theme` attribute: menus, dialogs, the title popover and scrollbars follow it too, and it applies before any window draws.
-- Text size, width and spacing apply to the screen only (the tokens sit on `.app-root`). Print, PDF and HTML export keep their paper typography, as focused editors' templates do.
+- Text size, width and spacing apply to the screen only (the tokens sit on `.app-root`). Print, PDF and HTML export keep their paper typography.
 - The controls are Bits UI (per the 2026-09-23 components decision), not native `<select>`: WKWebView would show a real macOS menu, but WebView2's popup looks like Chrome, not Windows 11.
-- Left out: font choice (the design depends on Classic Mono, and focused editors doesn't offer one either; superseded 2026-09-27, see "The editor font is a setting"), the export format (the export dialog already remembers the last one), and reading speed (too niche for now). Focus mode and typewriter scrolling (W-017, W-018) add their settings here once they're built.
+- Left out: font choice (the design depends on Classic Mono; superseded 2026-09-27, see "The editor font is a setting"), the export format (the export dialog already remembers the last one), and reading speed (too niche for now). Focus mode and typewriter scrolling (W-017, W-018) add their settings here once they're built.
 
 ## 2026-09-25: Preferences live in a JSON file owned by Rust, typed in the frontend
 - `preferences.json` in the app data folder, like `recent.json`, rather than the webview's `localStorage`. localStorage belongs to the webview's origin, which differs between `make dev` and a bundled build, and its storage and syncing between windows is up to WKWebView and WebView2. A Rust-owned file is one source of truth, easy to find and reset, and Rust can broadcast changes to every window.
 - Rust stores untyped JSON and the frontend validates it (`parsePreferences`), so adding a preference is a frontend-only change.
-- Preferences are app-wide, not per window or per document: the menu checkmark is app-wide too, and focused editors' view settings behave the same way.
+- Preferences are app-wide, not per window or per document: the menu checkmark is app-wide too.
 
 ## 2026-09-25: How words are counted
 - Words are Unicode word segments (`Intl.Segmenter`) that contain a letter or digit, so "don't" and "3.14" are one word each, punctuation and emoji are none, and CJK text is segmented properly. Hyphenated compounds count once, as in Word and Pages. The segmenter's own `isWordLike` isn't used, because JavaScriptCore and V8 disagree about numbers (gotchas.md).
@@ -96,10 +96,10 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 
 ## 2026-09-25: Editor code highlighting is muted, not a second palette
 - W-045 reuses preview's `--code-*` colours mixed 45% with `--text-muted` (`color-mix` in `editor/setup.ts`), rather than its own tokens, so the two views stay recognisably the same and one palette change moves both. Comments aren't italic in the editor, and headings or invalid code aren't styled, to keep the column calm.
-- It's a View menu toggle rather than always on, because focused editors' editor never colours code and most documents here are prose.
+- It's a View menu toggle rather than always on, because most documents here are prose.
 
 ## 2026-09-25: Code blocks are highlighted in preview only, with Lezer parsers
-- focused editors doesn't highlight code; Typora does. Awen highlights in preview, print and exports, where code is read and shared, and leaves the editor calm. Muted editor highlighting is W-045 and off by default.
+- Typora highlights code in the editor. Awen highlights in preview, print and exports, where code is read and shared, and leaves the editor calm. Muted editor highlighting is W-045 and off by default.
 - Lezer parsers (`@codemirror/language-data`) rather than highlight.js or Shiki: the editor already uses Lezer, so W-045 can share the same parsers and `--code-*` colours and the two views match. language-data also gives ~150 languages, loaded on demand as separate chunks.
 - The cost is that loading is async while markdown-it is sync, so callers await `loadCodeLanguages` before rendering (see architecture.md).
 
@@ -126,14 +126,14 @@ W-043 uses the file's user-immutable flag (`NSURLIsUserImmutableKey`), the same 
 NSDocument apps get the title-bar rename popover for free, but it belongs to NSDocument and the window's own title, which the Overlay title bar hides. So Awen builds an equivalent NSPopover with objc2 (`rename.rs`) and anchors it to the web title, instead of adopting NSDocument. Locked is left for W-043: it needs a read-only editor state. Windows has no equivalent convention, so it keeps Save As only.
 
 ## 2026-09-25: One window per document; the Mac app outlives its windows
-Following TextEdit and focused editors: New and Open always make a new window. The exception is an untouched Untitled window, which Open reuses, as NSDocument apps do. On macOS closing the last window leaves the app running. Windows keeps its convention of exiting. Rust owns window creation and the label → path map, so it can open files with no window present (needed for Dock reopen and later for open-with, W-023) and bring an already-open file forward. Quit closes windows one by one so each can prompt, rather than using a single "Review changes" dialog.
+Following TextEdit: New and Open always make a new window. The exception is an untouched Untitled window, which Open reuses, as NSDocument apps do. On macOS closing the last window leaves the app running. Windows keeps its convention of exiting. Rust owns window creation and the label → path map, so it can open files with no window present (needed for Dock reopen and later for open-with, W-023) and bring an already-open file forward. Quit closes windows one by one so each can prompt, rather than using a single "Review changes" dialog.
 
 ## 2026-09-25: Open Recent is our own list, not NSDocumentController
 The app isn't NSDocument-based, so AppKit's automatic Open Recent menu isn't available. Rust keeps the list and builds the submenu itself, which also works unchanged on Windows. Adding entries to the system recents (Dock menu, `noteNewRecentDocumentURL:`) only makes sense once Awen registers as a `.md` handler and handles open-file events (rest of W-023).
 - Update (W-040): now that it does, our list stays the source of truth for the menu and is *mirrored* into the system list, not replaced by it. The Windows Clear Menu uses `RemoveAllDestinations` rather than `SHAddToRecentDocs(…, NULL)`, which would clear the user's recent files for every app.
 
 ## 2026-09-25: Title bar toolbar; custom title bar on Windows
-- Preview gets a play button in the title bar, like focused editors. The button, shortcut and menu item all call the same `togglePreview()`. View → Preview is a `CheckMenuItem`, synced from the frontend's state.
+- Preview gets a play button in the title bar. The button, shortcut and menu item all call the same `togglePreview()`. View → Preview is a `CheckMenuItem`, synced from the frontend's state.
 - **Windows:** turns off native decorations (`tauri.windows.conf.json`) and draws its own title bar with Segoe Fluent Icons caption buttons, since the native title bar has no room for app buttons.
   - This loses the Windows 11 Snap Layouts flyout on hovering maximize (tracked as W-037).
   - `tauri-plugin-decorum` would provide it, but was rejected: no release since 2024-09.
@@ -143,7 +143,7 @@ The app isn't NSDocument-based, so AppKit's automatic Open Recent menu isn't ava
 `AGENTS.md` and `docs/agents/` serve as memory for Claude Code and Codex alike. Each `CLAUDE.md` contains only `@AGENTS.md`. Symlinks were rejected because the project must also be checked out on Windows.
 
 ## 2026-09-25: Export dialog is native per OS; PDF is written directly
-- **macOS:** an NSSavePanel sheet with an "Export To" popup, like focused editors (`Inspiration/export.png`). The Tauri dialog plugin can't add accessory views, so it is built with objc2 in `src-tauri/src/export.rs`.
+- **macOS:** an NSSavePanel sheet with an "Export To" popup. The Tauri dialog plugin can't add accessory views, so it is built with objc2 in `src-tauri/src/export.rs`.
 - **Windows:** the native equivalent is the "Save as type" list, which the dialog plugin already supports.
 - **PDF** goes straight to the chosen file instead of through the print dialog. Print… remains a separate command.
 - Only HTML and PDF are offered for now. Word and Project Archive, from the reference image, are not offered yet.
@@ -152,7 +152,7 @@ The app isn't NSDocument-based, so AppKit's automatic Open Recent menu isn't ava
 The CSS and fonts are embedded, so the file looks right anywhere. That size (~235 KB) is accepted. Relative image paths are left as-is, so they resolve when the export is saved next to the Markdown file.
 
 ## 2026-09-24: Replace-style preview, not a side panel
-It matches focused editors' focused feel, it is the only layout that works at phone width, and it avoids live re-rendering and scroll sync. Position is matched once per toggle via `data-line`.
+It keeps the editor focused, it is the only layout that works at phone width, and it avoids live re-rendering and scroll sync. Position is matched once per toggle via `data-line`.
 
 ## 2026-09-24: markdown-it with `html: false`
 The webview has access to Tauri's backend (IPC), so a document must not be able to inject HTML or scripts. The default `validateLink` already blocks `javascript:` URLs, so no sanitizer is needed. Don't enable `html` without adding sanitization.

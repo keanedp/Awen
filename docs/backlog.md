@@ -107,7 +107,7 @@ As a writer, I want to swap to a rendered preview and back with one shortcut, so
 
 ### W-036 Toggle preview from the title bar
 Status: Needs verification (Windows only) · Platforms: macOS, Windows
-As a writer, I want a play button in the window header, like focused editors, so I can switch to preview without remembering the shortcut.
+As a writer, I want a play button in the window header, so I can switch to preview without remembering the shortcut.
 - [x] Play button at the trailing edge of the title bar; tooltip shows the shortcut
 - [x] Button, Cmd/Ctrl+R, View → Preview and Esc all stay in sync: the button shows pressed and the menu item shows a checkmark
 - [x] Clicking the button doesn't take focus or the caret from the editor
@@ -149,7 +149,7 @@ As a writer, I want to export a single HTML file that looks like my preview, so 
 
 ### W-014 Export dialog with a format choice
 Status: Needs verification (Windows only) · Platforms: macOS, Windows
-As a writer, I want one Export… dialog where I choose the format, like focused editors (`Inspiration/export.png`).
+As a writer, I want one Export… dialog where I choose the format.
 - [x] macOS: native save sheet with "Export To: HTML / PDF"; switching format updates the extension
 - [x] Windows: HTML / PDF in the "Save as type" list
 - [x] Verified by clicking through on macOS
@@ -247,7 +247,7 @@ As a Windows user, I want W-066's heading marks to work in a real build.
 
 ### W-066 Heading marks hang only as far as there is room
 Status: Done · Platforms: macOS (Windows verification moved to W-067)
-As a writer, I want heading markers to behave like focused editors' when the window is narrow (`screenshots/headers_narrow.png`, `headers_medium.png`, `headers_wide.png`), so they're never cut off at the window's edge.
+As a writer, I want heading markers to adapt when the window is narrow, so they're never cut off at the window's edge.
 - [x] Wide window: every marker, `#` to `######`, hangs whole and heading text lines up with body text
 - [x] Narrower: a marker hangs only as far as the space beside the column, pushing its heading text in
 - [x] Column fills the window: no marker hangs; heading text follows its marker
@@ -320,8 +320,8 @@ As a Windows user, I want W-060's Format menu to work in a real build (its menu 
 
 ### W-060 Format menu
 Status: Done · Platforms: macOS (Windows verification moved to W-062)
-As a writer, I want a Format menu that applies Markdown formatting to the selected text, like focused editors (`screenshots/format_menu.png`), so I don't have to type the syntax by hand.
-- [x] Format menu between Edit and View, with the same groups and shortcuts as focused editors (Cmd on macOS, Ctrl on Windows):
+As a writer, I want a Format menu that applies Markdown formatting to the selected text, so I don't have to type the syntax by hand.
+- [x] Format menu between Edit and View, with these groups and shortcuts (Cmd on macOS, Ctrl on Windows):
   - Headings ▸ (Heading 1–6, ⌘1–⌘6), Lists ▸ (Bulleted, Numbered, Task), Blockquote ⌘> (Ctrl+Shift+. on Windows), Body (removes heading, list and quote markers)
   - Bold ⌘B, Italic ⌘I, Strikethrough ⌥⌘U, Highlight ⇧⌘U
   - Code ⌘J, Code Block ⇧⌘J
@@ -337,7 +337,7 @@ As a writer, I want a Format menu that applies Markdown formatting to the select
 
 ### W-061 More Format menu items
 Status: Todo · Platforms: all
-As a writer, I want the rest of focused editors' Format menu (`screenshots/format_menu.png`), once W-060's basic formatting is done.
+As a writer, I want more Format menu items, once W-060's basic formatting is done.
 - [ ] Add Footnote ⌃⌘K, and footnotes render in preview and exports
 - [ ] Add Table, Add Date, Add Page Break (honoured in print and PDF), Add Table of Contents
 - [ ] Decide whether Structure ▸, Add Wikilink, Add Content Block and Add Hashtag fit Awen (they depend on library features, see W-030), and record the decision in `decisions.md`
