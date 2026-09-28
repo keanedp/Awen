@@ -36,7 +36,7 @@ Awen is built to feel like it belongs on your computer. On a Mac it looks and be
 - **Rename, tag and move from the title bar** (macOS). Click the document's name, just like in Apple's own apps. You can also lock a document to protect it from accidental edits.
 - **Settings that follow you.** Change the text size, column width (Narrow, Medium or Wide), line spacing and theme (Match System, Light or Dark). Changes apply live in every window and are remembered between launches.
 
-![Settings Screenshot](./screenshots/settings.png Settings)
+![Settings Screenshot](./screenshots/settings.png "Settings")
 
 ### Coming soon
 Focus mode, typewriter scrolling, a library sidebar with full-text search, and Awen on iPhone, iPad and Android. See [`docs/backlog.md`](docs/backlog.md) for the full roadmap.
