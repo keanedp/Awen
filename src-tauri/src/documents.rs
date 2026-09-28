@@ -1,4 +1,4 @@
-//! Document windows: one window per document, like TextEdit and focused editors.
+//! Document windows: one window per document, like TextEdit.
 //!
 //! Rust creates the windows and remembers which file each one shows, so that
 //! opening a file that is already open brings its window forward instead.

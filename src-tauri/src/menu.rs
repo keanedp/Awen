@@ -154,7 +154,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         ],
     )?;
 
-    // focused editors' Format menu (W-060), with its shortcuts. Blockquote's ⌘> is
+    // The Format menu (W-060), with its shortcuts. Blockquote's ⌘> is
     // set natively on macOS (`use_character_shortcuts`); elsewhere it's Ctrl+Shift+.
     let mut format_items = Vec::new();
     let mut format_item = |id: &str, text: &str, accel: Option<&str>| {
@@ -314,9 +314,8 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
 }
 
 /// Gives macOS menu items a shortcut that is a typed character rather than a
-/// key: Blockquote shows ⌘> and follows the `>` key on any keyboard layout, as
-/// in focused editors. Tauri's accelerators name physical keys, so the closest it
-/// can do is ⇧⌘. . Call after the menu is built (it is before `setup`).
+/// key: Blockquote shows ⌘> and follows the `>` key on any keyboard layout.
+/// Tauri's accelerators name physical keys, so the closest it can do is ⇧⌘. . Call after the menu is built (it is before `setup`).
 #[cfg(target_os = "macos")]
 pub fn use_character_shortcuts() {
     use objc2::MainThreadMarker;

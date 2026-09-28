@@ -10,7 +10,7 @@ use std::sync::{Mutex, OnceLock};
 use tauri::menu::{MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, Runtime};
 
-/// How many documents the menu lists, as in TextEdit and focused editors.
+/// How many documents the menu lists, as in TextEdit.
 const LIMIT: usize = 10;
 
 /// Menu ids of the document items are this prefix followed by the full path.
