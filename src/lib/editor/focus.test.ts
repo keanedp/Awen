@@ -3,17 +3,17 @@ import { describe, expect, test } from "vitest";
 import { createState } from "./setup";
 import { dimmedRanges, focusedRange } from "./focus";
 import { loadCodeLanguages } from "../preview/highlight";
-import type { FocusUnit } from "../settings";
+import type { DimmedUnit } from "../settings";
 
 /** A state with the caret at `|`, or the selection between two `|`s. */
-function open(marked: string, focus: FocusUnit | null = "sentence", highlightCode = false): EditorState {
+function open(marked: string, focus: DimmedUnit | null = "sentence", highlightCode = false): EditorState {
   const [from, to = from] = [...marked.matchAll(/\|/g)].map((m, i) => m.index - i);
   const state = createState(marked.replaceAll("|", ""), () => {}, () => {}, undefined, { focus, highlightCode });
   return state.update({ selection: EditorSelection.range(from, to) }).state;
 }
 
 /** The text focus mode leaves undimmed. */
-function focused(marked: string, unit: FocusUnit, highlightCode = false): string {
+function focused(marked: string, unit: DimmedUnit, highlightCode = false): string {
   const state = open(marked, unit, highlightCode);
   const { from, to } = focusedRange(state, unit);
   return state.sliceDoc(from, to);

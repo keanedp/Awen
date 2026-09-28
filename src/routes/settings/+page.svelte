@@ -52,6 +52,7 @@
   const focusUnits: { value: FocusUnit; label: string }[] = [
     { value: "sentence", label: "Sentence" },
     { value: "paragraph", label: "Paragraph" },
+    { value: "typewriter", label: "Typewriter" },
   ];
   // Each OS's own words for following the system.
   const themes = $derived<{ value: Theme; label: string }[]>([

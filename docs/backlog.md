@@ -363,12 +363,14 @@ As a Windows user, I want W-017's focus mode to work in a real build.
 - [ ] Dimmed text reads well in light and dark mode
 
 ### W-018 Typewriter scrolling
-Status: Todo · Platforms: all
+Status: Needs verification (not yet run on macOS or Windows) · Platforms: all
 As a writer, I want the line I'm typing to stay vertically centered, so my eyes stay in one place.
-- [ ] View menu toggle with shortcut
-- [ ] The cursor line stays centered while typing and moving the cursor
-- [ ] Works together with focus mode
-- [ ] The on/off setting persists between launches (using W-020's preferences store)
+- [x] View menu toggle with shortcut (View → Focus On ▸ Typewriter, turned on and off with Focus Mode's ⌘D / Ctrl+D; see decisions.md)
+- [x] The cursor line stays centered while typing and moving the cursor
+- [x] Works together with focus mode (as its third choice, beside Sentence and Paragraph)
+- [x] The on/off setting persists between launches (using W-020's preferences store)
+- [ ] Verified by running the app on macOS: View → Focus On ▸ Typewriter and its checkmark (Sentence / Paragraph / Typewriter exclusive), ⌘D turning it off and on, the line centred while typing, with arrow keys, after clicking or drag-selecting (not during the drag), and at the first and last lines, resizing the window, the find bar open
+- [ ] Verified on Windows
 
 ### W-023 Recent files and open with
 Status: Needs verification (Windows only) · Platforms: macOS, Windows

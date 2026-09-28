@@ -2,6 +2,12 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-28: Typewriter scrolling (W-018)
+
+- Typewriter is focus mode's third choice: View → Focus On ▸ Sentence / Paragraph / Typewriter are mutually exclusive (`focusUnit`), and Focus Mode (⌘D) turns the chosen one on and off. Typewriter centres the line and dims nothing; Sentence and Paragraph dim and don't centre. A separate Typewriter Scrolling toggle (first with ⌘T, then in the Focus On submenu) was tried and dropped: the user wanted the three to be one exclusive choice. Settings' "Focus on" has the same three.
+- The caret line is centred wherever CodeMirror would scroll the caret into view (typing, keyboard moves, undo, find), and after a click or drag. Mouse selections centre on release, not as the selection changes: scrolling mid-drag would move the text under the pointer. Leaving clicks alone until the next key was tried first; it felt wrong, since the caret had moved but the line hadn't.
+- The top and bottom padding is measured (half the scroller less half a line), not `50vh`, so a document opens with its first line already in the middle and nothing jumps on the first keystroke. The scroll is instant, like CodeMirror's own; no easing.
+
 ## 2026-09-28: Focus mode (W-017)
 
 - View → Focus Mode is ⌘D / Ctrl+D (free in CodeMirror's keymaps, which don't include `searchKeymap`'s Mod-d). View → Focus On ▸ Sentence / Paragraph are check items, since Tauri has no radio items; choosing one also turns focus mode on, so the choice is visible. Settings has both too.
@@ -72,7 +78,7 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 - The theme is applied natively (`AppHandle::set_theme`) rather than by overriding CSS tokens with a `data-theme` attribute: menus, dialogs, the title popover and scrollbars follow it too, and it applies before any window draws.
 - Text size, width and spacing apply to the screen only (the tokens sit on `.app-root`). Print, PDF and HTML export keep their paper typography.
 - The controls are Bits UI (per the 2026-09-23 components decision), not native `<select>`: WKWebView would show a real macOS menu, but WebView2's popup looks like Chrome, not Windows 11.
-- Left out: font choice (the design depends on Classic Mono; superseded 2026-09-27, see "The editor font is a setting"), the export format (the export dialog already remembers the last one), and reading speed (too niche for now). Focus mode and typewriter scrolling (W-017, W-018) add their settings here once they're built.
+- Left out: font choice (the design depends on Classic Mono; superseded 2026-09-27, see "The editor font is a setting"), the export format (the export dialog already remembers the last one), and reading speed (too niche for now). Focus mode and typewriter scrolling (W-017, W-018) have since added theirs.
 
 ## 2026-09-25: Preferences live in a JSON file owned by Rust, typed in the frontend
 - `preferences.json` in the app data folder, like `recent.json`, rather than the webview's `localStorage`. localStorage belongs to the webview's origin, which differs between `make dev` and a bundled build, and its storage and syncing between windows is up to WKWebView and WebView2. A Rust-owned file is one source of truth, easy to find and reset, and Rust can broadcast changes to every window.

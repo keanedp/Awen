@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { defaults } from "./preferences";
 import {
-  activeFocusUnit,
+  activeFocus,
   biggerText,
   defaultTextSize,
   isTextSize,
@@ -71,10 +71,16 @@ describe("writingStyle", () => {
   });
 });
 
-describe("activeFocusUnit", () => {
-  test("is the chosen unit only while focus mode is on", () => {
-    expect(activeFocusUnit({ focusMode: false, focusUnit: "paragraph" })).toBeNull();
-    expect(activeFocusUnit({ focusMode: true, focusUnit: "paragraph" })).toBe("paragraph");
+describe("activeFocus", () => {
+  test("does nothing while focus mode is off", () => {
+    expect(activeFocus({ focusMode: false, focusUnit: "paragraph" })).toEqual({ dim: null, typewriter: false });
+    expect(activeFocus({ focusMode: false, focusUnit: "typewriter" })).toEqual({ dim: null, typewriter: false });
+  });
+
+  test("Sentence and Paragraph dim; Typewriter centres the line instead", () => {
+    expect(activeFocus({ focusMode: true, focusUnit: "sentence" })).toEqual({ dim: "sentence", typewriter: false });
+    expect(activeFocus({ focusMode: true, focusUnit: "paragraph" })).toEqual({ dim: "paragraph", typewriter: false });
+    expect(activeFocus({ focusMode: true, focusUnit: "typewriter" })).toEqual({ dim: null, typewriter: true });
   });
 });
 
@@ -91,6 +97,7 @@ describe("viewChange", () => {
     expect(viewChange("focus_mode", { ...prefs, focusMode: true })).toEqual({ focusMode: false });
     expect(viewChange("focus_sentence", prefs)).toEqual({ focusMode: true, focusUnit: "sentence" });
     expect(viewChange("focus_paragraph", prefs)).toEqual({ focusMode: true, focusUnit: "paragraph" });
+    expect(viewChange("focus_typewriter", prefs)).toEqual({ focusMode: true, focusUnit: "typewriter" });
   });
 
   test("Bigger, Smaller and Actual Size set the text size", () => {
