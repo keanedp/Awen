@@ -50,3 +50,4 @@ Thumbs.db
 
 # Headroom wrapper state
 .claude/.headroom_wrap_*
+.codex/
