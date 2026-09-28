@@ -27,6 +27,10 @@ export const writingFonts = {
 };
 export type WritingFont = keyof typeof writingFonts;
 
+/** What focus mode (W-017) keeps undimmed. */
+export const focusUnits = ["sentence", "paragraph"] as const;
+export type FocusUnit = (typeof focusUnits)[number];
+
 export const themes = ["system", "light", "dark"] as const;
 export type Theme = (typeof themes)[number];
 
@@ -60,6 +64,11 @@ export function writingStyle(
   ].join("; ");
 }
 
+/** What focus mode keeps undimmed, or `null` when it's off. */
+export function activeFocusUnit(prefs: Pick<Preferences, "focusMode" | "focusUnit">): FocusUnit | null {
+  return prefs.focusMode ? prefs.focusUnit : null;
+}
+
 /**
  * What a View menu command changes, if it sets a preference. Document windows
  * and Settings both handle these, since the menu goes to whichever is focused.
@@ -70,6 +79,13 @@ export function viewChange(id: string, prefs: Preferences): Partial<Preferences>
       return { wordCount: !prefs.wordCount };
     case "code_highlighting":
       return { codeHighlighting: !prefs.codeHighlighting };
+    case "focus_mode":
+      return { focusMode: !prefs.focusMode };
+    // Choosing what to focus on also turns focus mode on, so the choice shows.
+    case "focus_sentence":
+      return { focusMode: true, focusUnit: "sentence" };
+    case "focus_paragraph":
+      return { focusMode: true, focusUnit: "paragraph" };
     case "text_bigger":
       return { textSize: biggerText(prefs.textSize) };
     case "text_smaller":

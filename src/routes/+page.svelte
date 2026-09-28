@@ -8,6 +8,7 @@
   import { findSelection, openFind } from "$lib/editor/find";
   import { countWords, formatCount } from "$lib/editor/count";
   import { setCodeHighlighting } from "$lib/editor/code";
+  import { setFocusMode } from "$lib/editor/focus";
   import { createState, documentText, setReadOnly, setSpellcheck } from "$lib/editor/setup";
   import { systemSpellChecker } from "$lib/spellchecker";
   import { taskToggle } from "$lib/editor/tasks";
@@ -37,7 +38,7 @@
     writeDocument,
   } from "$lib/files";
   import { applyAccent, applyPlatform, type OS } from "$lib/platform";
-  import { noteRecentDocument, setFormatEnabled, setMenuChecked } from "$lib/menu";
+  import { noteRecentDocument, setFocusChecked, setFormatEnabled, setMenuChecked } from "$lib/menu";
   import {
     defaults,
     loadPreferences,
@@ -46,7 +47,7 @@
     setPreferences,
     type Preferences,
   } from "$lib/preferences";
-  import { viewChange, writingStyle } from "$lib/settings";
+  import { activeFocusUnit, viewChange, writingStyle } from "$lib/settings";
   import Preview from "$lib/preview/Preview.svelte";
   import TitleBar from "$lib/ui/TitleBar.svelte";
   import WordCount from "$lib/ui/WordCount.svelte";
@@ -130,6 +131,9 @@
     setMenuChecked("word_count", prefs.wordCount);
   });
   $effect(() => {
+    setFocusChecked(prefs);
+  });
+  $effect(() => {
     setMenuChecked("code_highlighting", prefs.codeHighlighting);
   });
   // Formatting only applies in the editor, to a document that can be changed.
@@ -145,6 +149,10 @@
   $effect(() => {
     const on = prefs.spellcheck;
     if (view) setSpellcheck(view, on);
+  });
+  $effect(() => {
+    const unit = activeFocusUnit(prefs);
+    if (view) setFocusMode(view, unit);
   });
 
   function onChange(v: EditorView) {
@@ -180,6 +188,7 @@
       highlightCode: prefs.codeHighlighting,
       spellcheck: prefs.spellcheck,
       checker: systemSpellChecker,
+      focus: activeFocusUnit(prefs),
     });
   }
 
@@ -465,6 +474,9 @@
     preview: togglePreview,
     word_count: () => changeView("word_count"),
     code_highlighting: () => changeView("code_highlighting"),
+    focus_mode: () => changeView("focus_mode"),
+    focus_sentence: () => changeView("focus_sentence"),
+    focus_paragraph: () => changeView("focus_paragraph"),
     text_bigger: () => changeView("text_bigger"),
     text_smaller: () => changeView("text_smaller"),
     text_actual: () => changeView("text_actual"),
@@ -497,6 +509,9 @@
     "preview",
     "word_count",
     "code_highlighting",
+    "focus_mode",
+    "focus_sentence",
+    "focus_paragraph",
     "text_bigger",
     "text_smaller",
     "text_actual",
@@ -569,6 +584,7 @@
         setMenuChecked("preview", previewing);
         setMenuChecked("word_count", prefs.wordCount);
         setMenuChecked("code_highlighting", prefs.codeHighlighting);
+        setFocusChecked(prefs);
         setFormatEnabled(!previewing && !locked);
         refreshLocked();
         // The user may have changed it in System Settings meanwhile.

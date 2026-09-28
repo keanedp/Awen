@@ -34,6 +34,8 @@ describe("parsePreferences", () => {
     const saved = {
       wordCount: false,
       codeHighlighting: true,
+      focusMode: true,
+      focusUnit: "paragraph",
       exportFormat: "pdf",
       writingFont: "radon",
       textSize: 22,
@@ -54,6 +56,7 @@ describe("parsePreferences", () => {
     expect(
       parsePreferences({ textSize: "18", columnWidth: "huge", lineSpacing: 1.6, spellcheck: "on", theme: "sepia" }),
     ).toEqual(defaults);
+    expect(parsePreferences({ focusMode: "yes", focusUnit: "line" })).toEqual(defaults);
   });
 
   test("text sizes outside the slider's range fall back to the default", () => {
@@ -69,7 +72,7 @@ describe("parsePreferences", () => {
   });
 
   test("unknown keys, e.g. from a newer version, are ignored", () => {
-    expect(parsePreferences({ focusMode: true, toString: 1 })).toEqual(defaults);
+    expect(parsePreferences({ typewriterScrolling: true, toString: 1 })).toEqual(defaults);
   });
 
   test("defaults are never changed", () => {

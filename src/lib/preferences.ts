@@ -4,11 +4,13 @@ import type { ExportFormat } from "./files";
 import {
   columnWidths,
   defaultTextSize,
+  focusUnits,
   isTextSize,
   lineSpacings,
   themes,
   writingFonts,
   type ColumnWidth,
+  type FocusUnit,
   type LineSpacing,
   type Theme,
   type WritingFont,
@@ -25,6 +27,10 @@ export interface Preferences {
   wordCount: boolean;
   /** View → Code Highlighting: muted colours in the editor's fenced code blocks. */
   codeHighlighting: boolean;
+  /** View → Focus Mode: dims all but the sentence or paragraph being written. */
+  focusMode: boolean;
+  /** View → Focus On: what focus mode keeps undimmed. */
+  focusUnit: FocusUnit;
   /** The format the export dialog starts with: the last one used. */
   exportFormat: ExportFormat;
   /** Settings → Font: the editor's; preview, print and exports keep the system font. */
@@ -44,6 +50,8 @@ export interface Preferences {
 export const defaults: Preferences = {
   wordCount: true,
   codeHighlighting: false,
+  focusMode: false,
+  focusUnit: "sentence",
   exportFormat: "html",
   writingFont: "neon",
   textSize: defaultTextSize,
@@ -63,6 +71,8 @@ const oneOf =
 const valid: { [K in keyof Preferences]: (value: unknown) => value is Preferences[K] } = {
   wordCount: (value) => typeof value === "boolean",
   codeHighlighting: (value) => typeof value === "boolean",
+  focusMode: (value) => typeof value === "boolean",
+  focusUnit: oneOf(focusUnits),
   exportFormat: (value) => value === "html" || value === "pdf",
   writingFont: oneOf(Object.keys(writingFonts) as WritingFont[]),
   textSize: isTextSize,
