@@ -44,6 +44,13 @@ const theme = EditorView.theme({
   ".cm-hanging-heading": {
     textIndent: "calc(-1 * min(var(--hang) * 1ch, max(0px, (100cqw - var(--measure)) / 2)))",
   },
+  // Fenced code blocks (`markdownStyling.ts`). The shadows widen the background
+  // past the column without moving the text.
+  ".cm-code-line": {
+    backgroundColor: "var(--code-bg)",
+    boxShadow: "-0.75rem 0 0 var(--code-bg), 0.75rem 0 0 var(--code-bg)",
+  },
+  ".cm-code-first": { paddingTop: "2px" },
   // Drawn by CodeMirror (`drawSelection`), not WebKit; see decisions.md.
   ".cm-cursor, .cm-dropCursor": { borderLeft: "2px solid var(--caret)", marginLeft: "-1px" },
   ".cm-selectionBackground": { background: "var(--selection-inactive)" },

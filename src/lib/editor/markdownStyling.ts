@@ -89,4 +89,63 @@ const hangingHeadersPlugin = ViewPlugin.fromClass(
   { decorations: (v) => v.decorations },
 );
 
-export const markdownStyling = [syntaxHighlighting(style), hangingHeadersPlugin];
+/** The start of each line of each fenced code block in `ranges`, and whether it is the block's first or last line. */
+export function fencedCodeLines(state: EditorState, ranges: readonly { from: number; to: number }[]) {
+  const lines: { from: number; first: boolean; last: boolean }[] = [];
+  const doc = state.doc;
+  for (const { from, to } of ranges) {
+    syntaxTree(state).iterate({
+      from,
+      to,
+      mode: IterMode.IgnoreMounts,
+      enter(node) {
+        if (node.name !== "FencedCode") return;
+        const first = doc.lineAt(node.from).number;
+        const last = doc.lineAt(node.to).number;
+        for (let n = first; n <= last; n++) {
+          const line = doc.line(n);
+          // The viewport may start or end inside the block.
+          if (line.to < from || line.from > to) continue;
+          lines.push({ from: line.from, first: n === first, last: n === last });
+        }
+        return false;
+      },
+    });
+  }
+  return lines;
+}
+
+const codeLine = Decoration.line({ class: "cm-code-line" });
+const codeFirst = Decoration.line({ class: "cm-code-line cm-code-first" });
+const codeLast = Decoration.line({ class: "cm-code-line cm-code-last" });
+const codeOnly = Decoration.line({ class: "cm-code-line cm-code-first cm-code-last" });
+
+/** A light background behind fenced code blocks. */
+function codeBlocks(view: EditorView): DecorationSet {
+  const builder = new RangeSetBuilder<Decoration>();
+  for (const { from, first, last } of fencedCodeLines(view.state, view.visibleRanges)) {
+    builder.add(from, from, first && last ? codeOnly : first ? codeFirst : last ? codeLast : codeLine);
+  }
+  return builder.finish();
+}
+
+const codeBlocksPlugin = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+    constructor(view: EditorView) {
+      this.decorations = codeBlocks(view);
+    }
+    update(update: ViewUpdate) {
+      if (
+        update.docChanged ||
+        update.viewportChanged ||
+        syntaxTree(update.state) !== syntaxTree(update.startState)
+      ) {
+        this.decorations = codeBlocks(update.view);
+      }
+    }
+  },
+  { decorations: (v) => v.decorations },
+);
+
+export const markdownStyling = [syntaxHighlighting(style), hangingHeadersPlugin, codeBlocksPlugin];
