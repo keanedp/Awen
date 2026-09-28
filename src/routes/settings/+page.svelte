@@ -2,7 +2,7 @@
   import { onMount, tick } from "svelte";
   import { LogicalSize } from "@tauri-apps/api/dpi";
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-  import { setFormatEnabled, setMenuChecked } from "$lib/menu";
+  import { setFocusChecked, setFormatEnabled, setMenuChecked } from "$lib/menu";
   import { applyAccent, applyPlatform, type OS } from "$lib/platform";
   import {
     defaults,
@@ -16,6 +16,7 @@
     textSizes,
     viewChange,
     type ColumnWidth,
+    type FocusUnit,
     type LineSpacing,
     type Theme,
     type WritingFont,
@@ -48,6 +49,10 @@
     { value: "normal", label: "Normal" },
     { value: "loose", label: "Loose" },
   ];
+  const focusUnits: { value: FocusUnit; label: string }[] = [
+    { value: "sentence", label: "Sentence" },
+    { value: "paragraph", label: "Paragraph" },
+  ];
   // Each OS's own words for following the system.
   const themes = $derived<{ value: Theme; label: string }[]>([
     { value: "system", label: os === "windows" ? "Use system setting" : "Match System" },
@@ -61,6 +66,9 @@
   });
   $effect(() => {
     if (prefsLoaded) setMenuChecked("code_highlighting", prefs.codeHighlighting);
+  });
+  $effect(() => {
+    if (prefsLoaded) setFocusChecked(prefs);
   });
 
   /** Applies a setting here at once, so dragging and key repeats build on it, then in every window. */
@@ -189,6 +197,19 @@
             options={themes}
             label={os === "windows" ? "App theme" : "Appearance"}
             onchange={(v) => set("theme", v)}
+          />
+        </div>
+        <div class="row">
+          <span>Focus mode</span>
+          <Toggle checked={prefs.focusMode} label="Focus mode" onchange={(v) => set("focusMode", v)} />
+        </div>
+        <div class="row">
+          <span>Focus on</span>
+          <Choice
+            value={prefs.focusUnit}
+            options={focusUnits}
+            label="Focus on"
+            onchange={(v) => set("focusUnit", v)}
           />
         </div>
         <div class="row">

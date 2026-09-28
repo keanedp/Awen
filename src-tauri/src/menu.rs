@@ -19,6 +19,9 @@ pub const FORWARDED: &[&str] = &[
     "find_previous",
     "find_selection",
     "preview",
+    "focus_mode",
+    "focus_sentence",
+    "focus_paragraph",
     "word_count",
     "code_highlighting",
     "text_bigger",
@@ -238,6 +241,26 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
 
     let preview =
         CheckMenuItem::with_id(app, "preview", "Preview", true, false, Some("CmdOrCtrl+R"))?;
+    let focus_mode = CheckMenuItem::with_id(
+        app,
+        "focus_mode",
+        "Focus Mode",
+        true,
+        false,
+        Some("CmdOrCtrl+D"),
+    )?;
+    let focus_sentence =
+        CheckMenuItem::with_id(app, "focus_sentence", "Sentence", true, false, None::<&str>)?;
+    let focus_paragraph = CheckMenuItem::with_id(
+        app,
+        "focus_paragraph",
+        "Paragraph",
+        true,
+        false,
+        None::<&str>,
+    )?;
+    let focus_unit =
+        Submenu::with_items(app, "Focus On", true, &[&focus_sentence, &focus_paragraph])?;
     let word_count =
         CheckMenuItem::with_id(app, "word_count", "Word Count", true, false, None::<&str>)?;
     let code_highlighting = CheckMenuItem::with_id(
@@ -250,6 +273,9 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     )?;
     app.manage(CheckItems(HashMap::from([
         ("preview", preview.clone()),
+        ("focus_mode", focus_mode.clone()),
+        ("focus_sentence", focus_sentence.clone()),
+        ("focus_paragraph", focus_paragraph.clone()),
         ("word_count", word_count.clone()),
         ("code_highlighting", code_highlighting.clone()),
     ])));
@@ -260,6 +286,9 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         true,
         &[
             &preview,
+            &PredefinedMenuItem::separator(app)?,
+            &focus_mode,
+            &focus_unit,
             &PredefinedMenuItem::separator(app)?,
             // The text size preference, also set in Settings.
             &item("text_bigger", "Bigger", "CmdOrCtrl+=")?,

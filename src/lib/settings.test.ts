@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { defaults } from "./preferences";
 import {
+  activeFocusUnit,
   biggerText,
   defaultTextSize,
   isTextSize,
@@ -70,12 +71,26 @@ describe("writingStyle", () => {
   });
 });
 
+describe("activeFocusUnit", () => {
+  test("is the chosen unit only while focus mode is on", () => {
+    expect(activeFocusUnit({ focusMode: false, focusUnit: "paragraph" })).toBeNull();
+    expect(activeFocusUnit({ focusMode: true, focusUnit: "paragraph" })).toBe("paragraph");
+  });
+});
+
 describe("viewChange", () => {
   const prefs = { ...defaults, textSize: 20 };
 
   test("Word Count and Code Highlighting toggle", () => {
     expect(viewChange("word_count", prefs)).toEqual({ wordCount: !prefs.wordCount });
     expect(viewChange("code_highlighting", prefs)).toEqual({ codeHighlighting: !prefs.codeHighlighting });
+  });
+
+  test("Focus Mode toggles, and choosing what to focus on turns it on", () => {
+    expect(viewChange("focus_mode", prefs)).toEqual({ focusMode: true });
+    expect(viewChange("focus_mode", { ...prefs, focusMode: true })).toEqual({ focusMode: false });
+    expect(viewChange("focus_sentence", prefs)).toEqual({ focusMode: true, focusUnit: "sentence" });
+    expect(viewChange("focus_paragraph", prefs)).toEqual({ focusMode: true, focusUnit: "paragraph" });
   });
 
   test("Bigger, Smaller and Actual Size set the text size", () => {

@@ -3,6 +3,8 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, drawSelection, keymap } from "@codemirror/view";
 import { markdownWithCode } from "./code";
 import { find } from "./find";
+import type { FocusUnit } from "../settings";
+import { focusMode } from "./focus";
 import { markdownStyling } from "./markdownStyling";
 import { spellChecker, spelling, type SpellChecker } from "./spelling";
 
@@ -61,6 +63,8 @@ const theme = EditorView.theme({
     textDecorationSkipInk: "none",
     textUnderlineOffset: "3px",
   },
+  // Focus mode (W-017): what's outside the sentence or paragraph at the caret.
+  ".cm-unfocused": { opacity: "var(--unfocused-opacity)" },
   ".hl-keyword": muted("keyword"),
   ".hl-string": muted("string"),
   ".hl-literal": muted("literal"),
@@ -102,7 +106,8 @@ const checkSpelling = new Compartment();
  * `onSelect` runs when the text or the selection changes. `highlightCode`
  * turns on muted highlighting in fenced code blocks (`setCodeHighlighting`);
  * `spellcheck` marks misspellings (`setSpellcheck`) found by `spellChecker`,
- * the system's checker in the app.
+ * the system's checker in the app. `focus` dims all but the sentence or
+ * paragraph at the caret (`setFocusMode`).
  */
 export function createState(
   doc: string,
@@ -113,7 +118,8 @@ export function createState(
     highlightCode = false,
     spellcheck = true,
     checker,
-  }: { highlightCode?: boolean; spellcheck?: boolean; checker?: SpellChecker } = {},
+    focus = null,
+  }: { highlightCode?: boolean; spellcheck?: boolean; checker?: SpellChecker; focus?: FocusUnit | null } = {},
 ): EditorState {
   const blocked = (_: Event, view: EditorView) => {
     if (!view.state.readOnly) return false;
@@ -143,6 +149,7 @@ export function createState(
       EditorView.lineWrapping,
       checker ? spellChecker.of(checker) : [],
       checkSpelling.of(spellcheck ? spelling : []),
+      focusMode(focus),
       theme,
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.view);

@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-069**
+Next free ID: **W-070**
 
 ---
 
@@ -349,12 +349,18 @@ As a writer, I want to match case or whole words when I search, like other edito
 - [ ] The choices persist between launches (using W-020's preferences store)
 
 ### W-017 Focus mode
-Status: Todo · Platforms: all
+Status: Done · Platforms: macOS (Windows verification moved to W-069)
 As a writer, I want everything except the sentence or paragraph I'm writing to fade, so I can concentrate on the current thought.
-- [ ] View menu toggle with shortcut; choice of sentence or paragraph
-- [ ] Everything outside the focused unit is dimmed and follows the cursor as I type
-- [ ] Works in light and dark mode, and doesn't affect preview or exports
-- [ ] The on/off setting and sentence/paragraph choice persist between launches (using W-020's preferences store)
+- [x] View menu toggle with shortcut; choice of sentence or paragraph
+- [x] Everything outside the focused unit is dimmed and follows the cursor as I type
+- [x] Works in light and dark mode, and doesn't affect preview or exports
+- [x] The on/off setting and sentence/paragraph choice persist between launches (using W-020's preferences store)
+
+### W-069 Verify focus mode on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want W-017's focus mode to work in a real build.
+- [ ] View → Focus Mode (Ctrl+D) and Focus On ▸ Sentence / Paragraph work, with their checkmarks, and Ctrl+D doesn't clash with anything
+- [ ] Dimmed text reads well in light and dark mode
 
 ### W-018 Typewriter scrolling
 Status: Todo · Platforms: all

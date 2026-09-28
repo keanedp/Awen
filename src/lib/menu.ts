@@ -1,8 +1,19 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { Preferences } from "./preferences";
 
-/** Keeps a menu checkmark (View → Preview, Word Count, Code Highlighting) in step with the frontend. */
-export function setMenuChecked(id: "preview" | "word_count" | "code_highlighting", checked: boolean): Promise<void> {
+/** Keeps a menu checkmark (View → Preview, Focus Mode, Word Count, …) in step with the frontend. */
+export function setMenuChecked(
+  id: "preview" | "focus_mode" | "focus_sentence" | "focus_paragraph" | "word_count" | "code_highlighting",
+  checked: boolean,
+): Promise<void> {
   return invoke("set_menu_checked", { id, checked });
+}
+
+/** Restates View → Focus Mode and the Focus On unit's checkmark. */
+export function setFocusChecked({ focusMode, focusUnit }: Pick<Preferences, "focusMode" | "focusUnit">) {
+  setMenuChecked("focus_mode", focusMode);
+  setMenuChecked("focus_sentence", focusUnit === "sentence");
+  setMenuChecked("focus_paragraph", focusUnit === "paragraph");
 }
 
 /** Enables the Format menu (W-060) while the focused window's document can be edited. */

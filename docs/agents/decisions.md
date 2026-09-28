@@ -2,6 +2,12 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-28: Focus mode (W-017)
+
+- View → Focus Mode is ⌘D / Ctrl+D (free in CodeMirror's keymaps, which don't include `searchKeymap`'s Mod-d). View → Focus On ▸ Sentence / Paragraph are check items, since Tauri has no radio items; choosing one also turns focus mode on, so the choice is visible. Settings has both too.
+- A paragraph is the Markdown block at the caret, from the parse tree, extended to whole lines: each heading, paragraph, list item, quote's text, code block or table is its own. Runs of non-blank lines were tried first and lumped headings written without blank lines between them (or a heading and the text under it) into one. A sentence comes from `Intl.Segmenter` on the caret's line only, so sentences end at line breaks: each list item and heading is one, and a hard-wrapped paragraph's sentences break at its line ends (Awen soft-wraps, so this is rare). On a blank line nothing is focused and everything dims.
+- Dimming is `opacity` on a mark decoration (`--unfocused-opacity`), not a colour, so the markup/code colour hierarchy survives inside dimmed text. No fade on caret moves: the marks are rebuilt, not transitioned.
+
 ## 2026-09-27: Preview dissolves in and out
 - Preview fades in over the editor (180ms, rising 6px) and fades out to reveal it (140ms). A dissolve reads as the same document changing form; a slide would suggest a separate page. Leaving is quicker because the writer wants to get back to typing.
 - Reduce Motion keeps the fade and drops the rise, as macOS and Windows themselves swap movement for dissolves rather than cutting.
