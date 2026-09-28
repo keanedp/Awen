@@ -35,11 +35,6 @@ const theme = EditorView.theme({
     margin: "0 auto",
     padding: "2rem 2rem 40vh",
   },
-  // Typewriter scrolling (W-018): room for the first and last lines to reach the middle.
-  "&.cm-typewriter .cm-content": {
-    paddingTop: "var(--typewriter-inset, 2rem)",
-    paddingBottom: "var(--typewriter-inset, 40vh)",
-  },
   ".cm-line": { position: "relative", padding: "0" },
   // A heading's marker hangs into the space beside the column, but
   // only as far as there is room, so in a narrow window it pushes the heading text in

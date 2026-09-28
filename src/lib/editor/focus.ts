@@ -136,9 +136,16 @@ export function focusMode(unit: DimmedUnit | null): Extension {
   return focus.of(unit ? fields[unit] : off);
 }
 
-/** Turns focus mode on or off, or changes its unit, in an open editor. */
+/**
+ * Turns focus mode on or off, or changes its unit, in an open editor. The text
+ * stays where it is: turning it on or off rewraps nearly every line at once,
+ * and WebKit moves the scroll position while CodeMirror does that (Chrome
+ * doesn't), so it's put back before the frame is drawn.
+ */
 export function setFocusMode(view: EditorView, unit: DimmedUnit | null) {
   const wanted = unit ? fields[unit] : off;
   if (focus.get(view.state) === wanted) return;
+  const { scrollTop } = view.scrollDOM;
   view.dispatch({ effects: focus.reconfigure(wanted) });
+  if (view.scrollDOM.scrollTop !== scrollTop) view.scrollDOM.scrollTop = scrollTop;
 }

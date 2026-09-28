@@ -1,6 +1,14 @@
-import { EditorSelection, type SelectionRange, type Transaction, type TransactionSpec } from "@codemirror/state";
+import {
+  EditorSelection,
+  type EditorState,
+  type SelectionRange,
+  type Transaction,
+  type TransactionSpec,
+} from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 import { describe, expect, test } from "vitest";
 import { createState } from "./setup";
+import { setInset, toggleTypewriter } from "./typewriter";
 
 const text = "First line.\nSecond line.\nThird line.";
 
@@ -17,10 +25,10 @@ function apply(spec: TransactionSpec, typewriter = true): Transaction {
 
 /** Where each scroll effect in `tr` puts the view: the position and how it's aligned. */
 function scrolls(tr: Transaction): { head: number; y: string }[] {
-  return tr.effects.map((e) => {
-    const { range, y } = e.value as { range: SelectionRange; y: string };
-    return { head: range.head, y };
-  });
+  return tr.effects
+    .map((e) => e.value as { range?: SelectionRange; y?: string })
+    .filter(({ range }) => range)
+    .map(({ range, y }) => ({ head: range!.head, y: y! }));
 }
 
 describe("typewriter scrolling", () => {
@@ -52,5 +60,55 @@ describe("typewriter scrolling", () => {
 
   test("leaves CodeMirror's own scrolling alone when off", () => {
     expect(apply({ selection: { anchor: 20 }, scrollIntoView: true }, false).effects).toEqual([]);
+  });
+});
+
+describe("the padding that lets the first and last lines reach the middle", () => {
+  /** The inline style typewriter scrolling puts on `.cm-content`, if any. */
+  const padding = (state: EditorState) =>
+    state
+      .facet(EditorView.contentAttributes)
+      .map((attrs) => (typeof attrs === "function" ? null : attrs.style))
+      .find(Boolean);
+
+  test("is applied by CodeMirror once measured, and goes when typewriter scrolling is turned off", () => {
+    let state = createState(
+      text,
+      () => {},
+      () => {},
+      undefined,
+      { typewriter: true },
+    );
+    expect(padding(state)).toBeUndefined();
+    state = state.update({ effects: setInset.of(300) }).state;
+    expect(padding(state)).toBe("padding-top: 300px; padding-bottom: 300px");
+    state = state.update(toggleTypewriter(state, false)!).state;
+    expect(padding(state)).toBeUndefined();
+  });
+
+  test("turning it off moves neither the caret nor the text", () => {
+    const state = createState(
+      text,
+      () => {},
+      () => {},
+      undefined,
+      { typewriter: true },
+    ).update({
+      selection: { anchor: 20 },
+    }).state;
+    const tr = state.update(toggleTypewriter(state, false)!);
+    expect(tr.newSelection.main.head).toBe(20);
+    expect(scrolls(tr)).toEqual([]);
+  });
+
+  test("toggling to the current setting does nothing", () => {
+    const state = createState(
+      text,
+      () => {},
+      () => {},
+      undefined,
+      { typewriter: true },
+    );
+    expect(toggleTypewriter(state, true)).toBeNull();
   });
 });
