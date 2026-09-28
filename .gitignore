@@ -47,3 +47,6 @@ npm-debug.log*
 Thumbs.db
 
 /dev_screenshots/
+
+# Headroom wrapper state
+.claude/.headroom_wrap_*
