@@ -26,8 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      release_id: ${{ steps.release.outputs.id }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,10 +37,10 @@ jobs:
 
       # Reuses the release if it already exists, so a failed run can be re-run.
       # Drafts aren't found by tag through the API, so look them up in the list.
-      # A new draft can be missing from that list for a moment, so take its id
-      # from the create call instead of looking it up again.
+      # A new draft can be missing from that list for a moment, so check the
+      # create call's result, not a second lookup. The builds find the draft by
+      # tag minutes later, when it's listed.
       - name: Create the draft release
-        id: release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -54,8 +52,7 @@ jobs:
             id=$(gh api "repos/$GH_REPO/releases" -f tag_name="$TAG" -f name="Awen ${TAG#v}" \
               -F draft=true -F prerelease="$prerelease" -F generate_release_notes=true --jq .id)
           fi
-          if [ -z "$id" ]; then echo "::error::No release id for $TAG"; exit 1; fi
-          echo "id=$id" >> "$GITHUB_OUTPUT"
+          if [ -z "$id" ]; then echo "::error::No release for $TAG"; exit 1; fi
 
   build:
     needs: prepare
@@ -104,13 +101,21 @@ jobs:
 
       # macOS builds are ad-hoc signed (bundle.macOS.signingIdentity "-").
       # Developer ID signing and notarization (W-035) will pass APPLE_* secrets here.
-      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
+      - run: npm run tauri build -- --target ${{ matrix.target }}
+
+      # Only the installers. (tauri-action was dropped because it always adds
+      # a .app.tar.gz, which is only useful to the updater, W-071.)
+      # --clobber replaces them when a failed run is re-run.
+      - name: Upload the installers
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          releaseId: ${{ needs.prepare.outputs.release_id }}
-          args: --target ${{ matrix.target }}
-          uploadUpdaterJson: false
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BUNDLE: src-tauri/target/${{ matrix.target }}/release/bundle
+        run: |
+          shopt -s nullglob
+          files=("$BUNDLE"/dmg/*.dmg "$BUNDLE"/nsis/*-setup.exe "$BUNDLE"/msi/*.msi)
+          if [ ${#files[@]} -eq 0 ]; then echo "::error::No installers in $BUNDLE"; exit 1; fi
+          gh release upload "$TAG" "${files[@]}" --clobber
 
       # GitHub only stores attestations for public repos (or organization-owned
       # private ones), so this repo gets them once it's public.

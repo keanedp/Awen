@@ -194,7 +194,7 @@ Details:
 - **Version:** `package.json` holds it; `tauri.conf.json` reads it (`"version": "../package.json"`). `scripts/version.mjs` copies it into `package-lock.json`, `Cargo.toml` and `Cargo.lock` (`set`) and checks they agree (`check`).
 - **Cutting a release:** `make release VERSION=x.y.z` bumps, runs the tests, commits and tags `vX.Y.Z` locally. Pushing the tag runs `release.yml`:
   - `prepare` checks the tag against every version copy, then creates a draft release (or reuses it on a re-run);
-  - `build` runs tauri-action per target (macOS arm64, macOS x64 cross-built on the arm runner, Windows x64), uploads to that draft, and attests the installers' provenance.
+  - `build` runs `tauri build` per target (macOS arm64, macOS x64 cross-built on the arm runner, Windows x64), uploads only the installers (`.dmg`, `-setup.exe`, `.msi`) to that draft with `gh release upload --clobber`, and attests their provenance once the repo is public.
   - Publishing the draft is manual.
 - **CI:** `ci.yml` runs on PRs and `main`, on macOS and Windows: tests, svelte-check, frontend build, `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`. It's the only place the Windows code gets compiled.
 - Actions are pinned to commit SHAs; Dependabot (`.github/dependabot.yml`) bumps them weekly.

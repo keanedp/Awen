@@ -8,7 +8,8 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 - **Releases start as drafts.** A tag builds everything, but nothing is public until someone checks the draft and publishes it.
 - **macOS builds are ad-hoc signed** (`bundle.macOS.signingIdentity: "-"`, so local builds match). Unsigned downloads on Apple silicon get "Awen is damaged", which has no workaround a user can find. Ad-hoc signed ones get the "can't be opened" prompt the README explains. Developer ID signing (W-035) overrides this with the `APPLE_SIGNING_IDENTITY` env var.
 - **`package.json` is the version source**, since `tauri.conf.json` can point at it. The Cargo copies are kept in step by a script, not by hand.
-- **No auto-updater yet.** It needs its own signing keypair and some UI. `uploadUpdaterJson` is off until then.
+- **No auto-updater yet** (W-071). It needs its own signing keypair, some UI, and a public place to download from.
+- **`tauri build` + `gh release upload`, not tauri-action.** tauri-action always uploads a `.app.tar.gz`, which only the updater uses, and has no setting to stop it. Its only other job here was running `tauri build`. Reconsider it for W-071, since it also writes the updater's `latest.json`.
 - Provenance attestations let people verify the unsigned downloads (`gh attestation verify <file> -R keanedp/Awen`) until W-035. GitHub refuses them for a private repo owned by a personal account, so the step only runs once the repo is public.
 
 ## 2026-09-28: Typewriter scrolling (W-018)

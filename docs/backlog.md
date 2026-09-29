@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-071**
+Next free ID: **W-072**
 
 ---
 
@@ -483,14 +483,27 @@ As a user, I want to install Awen without security warnings.
 - [ ] Windows installer signed
 - [ ] Release steps documented in `docs/agents/` (signing keys stay out of git)
 
-Builds already come from `.github/workflows/release.yml` (W-070). Signing means adding the `APPLE_*` secrets (in a `release` environment) to its tauri-action step and a Windows signing step, and replacing the ad-hoc `signingIdentity`.
+Builds already come from `.github/workflows/release.yml` (W-070). Signing means adding the `APPLE_*` secrets (in a `release` environment) to its `tauri build` step and a Windows signing step, and replacing the ad-hoc `signingIdentity`.
 
 ### W-070 Automated release builds
-Status: In progress (agent) · Platforms: macOS, Windows
+Status: Needs verification (downloads on macOS and Windows) · Platforms: macOS, Windows
 As a maintainer, I want pushing a version tag to build the installers, so releasing doesn't depend on my machine.
 - [x] The version lives in `package.json`; `make release VERSION=x.y.z` updates the other copies, commits and tags
 - [x] CI (tests, svelte-check, fmt, clippy, cargo test) is green on macOS and Windows
-- [ ] Pushing `vX.Y.Z` creates a draft release with the arm64 and x64 DMGs, the setup `.exe` and the `.msi`, named as in the README
-- [ ] Downloads open as the README describes (ad-hoc signed on macOS) and carry build provenance attestations
+- [x] Pushing `vX.Y.Z` creates a draft release with the arm64 and x64 DMGs, the setup `.exe` and the `.msi`, named as in the README
+- [ ] Downloads open as the README describes (ad-hoc signed on macOS)
 
-CI passes on both OSes. The release workflow hasn't run yet (it needs a tag pushed after merge).
+`v0.1.0` built and uploaded all four installers. Provenance attestations are skipped until the repo is public (GitHub refuses them for a personal account's private repo).
+
+### W-071 Automatic updates
+Status: Todo · Platforms: macOS, Windows
+As a user, I want Awen to tell me about a new version and install it, so I don't have to download it by hand.
+- [ ] `tauri-plugin-updater` checks `latest.json` from the latest GitHub release (`releases/latest/download/latest.json`)
+- [ ] Updates are signed with a Tauri updater key: public key in `tauri.conf.json`, private key and password only in GitHub secrets (never in git)
+- [ ] `release.yml` builds updater artifacts (`bundle.createUpdaterArtifacts`), uploads the `.sig` files and the `.app.tar.gz`, and publishes `latest.json` for all three targets
+- [ ] A Check for Updates… menu item (Awen menu on macOS, Help menu on Windows) and a quiet check at launch
+- [ ] A native dialog offers Install and Relaunch or Later. Installing goes through the same unsaved-changes prompts as Quit
+- [ ] A Settings toggle turns the launch check off
+- [ ] An update installed on macOS opens without the Gatekeeper prompt (check on a real Mac)
+
+Blocked until release downloads are public: assets of a private repo's releases need a GitHub login, so installed copies can't fetch `latest.json`. Either make the repo public or publish releases to a public repo or CDN.
