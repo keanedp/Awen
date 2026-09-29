@@ -2,15 +2,13 @@
 
 **A calm place to write.** Awen is a focused Markdown editor for macOS and Windows. It's just you, your words and a clean column of text. There are no toolbars full of buttons, no accounts and no cloud lock-in. Your writing stays in plain `.md` files that you own and that open anywhere.
 
-Awen is built to feel like it belongs on your computer. On a Mac it looks and behaves like a Mac app. On Windows it looks and behaves like a Windows 11 app.
-
 ![Awen](./screenshots/awen-marketing.png "Awen")
 
 ---
 
 ## Why Awen
 
-- **Distraction-free by design.** Text sits in a centred column about 66 characters wide, set in GitHub's Monaspace Neon typeface (or Argon, Radon or the system monospace, in Settings). Markdown marks like `#` and `*` fade into the background, and headings hang into the margin, so the page reads like prose and not like code.
+- **Distraction-free by design.** Text sits in a centered column about 66 characters wide, set in GitHub's Monaspace Neon typeface (or Argon, Radon or the system monospace, in Settings). Markdown marks like `#` and `*` fade into the background, and headings hang into the margin, so the page reads like prose and not like code.
 - **Plain files, no lock-in.** Awen opens and saves ordinary Markdown files. It even keeps each file's original line endings, so saving never rewrites a file you didn't change.
 - **Never lose your work.** Awen asks before closing a document with unsaved changes, including when you quit, log out or restart.
 - **Native on every platform.** Awen uses real system menus, your system accent colour, light and dark mode, and your platform's keyboard shortcuts.
@@ -172,7 +170,7 @@ Check the draft on the Releases page, then publish it.
    - A new menu item needs its id in `src-tauri/src/menu.rs` (`FORWARDED`) **and** a handler in the page's `actions` map.
    - Read document text with `documentText()`, never `doc.toString()`.
    - markdown-it stays `html: false`.
-   - Style with CSS tokens, not hard-coded colours, so per-OS themes and dark mode keep working.
+   - Style with CSS tokens, not hard-coded colors, so per-OS themes and dark mode keep working.
 4. **Update the knowledge base.** If you learn something non-obvious, record it in `docs/agents/` in the same change.
 5. **Help with Windows.** Many stories are waiting for verification on a real Windows build (`Needs verification`). Testing them there is one of the most useful contributions right now.
 
