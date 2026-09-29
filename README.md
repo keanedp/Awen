@@ -40,9 +40,6 @@ Awen is built to feel like it belongs on your computer. On a Mac it looks and be
 
 ![Settings Screenshot](./screenshots/settings.png "Settings")
 
-### Coming soon
-Focus mode, typewriter scrolling, a library sidebar with full-text search, and Awen on iPhone, iPad and Android. See [`docs/backlog.md`](docs/backlog.md) for the full roadmap.
-
 ---
 
 ## Download and install
