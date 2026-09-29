@@ -69,7 +69,7 @@ export function writingStyle(
   ].join("; ");
 }
 
-/** What focus mode keeps undimmed (`null` for none), and whether it keeps the line centred. */
+/** What focus mode keeps undimmed (`null` for none), and whether it keeps the line centerd. */
 export function activeFocus(prefs: Pick<Preferences, "focusMode" | "focusUnit">): {
   dim: DimmedUnit | null;
   typewriter: boolean;

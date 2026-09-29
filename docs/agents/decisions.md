@@ -14,15 +14,15 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 
 ## 2026-09-28: Typewriter scrolling (W-018)
 
-- Typewriter is focus mode's third choice: View → Focus On ▸ Sentence / Paragraph / Typewriter are mutually exclusive (`focusUnit`), and Focus Mode (⌘D) turns the chosen one on and off. Typewriter centres the line and dims nothing; Sentence and Paragraph dim and don't centre. A separate Typewriter Scrolling toggle (first with ⌘T, then in the Focus On submenu) was tried and dropped: the user wanted the three to be one exclusive choice. Settings' "Focus on" has the same three.
-- The caret line is centred wherever CodeMirror would scroll the caret into view (typing, keyboard moves, undo, find), and after a click or drag. Mouse selections centre on release, not as the selection changes: scrolling mid-drag would move the text under the pointer. Leaving clicks alone until the next key was tried first; it felt wrong, since the caret had moved but the line hadn't.
+- Typewriter is focus mode's third choice: View → Focus On ▸ Sentence / Paragraph / Typewriter are mutually exclusive (`focusUnit`), and Focus Mode (⌘D) turns the chosen one on and off. Typewriter centers the line and dims nothing; Sentence and Paragraph dim and don't center. A separate Typewriter Scrolling toggle (first with ⌘T, then in the Focus On submenu) was tried and dropped: the user wanted the three to be one exclusive choice. Settings' "Focus on" has the same three.
+- The caret line is centerd wherever CodeMirror would scroll the caret into view (typing, keyboard moves, undo, find), and after a click or drag. Mouse selections center on release, not as the selection changes: scrolling mid-drag would move the text under the pointer. Leaving clicks alone until the next key was tried first; it felt wrong, since the caret had moved but the line hadn't.
 - The top and bottom padding is measured (half the scroller less half a line), not `50vh`, so a document opens with its first line already in the middle and nothing jumps on the first keystroke. The scroll is instant, like CodeMirror's own; no easing.
 
 ## 2026-09-28: Focus mode (W-017)
 
 - View → Focus Mode is ⌘D / Ctrl+D (free in CodeMirror's keymaps, which don't include `searchKeymap`'s Mod-d). View → Focus On ▸ Sentence / Paragraph are check items, since Tauri has no radio items; choosing one also turns focus mode on, so the choice is visible. Settings has both too.
 - A paragraph is the Markdown block at the caret, from the parse tree, extended to whole lines: each heading, paragraph, list item, quote's text, code block or table is its own. Runs of non-blank lines were tried first and lumped headings written without blank lines between them (or a heading and the text under it) into one. A sentence comes from `Intl.Segmenter` on the caret's line only, so sentences end at line breaks: each list item and heading is one, and a hard-wrapped paragraph's sentences break at its line ends (Awen soft-wraps, so this is rare). On a blank line nothing is focused and everything dims.
-- Dimming is `opacity` on a mark decoration (`--unfocused-opacity`), not a colour, so the markup/code colour hierarchy survives inside dimmed text. No fade on caret moves: the marks are rebuilt, not transitioned.
+- Dimming is `opacity` on a mark decoration (`--unfocused-opacity`), not a color, so the markup/code color hierarchy survives inside dimmed text. No fade on caret moves: the marks are rebuilt, not transitioned.
 
 ## 2026-09-27: Preview dissolves in and out
 - Preview fades in over the editor (180ms, rising 6px) and fades out to reveal it (140ms). A dissolve reads as the same document changing form; a slide would suggest a separate page. Leaving is quicker because the writer wants to get back to typing.
@@ -53,12 +53,12 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 ## 2026-09-26: Preview, print and exports are set in the system font
 - The editor stays in Classic Mono, but the rendered document uses the OS's own text font (`--font-preview`): SF on macOS, Segoe UI Variable on Windows. The design goal is to look native, and the finished page reads better in a proportional face than in the draft's semi-monospace. `preview.css` styles preview, print, PDF and HTML export alike, so they all follow.
 - Inter was tried first (it's close to SF and would look the same on every OS). Dropped because it made HTML exports ~620 KB, and on macOS static Inter lacks SF's automatic optical sizes.
-- Trade-off accepted: output isn't identical everywhere. A PDF carries the font of the machine that made it, and an HTML export shows in the reader's system font, because SF and Segoe UI can't be embedded (their licences forbid redistribution).
+- Trade-off accepted: output isn't identical everywhere. A PDF carries the font of the machine that made it, and an HTML export shows in the reader's system font, because SF and Segoe UI can't be embedded (their licenses forbid redistribution).
 - The export's stack names fonts explicitly (`-apple-system`, `"Segoe UI"`, Roboto…) rather than starting with `system-ui`: on Windows, `system-ui` can resolve to a locale-specific UI font (e.g. Yu Gothic UI in Japanese) with poor Latin text, which is why GitHub dropped it.
 
-## 2026-09-26: HTML export carries the font licence notice
+## 2026-09-26: HTML export carries the font license notice
 - Superseded: the export no longer embeds any fonts (see above), so there's no notice. If fonts are ever embedded again, the reasoning below still applies.
-- The export embeds the Classic Mono files as data URLs, and anyone can pull them back out, so each export arguably redistributes the fonts. OFL 1.1 condition 2 wants the copyright notice and licence with every copy, and allows a human-readable header. So a short CSS comment (`fontNotice` in `export/html.ts`) with both copyright holders and a link to the OFL goes before the `@font-face` rules. The OFL FAQ says a link is enough for web fonts, so the full licence text isn't embedded.
+- The export embeds the Classic Mono files as data URLs, and anyone can pull them back out, so each export arguably redistributes the fonts. OFL 1.1 condition 2 wants the copyright notice and license with every copy, and allows a human-readable header. So a short CSS comment (`fontNotice` in `export/html.ts`) with both copyright holders and a link to the OFL goes before the `@font-face` rules. The OFL FAQ says a link is enough for web fonts, so the full license text isn't embedded.
 - The document itself needs no credit: the OFL doesn't cover documents made with the fonts. Don't remove the notice to save bytes (~200 of ~235 KB). If the fonts are ever subset or modified, its Reserved Font Name can no longer be used for the family name.
 
 ## 2026-09-26: The app is called Awen
@@ -68,16 +68,16 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 
 ## 2026-09-26: Format menu (W-060)
 - The groups and shortcuts are listed under W-060 in `backlog.md`. Headings take ⌘1–⌘6 (as in Bear and Typora; ⌘0 is Actual Size), lists have no shortcuts yet. Blockquote is ⌘> on macOS; on Windows, Ctrl+Shift+. .
-- Italic writes `*`, bold `**`, as the preview's markdown-it reads them anywhere, even inside a word (`_` doesn't work there). Both `*` and `_` are recognised when removing a style.
+- Italic writes `*`, bold `**`, as the preview's markdown-it reads them anywhere, even inside a word (`_` doesn't work there). Both `*` and `_` are recognized when removing a style.
 - Every style is a toggle, and runs of `*` are read by count (three = bold and italic), so bold and italic can be added and removed independently.
 - Highlight writes `==text==`, rendered by `markdown-it-mark`. It isn't CommonMark, but it's what Obsidian and Bear write.
-- The menu is disabled in preview and on a locked document, rather than offering to unlock as typing does: a menu command the user can see is greyed out explains itself.
+- The menu is disabled in preview and on a locked document, rather than offering to unlock as typing does: a menu command the user can see is grayed out explains itself.
 - On Windows, Strikethrough and Clear Styles use Ctrl+Alt, which is AltGr on some keyboard layouts. Check this in W-060's Windows verification.
 
 ## 2026-09-26: The editor draws spelling marks with the system checker (W-057)
 - WebKit's continuous spell checking kept marks on the text nodes CodeMirror rewrites, and only rechecks the word just typed, so misspellings vanished as you wrote (`screenshots/spellcheck.png`). Neither side can be configured out of that.
 - So Rust asks `NSSpellChecker` / `ISpellChecker` (the same dictionaries, learned words and language settings as other apps), and the editor draws the marks and the suggestions menu. Marks now also behave the same on both OSes.
-- WebKit's autocorrect and automatic capitalisation go with it (CodeMirror's defaults turn them off). In a Markdown file they changed text you didn't ask to change; if they're missed, add a separate setting rather than turning WebKit's checking back on.
+- WebKit's autocorrect and automatic capitalization go with it (CodeMirror's defaults turn them off). In a Markdown file they changed text you didn't ask to change; if they're missed, add a separate setting rather than turning WebKit's checking back on.
 - Only the viewport is checked, after a 400ms pause. Checking the whole document on every edit would cost more than the marks you can't see are worth.
 
 ## 2026-09-26: What the settings window (W-021) holds
@@ -114,15 +114,15 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 
 ## 2026-09-26: CodeMirror draws the caret and selection, not WebKit
 - With the native caret, deleting a fence's backticks left a second, stale caret painted at the old spot, sometimes until something else repainted it (`Inspiration/cursor.png`). The text updated at once and the main thread was idle (Web Inspector timeline). Changing the line's syntax makes CodeMirror replace the line's DOM, and WebKit doesn't erase the caret it had drawn there.
-- `drawSelection()` draws both as DOM in the same update as the text, so they can't lag. The trade-off is a less native caret: its colour, width (2px) and blink (CodeMirror's 1.2s cycle) are ours to match. Typing, IME and the clipboard stay native (spell checking has since moved to the editor for a similar reason, W-057). Tried and rejected: keeping the native caret and re-setting the DOM selection whenever a redraw removed the caret's node (what CodeMirror's `forceSelection` does for Chrome and iOS). WebKit redrew the new caret but still left the stale one.
+- `drawSelection()` draws both as DOM in the same update as the text, so they can't lag. The trade-off is a less native caret: its color, width (2px) and blink (CodeMirror's 1.2s cycle) are ours to match. Typing, IME and the clipboard stay native (spell checking has since moved to the editor for a similar reason, W-057). Tried and rejected: keeping the native caret and re-setting the DOM selection whenever a redraw removed the caret's node (what CodeMirror's `forceSelection` does for Chrome and iOS). WebKit redrew the new caret but still left the stale one.
 
 ## 2026-09-25: Editor code highlighting is muted, not a second palette
-- W-045 reuses preview's `--code-*` colours mixed 45% with `--text-muted` (`color-mix` in `editor/setup.ts`), rather than its own tokens, so the two views stay recognisably the same and one palette change moves both. Comments aren't italic in the editor, and headings or invalid code aren't styled, to keep the column calm.
+- W-045 reuses preview's `--code-*` colors mixed 45% with `--text-muted` (`color-mix` in `editor/setup.ts`), rather than its own tokens, so the two views stay recognizably the same and one palette change moves both. Comments aren't italic in the editor, and headings or invalid code aren't styled, to keep the column calm.
 - It's a View menu toggle rather than always on, because most documents here are prose.
 
 ## 2026-09-25: Code blocks are highlighted in preview only, with Lezer parsers
 - Typora highlights code in the editor. Awen highlights in preview, print and exports, where code is read and shared, and leaves the editor calm. Muted editor highlighting is W-045 and off by default.
-- Lezer parsers (`@codemirror/language-data`) rather than highlight.js or Shiki: the editor already uses Lezer, so W-045 can share the same parsers and `--code-*` colours and the two views match. language-data also gives ~150 languages, loaded on demand as separate chunks.
+- Lezer parsers (`@codemirror/language-data`) rather than highlight.js or Shiki: the editor already uses Lezer, so W-045 can share the same parsers and `--code-*` colors and the two views match. language-data also gives ~150 languages, loaded on demand as separate chunks.
 - The cost is that loading is async while markdown-it is sync, so callers await `loadCodeLanguages` before rendering (see architecture.md).
 
 ## 2026-09-25: Local images load through the asset protocol, scoped to document folders

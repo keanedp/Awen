@@ -57,7 +57,7 @@
   /* Fenced code blocks in the editor. */
   --code-bg: rgb(0 0 0 / 0.05);
   --selection: rgb(0 122 255 / 0.2);
-  /* The selection when the editor isn't focused, grey as in native text views. */
+  /* The selection when the editor isn't focused, gray as in native text views. */
   --selection-inactive: rgb(0 0 0 / 0.1);
   --caret: #19a0e6;
   --accent: #0a84ff;

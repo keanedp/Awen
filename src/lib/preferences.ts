@@ -25,7 +25,7 @@ import {
 export interface Preferences {
   /** View → Word Count: the footer with words and reading time. */
   wordCount: boolean;
-  /** View → Code Highlighting: muted colours in the editor's fenced code blocks. */
+  /** View → Code Highlighting: muted colors in the editor's fenced code blocks. */
   codeHighlighting: boolean;
   /** View → Focus Mode: dims all but the sentence or paragraph being written. */
   focusMode: boolean;

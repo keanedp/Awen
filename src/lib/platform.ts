@@ -17,7 +17,7 @@ export function applyPlatform(): OS {
 }
 
 /**
- * Feeds the system accent colour to the token files. Read natively (see
+ * Feeds the system accent color to the token files. Read natively (see
  * src-tauri/src/accent.rs), so call it again when the window comes forward.
  */
 export async function applyAccent() {

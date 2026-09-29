@@ -55,21 +55,21 @@ Status: Done · Platforms: macOS, Windows
 As a Mac or Windows user, I want the app to look and behave like other apps on my system.
 - [x] Native menu bar with platform conventions (app menu and Quit on macOS; Exit in File on Windows)
 - [x] macOS: inline traffic lights, draggable title area; Windows: native title bar
-- [x] System UI font, accent colour and scrollbar style per OS
+- [x] System UI font, accent color and scrollbar style per OS
 - [x] No text selection or web context menu on app chrome
 
 ### W-050 Pasting keeps the file's line endings
 Status: Done · Platforms: macOS (Windows verification moved to W-052)
 As a writer, I want pasted text to use my document's line endings, so a file never ends up with mixed or broken lines.
 - [x] Pasting LF text into a CRLF file, or CRLF text into an LF file, gives proper lines in the file's own line ending, with no stray `\r` or `\n` (`matchLineBreaks`, a `clipboardInputFilter` in `editor/setup.ts`)
-- [x] Dropped text is normalised too (CodeMirror runs drops through the same filter)
+- [x] Dropped text is normalized too (CodeMirror runs drops through the same filter)
 - [x] The paste tests in `src/lib/editor/setup.test.ts` pass as ordinary tests
 - [x] Verified in the app: paste CRLF text into an LF file and LF into a CRLF file, save, and check the bytes (e.g. `od -c`) on macOS (`test_files/lf.md` and `crlf.md`)
 
 ### W-055 The caret keeps up when editing fences
 Status: Needs verification · Platforms: macOS, Windows
 As a writer, I want the caret to move as soon as I type or delete, including on code fence lines.
-- [x] CodeMirror draws the caret and selection (`drawSelection()`), in `--caret` and `--selection` colours, grey when the editor isn't focused
+- [x] CodeMirror draws the caret and selection (`drawSelection()`), in `--caret` and `--selection` colors, gray when the editor isn't focused
 - [ ] Verified on macOS: deleting and typing a fence's backticks moves the caret at once; caret and selection look right in light and dark mode, while typing, selecting by mouse and keyboard, with the find bar focused, and with the window in the background
 - [ ] Verified on Windows
 
@@ -78,18 +78,18 @@ Status: Needs verification · Platforms: Windows
 As a Windows user, I want W-050's paste fix to work in a real build.
 - [ ] Paste CRLF text into `test_files/lf.md` and LF text into `test_files/crlf.md`, save, and check neither file has mixed endings (e.g. `Format-Hex`, or `git diff` showing no `^M` changes)
 
-### W-048 Follow the system accent colour
+### W-048 Follow the system accent color
 Status: Done · Platforms: macOS (Windows verification moved to W-049)
-As a writer, I want the app's highlights to use the accent colour I picked in System Settings / Windows Settings, not a fixed blue.
+As a writer, I want the app's highlights to use the accent color I picked in System Settings / Windows Settings, not a fixed blue.
 - [x] Accent read natively (`accent_colors`: `NSColor.controlAccentColor` / `UISettings`), since WKWebView reports `-apple-system-control-accent` as blue and WebView2 has no CSS for it
 - [x] Used for the pressed Preview button, focus rings (including the preview's top edge), links and checked task boxes, in light and dark mode
 - [x] A change in settings shows up when the window next comes forward
 - [x] Windows: WinUI accent roles (fill, text, and black on the accent in dark mode) (code written, see W-049)
 - [x] Verified on macOS
 
-### W-049 Verify the system accent colour on Windows
+### W-049 Verify the system accent color on Windows
 Status: Needs verification · Platforms: Windows
-As a Windows user, I want the W-048 accent colours to work in a real build.
+As a Windows user, I want the W-048 accent colors to work in a real build.
 - [ ] Compiles on Windows (`accent::win`, never built; needs the `UI` and `UI_ViewManagement` features)
 - [ ] Pressed Preview button, links, checked task boxes (black tick in dark mode) and the find field underline follow the Windows accent, in light and dark mode
 
@@ -177,20 +177,20 @@ As a writer, I want fenced code blocks with a language (```` ```js ````) to be s
 - [x] A small, muted palette from `--code-*` tokens, with light, dark and print variants
 - [x] Highlighter output is escaped text only (markdown-it stays `html: false`)
 - [x] Verified on macOS: preview, print, PDF and HTML export in light and dark mode
-- [ ] Verified on Windows (including whether PDF export keeps the code colours)
+- [ ] Verified on Windows (including whether PDF export keeps the code colors)
 
 ### W-045 Muted code highlighting in the editor
 Status: Done · Platforms: macOS (Windows verification moved to W-054)
 As a writer of technical documents, I want code inside fenced blocks to be lightly highlighted in the editor, so I can read it while I write.
-- [x] Uses the same Lezer parsers and `--code-*` colours as preview (W-044), via CodeMirror's `codeLanguages` (`editor/code.ts`, unit tested in `editor/code.test.ts`)
-- [x] Muted: much lower contrast than preview, so code never competes with the prose or the dimmed Markdown marks (each colour mixed 45% with `--text-muted`)
+- [x] Uses the same Lezer parsers and `--code-*` colors as preview (W-044), via CodeMirror's `codeLanguages` (`editor/code.ts`, unit tested in `editor/code.test.ts`)
+- [x] Muted: much lower contrast than preview, so code never competes with the prose or the dimmed Markdown marks (each color mixed 45% with `--text-muted`)
 - [x] Off by default, toggled from View → Code Highlighting; the setting persists (using W-020's preferences store)
-- [x] Verified in the app on macOS: toggle on and off with the checkmark in step across windows, colours look muted in light and dark mode, a language loads the first time its fence appears, the setting survives a relaunch
+- [x] Verified in the app on macOS: toggle on and off with the checkmark in step across windows, colors look muted in light and dark mode, a language loads the first time its fence appears, the setting survives a relaunch
 
 ### W-054 Verify editor code highlighting on Windows
 Status: Needs verification · Platforms: Windows
 As a Windows user, I want W-045's muted code highlighting to work in a real build.
-- [ ] View → Code Highlighting toggles it with the checkmark in step across windows; colours look muted in light and dark mode; the setting survives a relaunch
+- [ ] View → Code Highlighting toggles it with the checkmark in step across windows; colors look muted in light and dark mode; the setting survives a relaunch
 
 ### W-019 Word count and reading time
 Status: Done · Platforms: macOS (Windows verification moved to W-051)
@@ -273,7 +273,7 @@ As a Windows user, I want W-063's font setting and W-065's fonts to work in a re
 Status: Done · Platforms: macOS (Windows verification moved to W-064)
 As a writer, I want to pick the editor's font, so I can write in the face I like best.
 - [x] Settings → Font: Classic Mono (the default), Monaspace Neon, Monaspace Radon or System Monospace (SF Mono on macOS, Cascadia Mono or Consolas on Windows); in Settings only, not the View menu
-- [x] Monaspace Neon and Radon are bundled as variable fonts (`static/fonts/monaspace/`, SIL OFL, licence beside them)
+- [x] Monaspace Neon and Radon are bundled as variable fonts (`static/fonts/monaspace/`, SIL OFL, license beside them)
 - [x] Only the editor changes; preview, print, PDF and HTML export keep the system font
 - [x] Monaspace's code ligatures (`!=`, `...`, `://`) are off so the Markdown source stays visible; texture healing stays on
 - [x] Applies live in all windows and persists between launches (unit tested in `settings.test.ts`, `preferences.test.ts`)
@@ -315,7 +315,7 @@ Status: Needs verification · Platforms: Windows
 As a Windows user, I want W-060's Format menu to work in a real build (its menu code has never been compiled or run on Windows).
 - [ ] Format sits between Edit and View; every item works from the menu and its Ctrl shortcut (Blockquote is Ctrl+Shift+.)
 - [ ] Ctrl+Alt+U (Strikethrough) and Ctrl+Alt+Backspace (Clear Styles) don't clash with AltGr on keyboard layouts that use it (e.g. German, Polish)
-- [ ] The items are greyed out in preview, on a locked document and in Settings; each change is one undo step and keeps CRLF line endings
+- [ ] The items are grayed out in preview, on a locked document and in Settings; each change is one undo step and keeps CRLF line endings
 - [ ] `==highlight==` shows highlighted in preview, HTML export, PDF and print
 
 ### W-060 Format menu
@@ -339,7 +339,7 @@ As a writer, I want a Format menu that applies Markdown formatting to the select
 Status: Todo · Platforms: all
 As a writer, I want more Format menu items, once W-060's basic formatting is done.
 - [ ] Add Footnote ⌃⌘K, and footnotes render in preview and exports
-- [ ] Add Table, Add Date, Add Page Break (honoured in print and PDF), Add Table of Contents
+- [ ] Add Table, Add Date, Add Page Break (honored in print and PDF), Add Table of Contents
 - [ ] Decide whether Structure ▸, Add Wikilink, Add Content Block and Add Hashtag fit Awen (they depend on library features, see W-030), and record the decision in `decisions.md`
 
 ### W-046 Find options
@@ -369,7 +369,7 @@ As a writer, I want the line I'm typing to stay vertically centered, so my eyes 
 - [x] The cursor line stays centered while typing and moving the cursor
 - [x] Works together with focus mode (as its third choice, beside Sentence and Paragraph)
 - [x] The on/off setting persists between launches (using W-020's preferences store)
-- [ ] Verified by running the app on macOS: View → Focus On ▸ Typewriter and its checkmark (Sentence / Paragraph / Typewriter exclusive), ⌘D turning it off and on, the line centred while typing, with arrow keys, after clicking or drag-selecting (not during the drag), and at the first and last lines, resizing the window, the find bar open
+- [ ] Verified by running the app on macOS: View → Focus On ▸ Typewriter and its checkmark (Sentence / Paragraph / Typewriter exclusive), ⌘D turning it off and on, the line centerd while typing, with arrow keys, after clicking or drag-selecting (not during the drag), and at the first and last lines, resizing the window, the find bar open
 - [ ] Verified on Windows
 
 ### W-023 Recent files and open with

@@ -26,7 +26,7 @@ tauri-plugin-dialog = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-opener = "2"
 
-# Native export panel and PDF output (src/export.rs), title popover (src/rename.rs), accent colour (src/accent.rs).
+# Native export panel and PDF output (src/export.rs), title popover (src/rename.rs), accent color (src/accent.rs).
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
 block2 = "0.6"

@@ -9,7 +9,7 @@ import { markdownStyling } from "./markdownStyling";
 import { spellChecker, spelling, type SpellChecker } from "./spelling";
 import { typewriterScrolling } from "./typewriter";
 
-/** Code highlighting in the editor (W-045): preview's colours, mixed well towards the muted code text. */
+/** Code highlighting in the editor (W-045): preview's colors, mixed well towards the muted code text. */
 const muted = (name: string) => ({ color: `color-mix(in srgb, var(--code-${name}) 45%, var(--text-muted))` });
 
 const theme = EditorView.theme({
@@ -27,7 +27,7 @@ const theme = EditorView.theme({
   ".cm-scroller": {
     fontFamily: "inherit",
     lineHeight: "var(--writing-line-height)",
-    // For `.cm-hanging-heading`: 100cqw is the width the column is centred in.
+    // For `.cm-hanging-heading`: 100cqw is the width the column is centerd in.
     containerType: "inline-size",
   },
   ".cm-content": {
@@ -84,7 +84,7 @@ const theme = EditorView.theme({
   ".hl-deleted": muted("deleted"),
 });
 
-/** Files keep their original line endings; CodeMirror otherwise normalises to "\n". */
+/** Files keep their original line endings; CodeMirror otherwise normaliz to "\n". */
 function detectLineSeparator(text: string): string {
   return text.includes("\r\n") ? "\r\n" : "\n";
 }

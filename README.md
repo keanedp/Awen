@@ -11,7 +11,7 @@
 - **Distraction-free by design.** Text sits in a centered column about 66 characters wide, set in GitHub's Monaspace Neon typeface (or Argon, Radon or the system monospace, in Settings). Markdown marks like `#` and `*` fade into the background, and headings hang into the margin, so the page reads like prose and not like code.
 - **Plain files, no lock-in.** Awen opens and saves ordinary Markdown files. It even keeps each file's original line endings, so saving never rewrites a file you didn't change.
 - **Never lose your work.** Awen asks before closing a document with unsaved changes, including when you quit, log out or restart.
-- **Native on every platform.** Awen uses real system menus, your system accent colour, light and dark mode, and your platform's keyboard shortcuts.
+- **Native on every platform.** Awen uses real system menus, your system accent color, light and dark mode, and your platform's keyboard shortcuts.
 
 ## Features
 
@@ -112,7 +112,7 @@ How it fits together:
 - **Native menus drive the app.** Rust builds the menu bar and forwards each menu item's id to the focused window. The page then dispatches it through an `actions` map.
 - **One document per window.** Rust keeps track of which file each window shows. It also handles opening files from Finder or Explorer, Open Recent, and quitting in order so each window can prompt about unsaved changes.
 - **Preferences** are stored as JSON in the app data folder and broadcast to every window, so a change applies everywhere at once.
-- **Platform-specific parts are native code**: the macOS export sheet and title popover, PDF export, the system spell checker and the accent colour.
+- **Platform-specific parts are native code**: the macOS export sheet and title popover, PDF export, the system spell checker and the accent color.
 
 The detailed design notes live in [`docs/agents/`](docs/agents/):
 - [`architecture.md`](docs/agents/architecture.md) explains how the pieces connect.
@@ -176,6 +176,6 @@ Check the draft on the Releases page, then publish it.
 
 AI coding agents (Claude Code, Codex and others) are welcome. [`AGENTS.md`](AGENTS.md) is written for them as well as for people.
 
-### Licence
+### License
 
 Awen is released under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later; see `LICENSE`). The bundled Monaspace fonts are licensed under the SIL Open Font License (see `static/fonts/monaspace/LICENSE`).

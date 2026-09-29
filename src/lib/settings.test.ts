@@ -77,7 +77,7 @@ describe("activeFocus", () => {
     expect(activeFocus({ focusMode: false, focusUnit: "typewriter" })).toEqual({ dim: null, typewriter: false });
   });
 
-  test("Sentence and Paragraph dim; Typewriter centres the line instead", () => {
+  test("Sentence and Paragraph dim; Typewriter centers the line instead", () => {
     expect(activeFocus({ focusMode: true, focusUnit: "sentence" })).toEqual({ dim: "sentence", typewriter: false });
     expect(activeFocus({ focusMode: true, focusUnit: "paragraph" })).toEqual({ dim: "paragraph", typewriter: false });
     expect(activeFocus({ focusMode: true, focusUnit: "typewriter" })).toEqual({ dim: null, typewriter: true });

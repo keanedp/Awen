@@ -8,7 +8,7 @@ import { codeHighlighter, codeLanguage } from "../preview/highlight";
 /**
  * Muted highlighting of code in fenced blocks (W-045), off by default. When on,
  * fences are parsed with the same Lezer parsers and `hl-*` classes as preview,
- * loaded on demand; `setup.ts`'s theme mutes the colours. When off, code isn't parsed.
+ * loaded on demand; `setup.ts`'s theme mutes the colors. When off, code isn't parsed.
  */
 const off = markdown({ base: markdownLanguage });
 const on = [

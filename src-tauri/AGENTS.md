@@ -12,7 +12,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - `src/preferences.rs`: app-wide preferences, persisted to `preferences.json` in the app data dir; `set_preference` broadcasts `preference-changed` to every window. Applies the `theme` preference to the app.
 - `src/settings.rs`: the Settings window (`show`, opened hidden; the page shows it once sized).
 - `src/spelling.rs`: the system spell checker for the editor's marks (`NSSpellChecker` / `ISpellChecker`): check, suggestions, learn, ignore. Synchronous commands, so they run on the main thread.
-- `src/accent.rs`: `accent_colors`, the system accent fill and text colours for light and dark (`NSColor.controlAccentColor` / `UISettings`), read by `applyAccent()` in `platform.ts`.
+- `src/accent.rs`: `accent_colors`, the system accent fill and text colors for light and dark (`NSColor.controlAccentColor` / `UISettings`), read by `applyAccent()` in `platform.ts`.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
 - `capabilities/default.json`: permissions for plugin and core APIs used by document windows; `capabilities/settings.json` for the Settings window.
 - `tauri.conf.json`: window config (Overlay title bar on macOS), CSP, bundle settings.
@@ -41,7 +41,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 
 ## App icon
 - `src-tauri/icons/` is generated from a rounded source in the repo's `icons/` folder: `npm run tauri icon icons/<name>_rounded.png`.
-- A rounded source comes from a square, full-bleed 1254px artwork. It follows the macOS icon grid: the art is scaled to 824px, masked to a rounded rectangle with a 185px radius, then centred on a transparent 1024 canvas (100px margin):
+- A rounded source comes from a square, full-bleed 1254px artwork. It follows the macOS icon grid: the art is scaled to 824px, masked to a rounded rectangle with a 185px radius, then centerd on a transparent 1024 canvas (100px margin):
   `magick in.png -resize 824x824 \( -size 824x824 xc:black -fill white -draw "roundrectangle 0,0 823,823 185,185" \) -alpha off -compose CopyOpacity -composite -compose Over -background none -gravity center -extent 1024x1024 out_rounded.png`
 
 ## Windows

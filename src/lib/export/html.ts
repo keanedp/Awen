@@ -2,7 +2,7 @@ import previewCss from "../../styles/preview.css?raw";
 import { loadCodeLanguages } from "$lib/preview/highlight";
 import { renderMarkdown } from "$lib/preview/render";
 
-// The exported page carries its own colour tokens so it looks the same in any browser.
+// The exported page carries its own color tokens so it looks the same in any browser.
 // It is set in the reader's system font: nothing is embedded, since SF and Segoe UI can't be redistributed.
 const pageCss = `
 :root {

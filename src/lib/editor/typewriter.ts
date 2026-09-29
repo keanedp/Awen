@@ -12,27 +12,27 @@ import { EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view";
 /**
  * Typewriter scrolling (W-018): the caret's line stays in the middle of the
  * editor. Wherever CodeMirror would scroll the caret into view (typing, keys
- * that move it, undo, find), it's centred instead. A click or drag centres it
+ * that move it, undo, find), it's centerd instead. A click or drag centers it
  * once the button is released, so the text doesn't move under the pointer
  * while selecting.
  */
 
-const centre = (head: number) => EditorView.scrollIntoView(head, { y: "center" });
+const center = (head: number) => EditorView.scrollIntoView(head, { y: "center" });
 
-/** Centres the caret, rather than just bringing it into view. */
-const centreCaret = EditorState.transactionExtender.of((tr: Transaction) =>
-  tr.scrollIntoView ? { effects: centre(tr.newSelection.main.head) } : null,
+/** Centers the caret, rather than just bringing it into view. */
+const centerCaret = EditorState.transactionExtender.of((tr: Transaction) =>
+  tr.scrollIntoView ? { effects: center(tr.newSelection.main.head) } : null,
 );
 
 /**
- * Centres the caret when a mouse button pressed in the editor is released.
+ * Centers the caret when a mouse button pressed in the editor is released.
  * CodeMirror ends its own mouse selection on `document`, so by the time this
  * `window` listener runs the selection is final.
  */
-const centreOnRelease = EditorView.domEventHandlers({
+const centerOnRelease = EditorView.domEventHandlers({
   mousedown(event, view) {
     if (event.button !== 0) return false;
-    window.addEventListener("mouseup", () => view.dispatch({ effects: centre(view.state.selection.main.head) }), {
+    window.addEventListener("mouseup", () => view.dispatch({ effects: center(view.state.selection.main.head) }), {
       once: true,
     });
     return false;
@@ -56,7 +56,7 @@ const insetField = StateField.define<number>({
 
 /**
  * Pads the text above and below by half the editor's height, less half a line,
- * so the first and last lines can reach the middle too, and centres the caret
+ * so the first and last lines can reach the middle too, and centers the caret
  * whenever that changes: when typewriter scrolling comes on and when the window
  * is resized.
  */
@@ -80,7 +80,7 @@ const inset = ViewPlugin.fromClass(
           // The editor can't be updated while it's measuring.
           queueMicrotask(() => {
             if (this.destroyed) return;
-            view.dispatch({ effects: [setInset.of(px), centre(view.state.selection.main.head)] });
+            view.dispatch({ effects: [setInset.of(px), center(view.state.selection.main.head)] });
           });
         },
       });
@@ -93,7 +93,7 @@ const inset = ViewPlugin.fromClass(
 );
 
 const typewriter = new Compartment();
-const on: Extension = [centreCaret, centreOnRelease, insetField, inset];
+const on: Extension = [centerCaret, centerOnRelease, insetField, inset];
 const off: Extension = [];
 
 /** Typewriter scrolling, on or off. */

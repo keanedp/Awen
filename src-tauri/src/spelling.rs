@@ -114,7 +114,7 @@ mod imp {
     /// A checker for the user's language, or US English if Windows has no dictionary for it.
     unsafe fn create() -> Result<ISpellChecker> {
         unsafe {
-            // Already initialised on the main thread (tao); this only makes sure.
+            // Already initialized on the main thread (tao); this only makes sure.
             let _ = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
             let factory: ISpellCheckerFactory =
                 CoCreateInstance(&SpellCheckerFactory, None, CLSCTX_INPROC_SERVER)?;

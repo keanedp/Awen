@@ -27,7 +27,7 @@ Verify with `npm test`, `npm run check`, `cargo clippy`, and by running the app.
 - Native menu items drive the app: add the id in `src-tauri/src/menu.rs` (`FORWARDED`) **and** a handler in the `actions` map in `+page.svelte`.
 - Read document text with `documentText()`, never `doc.toString()`. It preserves the file's original line endings.
 - markdown-it stays `html: false`. Rendered content runs in a webview with IPC access.
-- Style with the CSS tokens (`var(--surface)`, `bg-surface`, …), not hard-coded colours, so per-OS themes and dark mode keep working.
+- Style with the CSS tokens (`var(--surface)`, `bg-surface`, …), not hard-coded colors, so per-OS themes and dark mode keep working.
 - Mark app chrome with the `.chrome` class (no selection, no web context menu).
 - Write American English (color, center, behavior) in all docs, internal and public: README, `docs/`, AGENTS.md, comments and UI text.
 - New features and bug fixes come with unit tests for their logic. Keep that logic out of `+page.svelte` and Svelte components, in plain modules that can be tested. See "Tests" in `docs/agents/architecture.md`.

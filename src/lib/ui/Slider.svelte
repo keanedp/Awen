@@ -61,7 +61,7 @@
     height: 24px;
     touch-action: none;
   }
-  /* Bits positions the range, ticks and thumb horizontally (with `translate`); these centre them vertically. */
+  /* Bits positions the range, ticks and thumb horizontally (with `translate`); these center them vertically. */
   .track,
   .slider :global(.range) {
     top: 50%;

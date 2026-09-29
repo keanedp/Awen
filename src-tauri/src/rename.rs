@@ -488,7 +488,7 @@ mod macos {
         item
     }
 
-    /// The current folder, then the usual Finder favourites, then Other….
+    /// The current folder, then the usual Finder favorites, then Other….
     fn place_popup(current: &str, mtm: MainThreadMarker) -> Retained<NSPopUpButton> {
         let popup =
             NSPopUpButton::initWithFrame_pullsDown(NSPopUpButton::alloc(mtm), NSRect::ZERO, false);

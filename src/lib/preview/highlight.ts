@@ -6,7 +6,7 @@ import { highlightCode, tagHighlighter, tags as t } from "@lezer/highlight";
  * Syntax highlighting for fenced code blocks in preview, print and exports,
  * and (muted, W-045) in the editor. Both use these Lezer parsers and classes,
  * so they match. A small palette keeps code calm next to the prose; the
- * colours are `--code-*` tokens in preview.css.
+ * colors are `--code-*` tokens in preview.css.
  */
 export const codeHighlighter = tagHighlighter([
   { tag: t.keyword, class: "hl-keyword" },

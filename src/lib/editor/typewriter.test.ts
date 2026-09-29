@@ -32,7 +32,7 @@ function scrolls(tr: Transaction): { head: number; y: string }[] {
 }
 
 describe("typewriter scrolling", () => {
-  test("centres the caret after typing", () => {
+  test("centers the caret after typing", () => {
     const tr = apply({
       changes: { from: 5, insert: "!" },
       selection: { anchor: 6 },
@@ -41,12 +41,12 @@ describe("typewriter scrolling", () => {
     expect(scrolls(tr)).toEqual([{ head: 6, y: "center" }]);
   });
 
-  test("centres the caret when a key moves it", () => {
+  test("centers the caret when a key moves it", () => {
     const tr = apply({ selection: { anchor: 20 }, scrollIntoView: true });
     expect(scrolls(tr)).toEqual([{ head: 20, y: "center" }]);
   });
 
-  test("centres a selection's moving end", () => {
+  test("centers a selection's moving end", () => {
     const tr = apply({
       selection: EditorSelection.range(30, 14),
       scrollIntoView: true,
@@ -54,7 +54,7 @@ describe("typewriter scrolling", () => {
     expect(scrolls(tr)).toEqual([{ head: 14, y: "center" }]);
   });
 
-  test("doesn't scroll while the mouse is selecting; it centres on release", () => {
+  test("doesn't scroll while the mouse is selecting; it centers on release", () => {
     expect(apply({ selection: { anchor: 20 }, userEvent: "select.pointer" }).effects).toEqual([]);
   });
 

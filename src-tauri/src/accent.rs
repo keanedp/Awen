@@ -1,4 +1,4 @@
-//! The system accent colour, for the web UI's `--accent` token.
+//! The system accent color, for the web UI's `--accent` token.
 //!
 //! WKWebView resolves `-apple-system-control-accent` to a fixed blue unless the
 //! (private) system-appearance mode is on, and WebView2 doesn't expose the
@@ -6,8 +6,8 @@
 
 use serde::Serialize;
 
-/// CSS colours for the light and dark appearance: `light`/`dark` fill controls,
-/// `text_*` colour accent text such as links. macOS uses one colour for both;
+/// CSS colors for the light and dark appearance: `light`/`dark` fill controls,
+/// `text_*` color accent text such as links. macOS uses one color for both;
 /// Windows 11 uses different shades of the accent (WinUI's `AccentFillColorDefault`
 /// and `AccentTextFillColorPrimary`).
 #[derive(Serialize)]
@@ -19,7 +19,7 @@ pub struct Accent {
     text_dark: String,
 }
 
-/// The accent colour from System Settings / Windows Settings. None elsewhere.
+/// The accent color from System Settings / Windows Settings. None elsewhere.
 #[tauri::command]
 pub fn accent_colors() -> Option<Accent> {
     #[cfg(target_os = "macos")]

@@ -198,8 +198,8 @@ mod system {
         use windows::Win32::UI::Shell::{ApplicationDestinations, IApplicationDestinations};
 
         unsafe {
-            // Usually already initialised on the main thread; balance only our own call.
-            let initialised = CoInitializeEx(None, COINIT_APARTMENTTHREADED).is_ok();
+            // Usually already initialized on the main thread; balance only our own call.
+            let initialized = CoInitializeEx(None, COINIT_APARTMENTTHREADED).is_ok();
             if let Ok(destinations) = CoCreateInstance::<_, IApplicationDestinations>(
                 &ApplicationDestinations,
                 None,
@@ -207,7 +207,7 @@ mod system {
             ) {
                 let _ = destinations.RemoveAllDestinations();
             }
-            if initialised {
+            if initialized {
                 CoUninitialize();
             }
         }

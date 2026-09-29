@@ -80,10 +80,10 @@
   background: none;
 }
 
-/* Code highlighting (src/lib/preview/highlight.ts). A few muted colours, so code
+/* Code highlighting (src/lib/preview/highlight.ts). A few muted colors, so code
    stays calm next to the prose. Defined here rather than in the app tokens
    because HTML export and print use this file too. On :root, so the editor's
-   muted highlighting (W-045, editor/setup.ts) mixes from the same colours. */
+   muted highlighting (W-045, editor/setup.ts) mixes from the same colors. */
 :root {
   --code-keyword: #9a3f86;
   --code-string: #3b7a3e;
