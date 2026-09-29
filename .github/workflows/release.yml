@@ -65,8 +65,10 @@ jobs:
             target: aarch64-apple-darwin
           - os: macos-latest
             target: x86_64-apple-darwin
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
+          # Windows releases are paused until the Windows build is ready.
+          # Uncomment to ship the setup .exe and .msi again (CI still builds it).
+          # - os: windows-latest
+          #   target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write

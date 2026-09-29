@@ -1,6 +1,6 @@
 # Awen
 
-**A calm place to write.** Awen is a focused Markdown editor for macOS and Windows. It's just you, your words and a clean column of text. There are no toolbars full of buttons, no accounts and no cloud lock-in. Your writing stays in plain `.md` files that you own and that open anywhere.
+**A calm place to write.** Awen is a focused Markdown editor for macOS, with Windows coming soon. It's just you, your words and a clean column of text. There are no toolbars full of buttons, no accounts and no cloud lock-in. Your writing stays in plain `.md` files that you own and that open anywhere.
 
 ![Awen](./screenshots/awen-marketing.png "Awen")
 
@@ -64,14 +64,9 @@ Download the latest version for your system from this repository's **Releases** 
 > If there's no **Open Anyway** button, or macOS says Awen "is damaged", run this in Terminal, then open Awen again:
 > `xattr -dr com.apple.quarantine /Applications/Awen.app`
 
-### Windows (Windows 10 or 11)
-1. Download `Awen_<version>_x64-setup.exe` (or the `.msi` if you prefer).
-2. Run the installer and follow the steps.
-3. Start Awen from the Start menu. `.md` files can now be opened with Awen.
+### Windows
 
-> **SmartScreen:** the installer isn't signed yet, so Windows may show "Windows protected your PC". Click **More info → Run anyway**.
->
-> Windows support is newer than macOS support, and some features are still being checked on real Windows machines. If something looks wrong, please open an issue.
+Coming soon. Awen builds on Windows, but it doesn't feel native enough there yet, so there's no Windows download for now. If you'd like to help get it ready, see [Contributing](#contributing).
 
 ### Keyboard shortcuts
 
@@ -155,7 +150,7 @@ GitHub Actions runs the same checks on macOS and Windows for every pull request.
 
 ```sh
 make release VERSION=0.2.0         # bump the version, test, commit and tag v0.2.0
-git push origin HEAD v0.2.0        # builds the installers into a draft GitHub release
+git push origin HEAD v0.2.0        # builds the macOS installers into a draft GitHub release
 ```
 
 Check the draft on the Releases page, then publish it.

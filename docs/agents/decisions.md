@@ -2,6 +2,9 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-29: Releases are macOS only for now
+The Windows build still feels janky, so `release.yml` no longer builds it and the README says Windows is coming soon. CI still compiles and tests Windows on every PR so it doesn't rot. To resume, uncomment the Windows matrix entry and restore the README's Windows install steps (see git history).
+
 ## 2026-09-29: Windows menu bar: native popups from HTML titles (W-073)
 - Turning off decorations for the custom title bar also hid the native menu bar, so Windows had no visible menus. The title bar now shows File, Edit, Format, View and Window, as the Windows 11 Notepad and Paint title bars do. Each one opens the real menu from `menu.rs` as a native popup.
 - Going back to native decorations was rejected: it loses the preview button and the Windows 11 look. Drawing the menus in HTML was rejected too: it would duplicate `menu.rs` (checkmarks, disabled items, Open Recent) and wouldn't look native.
