@@ -2,6 +2,7 @@ mod accent;
 mod documents;
 mod export;
 mod menu;
+mod menubar;
 mod preferences;
 mod recent;
 mod rename;
@@ -138,6 +139,7 @@ pub fn run() {
             print_page,
             set_menu_checked,
             set_format_enabled,
+            menubar::track_menu_bar,
             preferences::preferences,
             preferences::set_preference,
             note_recent_document,

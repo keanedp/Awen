@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import type { OS } from "$lib/platform";
+  import MenuBar from "./MenuBar.svelte";
   import ToolbarButton from "./ToolbarButton.svelte";
 
   let {
@@ -108,7 +109,10 @@
   </header>
 {:else if os === "windows"}
   <header class="titlebar windows chrome" class:inactive={!focused} data-tauri-drag-region>
-    <span class="title">{dirty ? "*" : ""}{name} - Awen</span>
+    <div class="lead" data-tauri-drag-region>
+      <MenuBar />
+      <span class="title">{dirty ? "*" : ""}{name} - Awen</span>
+    </div>
     <div class="actions">
       {@render previewButton()}
       <div class="captions">
@@ -187,10 +191,10 @@
     right: 8px;
   }
 
-  /* Windows 11: left-aligned title, caption buttons flush right. */
+  /* Windows 11: menus and title on the left, caption buttons flush right. */
   .windows {
     justify-content: space-between;
-    padding-left: 12px;
+    padding-left: 4px;
     font-size: 12px;
     background: var(--chrome);
     color: var(--text);
@@ -201,6 +205,15 @@
   }
   .windows .actions {
     gap: 4px;
+  }
+  .lead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .windows.inactive .lead {
+    color: var(--text-muted);
   }
   .captions {
     display: flex;

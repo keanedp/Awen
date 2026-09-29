@@ -121,6 +121,15 @@ As a Windows 11 user, I want hovering the maximize button to show Snap Layouts, 
 - [ ] Snap Layouts flyout appears when hovering maximize (needs native hit-testing of that button region)
 - [ ] Custom title bar otherwise unchanged
 
+### W-073 Menu bar on Windows
+Status: Needs verification · Platforms: Windows
+As a Windows user, I want a menu bar in the title bar that works like a native one, since the custom title bar hides the native menu bar.
+- [x] File, Edit, Format, View and Window at the left of the title bar, each opening the native menu from `menu.rs` as a popup under it
+- [x] With a menu open, hovering another title or pressing Left/Right (at the edge of the menu) switches to that menu; clicking the open menu's title closes it
+- [x] Alt+F / E / O / V / W open a menu; tapping Alt or F10 highlights the bar (Left/Right/Home/End move, Enter/Up/Down or a letter opens, Esc/F10/Alt leave); Esc in a menu closes it and keeps its title highlighted
+- [x] Access keys are underlined only while the keyboard drives the bar
+- [ ] Verified on Windows: all of the above; menu commands, shortcuts (Ctrl+S, …) and Open Recent still work; View checkmarks follow Preview; Format is grayed out in preview; tapping Alt doesn't also enter some invisible native menu mode; the title bar still drags and the caption buttons still work
+
 ### W-011 See task lists as checkboxes
 Status: Done · Platforms: macOS, Windows
 As a writer, I want `- [ ]` and `- [x]` to show as checkboxes in preview and exports.

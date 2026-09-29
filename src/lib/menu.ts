@@ -33,3 +33,15 @@ export function setFormatEnabled(enabled: boolean): Promise<void> {
 export function noteRecentDocument(path: string): Promise<void> {
   return invoke("note_recent_document", { path });
 }
+
+/** A Windows menu title's box in the web view (`getBoundingClientRect()`), for `trackMenuBar`. */
+export type MenuTitleBox = { name: string; left: number; top: number; right: number; bottom: number };
+
+/**
+ * Opens the menu at `open` under its title and lets the pointer and arrow keys
+ * move between menus until one closes (Windows, W-073). Resolves to the
+ * index of the title to keep highlighted when Esc closed the menu, else null.
+ */
+export function trackMenuBar(titles: MenuTitleBox[], open: number): Promise<number | null> {
+  return invoke("track_menu_bar", { titles, open });
+}

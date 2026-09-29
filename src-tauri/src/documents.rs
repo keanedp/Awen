@@ -123,10 +123,15 @@ fn open_window(app: &AppHandle, path: Option<String>, text: Option<String>) -> R
             builder = builder.position(x, y);
         }
     }
-    builder.build().map_err(|e| {
+    let _window = builder.build().map_err(|e| {
         forget_window(app, &label);
         format!("Could not open a window: {e}")
     })?;
+    // The title bar draws the menu bar (menubar.rs). Take the native one off
+    // the window, which has no frame to show it in, so Alt doesn't put an
+    // invisible menu bar in menu mode. Its shortcuts and commands still work.
+    #[cfg(windows)]
+    let _ = _window.hide_menu();
     Ok(())
 }
 

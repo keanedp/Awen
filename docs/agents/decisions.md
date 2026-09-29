@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-29: Windows menu bar: native popups from HTML titles (W-073)
+- Turning off decorations for the custom title bar also hid the native menu bar, so Windows had no visible menus. The title bar now shows File, Edit, Format, View and Window, as the Windows 11 Notepad and Paint title bars do. Each one opens the real menu from `menu.rs` as a native popup.
+- Going back to native decorations was rejected: it loses the preview button and the Windows 11 look. Drawing the menus in HTML was rejected too: it would duplicate `menu.rs` (checkmarks, disabled items, Open Recent) and wouldn't look native.
+- Plain popups don't behave like a menu bar: hovering the next title or pressing Right doesn't switch menus. So `menubar.rs` rebuilds that with a message filter hook around the popups, the technique WTL's CommandBar uses, rather than accepting the gap.
+
 ## 2026-09-28: Release builds on GitHub Actions (W-070)
 
 - **One DMG per architecture, not universal.** The README already lists `aarch64` and `x64` DMGs, and each is about half the size of a universal build.

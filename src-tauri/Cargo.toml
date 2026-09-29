@@ -71,6 +71,8 @@ webview2-com = "0.38"
 windows = { version = "0.61", features = ["Win32_Globalization", "Win32_System_Com", "Win32_UI_Shell", "UI", "UI_ViewManagement"] }
 # Explorer starts a second process per opened file; this forwards it (src/lib.rs).
 tauri-plugin-single-instance = "2"
+# The version muda and tao already use (src/menubar.rs).
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Graphics_Gdi", "Win32_System_Threading", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
