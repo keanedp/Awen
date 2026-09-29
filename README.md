@@ -54,7 +54,17 @@ Download the latest version for your system from this repository's **Releases** 
 2. Open the `.dmg` and drag **Awen** into your **Applications** folder.
 3. Eject the disk image, then open Awen from Applications or Launchpad.
 
-> **First launch:** Awen isn't notarized by Apple yet, so macOS may say it "can't be opened". Right-click (or Control-click) Awen in Applications, choose **Open**, then click **Open** again. You only need to do this once. On macOS 15 and later, go to **System Settings → Privacy & Security** and click **Open Anyway**.
+> **First launch:** Awen isn't notarized by Apple yet, so macOS blocks it the first time. You only need to do this once.
+>
+> **macOS 15 (Sequoia) and later:**
+> 1. Open Awen. When macOS says it can't verify Awen, click **Done**.
+> 2. Within the hour, go to **System Settings → Privacy & Security**, scroll down to **Security**, and click **Open Anyway** next to the message about Awen. Enter your password.
+> 3. Open Awen again and click **Open Anyway**.
+>
+> **macOS 14 and earlier:** right-click (or Control-click) Awen in Applications, choose **Open**, then click **Open** again.
+>
+> If there's no **Open Anyway** button, or macOS says Awen "is damaged", run this in Terminal, then open Awen again:
+> `xattr -dr com.apple.quarantine /Applications/Awen.app`
 
 ### Windows (Windows 10 or 11)
 1. Download `Awen_<version>_x64-setup.exe` (or the `.msi` if you prefer).
