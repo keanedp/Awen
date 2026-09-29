@@ -59,6 +59,9 @@ Download the latest version for your system from this repository's **Releases** 
 > **macOS 15 (Sequoia) and later:**
 > 1. Open Awen. When macOS says it can't verify Awen, click **Done**.
 > 2. Within the hour, go to **System Settings → Privacy & Security**, scroll down to **Security**, and click **Open Anyway** next to the message about Awen. Enter your password.
+>
+>    ![The Open Anyway button in Privacy & Security](./screenshots/mac_security_notice.png "Open Anyway")
+>
 > 3. Open Awen again and click **Open Anyway**.
 >
 > **macOS 14 and earlier:** right-click (or Control-click) Awen in Applications, choose **Open**, then click **Open** again.
