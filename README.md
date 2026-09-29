@@ -4,6 +4,8 @@
 
 Awen is built to feel like it belongs on your computer. On a Mac it looks and behaves like a Mac app. On Windows it looks and behaves like a Windows 11 app.
 
+![Awen](./screenshots/awen-marketing.png "Awen")
+
 ---
 
 ## Why Awen
