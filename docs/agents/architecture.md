@@ -12,7 +12,7 @@ How the parts of Awen connect. File-level detail is discoverable from the code; 
 
 ## Tests
 
-- **Vitest** runs `src/**/*.test.ts` in Node, with no DOM or Tauri (`npm test`). Its config is the `test` key in `vite.config.js`, so `$lib` imports resolve. Test files sit next to the module they test.
+- **Vitest** runs `src/**/*.test.ts` (and `scripts/**/*.test.ts`) in Node, with no DOM or Tauri (`npm test`). Its config is the `test` key in `vite.config.js`, so `$lib` imports resolve. Test files sit next to the module they test.
 - **Rust** unit tests go in a `#[cfg(test)] mod tests` at the bottom of the file they test and run with `cargo test`. `#[cfg(windows)]` code can't be tested here (see gotchas.md).
 - **Every feature or fix ships with tests for its logic.** The story's acceptance criteria are the checklist: each one that can be checked without a window gets a test. Put new logic in a plain module (like `editor/tasks.ts`), not in `+page.svelte` or a component, and keep the page to wiring (dispatching, focus, dialogs). If existing logic you're changing is still in the page, move it out first.
 - What tests can't cover (native menus, dialogs, WebView rendering, print/PDF, platform code) is still verified by running the app, and the story stays `Needs verification` until it has been.
@@ -189,3 +189,12 @@ Details:
   - Toggle buttons pass `pressed`.
   - A toolbar toggle that also has a menu item should use a `CheckMenuItem`, synced from frontend state the way Preview is (see Checkmarks under Menu → event → action).
 - **Components:** Bits UI headless components wrapped in `src/lib/ui/`, themed by the tokens (first used by Settings: `Toggle`, `Choice`, `Slider`). Konsta UI is planned for mobile.
+
+## Releases and CI (`.github/`, W-070)
+- **Version:** `package.json` holds it; `tauri.conf.json` reads it (`"version": "../package.json"`). `scripts/version.mjs` copies it into `package-lock.json`, `Cargo.toml` and `Cargo.lock` (`set`) and checks they agree (`check`).
+- **Cutting a release:** `make release VERSION=x.y.z` bumps, runs the tests, commits and tags `vX.Y.Z` locally. Pushing the tag runs `release.yml`:
+  - `prepare` checks the tag against every version copy, then creates a draft release (or reuses it on a re-run);
+  - `build` runs tauri-action per target (macOS arm64, macOS x64 cross-built on the arm runner, Windows x64), uploads to that draft, and attests the installers' provenance.
+  - Publishing the draft is manual.
+- **CI:** `ci.yml` runs on PRs and `main`, on macOS and Windows: tests, svelte-check, frontend build, `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`. It's the only place the Windows code gets compiled.
+- Actions are pinned to commit SHAs; Dependabot (`.github/dependabot.yml`) bumps them weekly.

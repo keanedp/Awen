@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-070**
+Next free ID: **W-071**
 
 ---
 
@@ -482,3 +482,15 @@ As a user, I want to install Awen without security warnings.
 - [ ] macOS build signed with Developer ID and notarized
 - [ ] Windows installer signed
 - [ ] Release steps documented in `docs/agents/` (signing keys stay out of git)
+
+Builds already come from `.github/workflows/release.yml` (W-070). Signing means adding the `APPLE_*` secrets (in a `release` environment) to its tauri-action step and a Windows signing step, and replacing the ad-hoc `signingIdentity`.
+
+### W-070 Automated release builds
+Status: In progress (agent) · Platforms: macOS, Windows
+As a maintainer, I want pushing a version tag to build the installers, so releasing doesn't depend on my machine.
+- [x] The version lives in `package.json`; `make release VERSION=x.y.z` updates the other copies, commits and tags
+- [ ] CI (tests, svelte-check, fmt, clippy, cargo test) is green on macOS and Windows
+- [ ] Pushing `vX.Y.Z` creates a draft release with the arm64 and x64 DMGs, the setup `.exe` and the `.msi`, named as in the README
+- [ ] Downloads open as the README describes (ad-hoc signed on macOS) and carry build provenance attestations
+
+Written and checked locally. Nothing has run on GitHub yet.

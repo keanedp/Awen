@@ -11,6 +11,7 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 ## Build / bundle
 - **DMG bundling fails** with `error running bundle_dmg.sh`. The cause is a Awen launched from the temporary `/Volumes/dmg.*` mount during a previous build, which blocks the eject. Fix: quit that app, `hdiutil detach -force /Volumes/dmg.*`, delete `src-tauri/target/release/bundle/macos/rw.*.dmg`, and rebuild. Don't open the app from the Finder window that pops up during `make build`.
 - `src-tauri/gen/schemas/` is regenerated every build, so don't edit or commit it.
+- **MSI limits the version.** WiX rejects a non-numeric pre-release (`0.2.0-beta.1`), and major/minor above 255. Use `0.2.0-1`. `scripts/version.mjs` refuses anything else, so the Windows build doesn't fail at the end of a release.
 
 ## Frontend
 - `@hedgedoc/markdown-it-task-lists` crashes with markdown-it 14 (`ERR_PACKAGE_PATH_NOT_EXPORTED` for `markdown-it/lib/token.js`). Use `markdown-it-task-lists`, whose types come from the local `src/lib/preview/markdown-it-task-lists.d.ts`.
