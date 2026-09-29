@@ -39,22 +39,22 @@ jobs:
 
       # Reuses the release if it already exists, so a failed run can be re-run.
       # Drafts aren't found by tag through the API, so look them up in the list.
+      # A new draft can be missing from that list for a moment, so take its id
+      # from the create call instead of looking it up again.
       - name: Create the draft release
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          find_release() {
-            gh api --paginate "repos/$GH_REPO/releases" --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -n1
-          }
-          id=$(find_release)
+          id=$(gh api --paginate "repos/$GH_REPO/releases" --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -n1)
           if [ -z "$id" ]; then
-            flags=(--draft --generate-notes --verify-tag --title "Awen ${TAG#v}")
-            if [[ "$TAG" == *-* ]]; then flags+=(--prerelease); fi
-            gh release create "$TAG" "${flags[@]}"
-            id=$(find_release)
+            prerelease=false
+            if [[ "$TAG" == *-* ]]; then prerelease=true; fi
+            id=$(gh api "repos/$GH_REPO/releases" -f tag_name="$TAG" -f name="Awen ${TAG#v}" \
+              -F draft=true -F prerelease="$prerelease" -F generate_release_notes=true --jq .id)
           fi
+          if [ -z "$id" ]; then echo "::error::No release id for $TAG"; exit 1; fi
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
   build:
@@ -112,12 +112,14 @@ jobs:
           args: --target ${{ matrix.target }}
           uploadUpdaterJson: false
 
-      - if: runner.os == 'macOS'
+      # GitHub only stores attestations for public repos (or organization-owned
+      # private ones), so this repo gets them once it's public.
+      - if: runner.os == 'macOS' && github.event.repository.visibility == 'public'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
 
-      - if: runner.os == 'Windows'
+      - if: runner.os == 'Windows' && github.event.repository.visibility == 'public'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: |
