@@ -5,13 +5,16 @@
 use serde::Serialize;
 use tauri::WebviewWindow;
 
+// Only the macOS export sheet uses these; other OSes get `choose_export`'s stub.
 #[derive(Clone, Copy, Serialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub enum Format {
     Html,
     Pdf,
 }
 
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 impl Format {
     const ALL: [Format; 2] = [Format::Html, Format::Pdf];
 

@@ -81,6 +81,7 @@ fn document_windows(app: &AppHandle) -> impl Iterator<Item = WebviewWindow> {
 }
 
 /// Whether any document window is open (Settings may be open without one).
+#[cfg(target_os = "macos")]
 pub fn any_open(app: &AppHandle) -> bool {
     document_windows(app).next().is_some()
 }

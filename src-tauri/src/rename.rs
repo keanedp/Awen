@@ -25,7 +25,9 @@ pub struct DocumentInfo {
 }
 
 /// The title's rectangle in CSS pixels, from `getBoundingClientRect()`.
+/// Only the macOS popover reads it.
 #[derive(Deserialize)]
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub struct Anchor {
     x: f64,
     y: f64,
