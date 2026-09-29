@@ -1,6 +1,6 @@
 [package]
 name = "awen"
-version = "0.1.1"
+version = "0.1.2"
 description = "A focused Markdown writing app"
 license = "GPL-3.0-or-later"
 authors = ["Daniel Keane"]
