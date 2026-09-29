@@ -5,7 +5,8 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 ## Machine / shell
 - `sed` is GNU sed: use `sed -i`, not `sed -i ''`.
 - `grep` is ugrep, so some regex syntax differs from GNU grep. For example, `(\.|--|...)` alternations failed.
-- There is no `rustup` (Rust comes from Homebrew), so there are no cross targets. `#[cfg(windows)]` code **cannot be compiled here**. Write it against the crate sources and flag it as unverified.
+- There is no `rustup` (Rust comes from Homebrew), so there are no cross targets. `#[cfg(windows)]` code **cannot be compiled here**. Write it against the crate sources; CI's Windows job (`ci.yml`) is where it gets compiled and linted, so push a branch to check it. Running it on real Windows is still unverified.
+- **macOS-only helpers fail Windows CI as dead code.** CI runs clippy with `-D warnings`, so a function, type or field used only from `#[cfg(target_os = "macos")]` code breaks the Windows job. Put the same `cfg` on a function that only macOS calls. For a type that the cross-platform stubs still name, add `#[cfg_attr(not(target_os = "macos"), allow(dead_code))]` (see `export::Format`, `rename::Anchor`).
 - **Never run a bare `cargo fetch`.** It downloads and unpacks dependencies for every platform, including the huge `windows` crates, and once filled the disk (every command then fails with ENOSPC). To read one crate's source, download just that `.crate` from `https://static.crates.io/crates/<name>/<name>-<ver>.crate` into a scratch directory.
 
 ## Build / bundle

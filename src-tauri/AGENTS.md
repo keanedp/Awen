@@ -45,4 +45,4 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
   `magick in.png -resize 824x824 \( -size 824x824 xc:black -fill white -draw "roundrectangle 0,0 823,823 185,185" \) -alpha off -compose CopyOpacity -composite -compose Over -background none -gravity center -extent 1024x1024 out_rounded.png`
 
 ## Windows
-- This code cannot be compiled on the dev Mac (see `docs/agents/gotchas.md`). After touching `#[cfg(windows)]` code, say it's unverified. Fixes from a real Windows build should be recorded in gotchas.md.
+- This code cannot be compiled on the dev Mac (see `docs/agents/gotchas.md`), but CI's Windows job compiles and lints it on every PR. After touching `#[cfg(windows)]` code, check that job and say the code is still unverified on a real machine. Fixes from a real Windows build should be recorded in gotchas.md.
