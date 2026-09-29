@@ -141,6 +141,17 @@ cd src-tauri && cargo fmt && cargo clippy && cargo test
 
 Then try the change in the running app. Native menus, dialogs, rendering and printing can't be unit tested.
 
+GitHub Actions runs the same checks on macOS and Windows for every pull request.
+
+### Releasing
+
+```sh
+make release VERSION=0.2.0         # bump the version, test, commit and tag v0.2.0
+git push origin HEAD v0.2.0        # builds the installers into a draft GitHub release
+```
+
+Check the draft on the Releases page, then publish it.
+
 ### Contributing
 
 1. **Pick a story.** [`docs/backlog.md`](docs/backlog.md) lists user stories with their status and acceptance criteria. Find open work with:

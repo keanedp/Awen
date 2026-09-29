@@ -2,6 +2,15 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-28: Release builds on GitHub Actions (W-070)
+
+- **One DMG per architecture, not universal.** The README already lists `aarch64` and `x64` DMGs, and each is about half the size of a universal build.
+- **Releases start as drafts.** A tag builds everything, but nothing is public until someone checks the draft and publishes it.
+- **macOS builds are ad-hoc signed** (`bundle.macOS.signingIdentity: "-"`, so local builds match). Unsigned downloads on Apple silicon get "Awen is damaged", which has no workaround a user can find. Ad-hoc signed ones get the "can't be opened" prompt the README explains. Developer ID signing (W-035) overrides this with the `APPLE_SIGNING_IDENTITY` env var.
+- **`package.json` is the version source**, since `tauri.conf.json` can point at it. The Cargo copies are kept in step by a script, not by hand.
+- **No auto-updater yet.** It needs its own signing keypair and some UI. `uploadUpdaterJson` is off until then.
+- Provenance attestations let people verify the unsigned downloads (`gh attestation verify <file> -R keanedp/Awen`) until W-035.
+
 ## 2026-09-28: Typewriter scrolling (W-018)
 
 - Typewriter is focus mode's third choice: View → Focus On ▸ Sentence / Paragraph / Typewriter are mutually exclusive (`focusUnit`), and Focus Mode (⌘D) turns the chosen one on and off. Typewriter centres the line and dims nothing; Sentence and Paragraph dim and don't centre. A separate Typewriter Scrolling toggle (first with ⌘T, then in the Focus On submenu) was tried and dropped: the user wanted the three to be one exclusive choice. Settings' "Focus on" has the same three.
