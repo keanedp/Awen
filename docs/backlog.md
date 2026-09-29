@@ -489,8 +489,8 @@ Builds already come from `.github/workflows/release.yml` (W-070). Signing means 
 Status: In progress (agent) · Platforms: macOS, Windows
 As a maintainer, I want pushing a version tag to build the installers, so releasing doesn't depend on my machine.
 - [x] The version lives in `package.json`; `make release VERSION=x.y.z` updates the other copies, commits and tags
-- [ ] CI (tests, svelte-check, fmt, clippy, cargo test) is green on macOS and Windows
+- [x] CI (tests, svelte-check, fmt, clippy, cargo test) is green on macOS and Windows
 - [ ] Pushing `vX.Y.Z` creates a draft release with the arm64 and x64 DMGs, the setup `.exe` and the `.msi`, named as in the README
 - [ ] Downloads open as the README describes (ad-hoc signed on macOS) and carry build provenance attestations
 
-Written and checked locally. Nothing has run on GitHub yet.
+CI passes on both OSes. The release workflow hasn't run yet (it needs a tag pushed after merge).
