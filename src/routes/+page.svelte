@@ -541,6 +541,9 @@
     applyAccent();
     view = new EditorView({ state: newState(""), parent: host });
     view.focus();
+    // Rust opens the window hidden, since the web view is white until the page
+    // is styled. It is by now, so a dark theme doesn't flash white first.
+    appWindow.show();
 
     // App chrome has no web context menu, like native UI.
     const blockChromeMenu = (e: MouseEvent) => {

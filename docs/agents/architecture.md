@@ -66,6 +66,7 @@ Details:
 
 - One document per window. Rust creates windows from the `tauri.conf.json` window config (so per-OS settings apply) and keeps a map of window label → file path.
   - The first window is `main`, the only one the window-state plugin remembers. If `main` is closed, the next new window takes the label back. Others are `doc-N`, cascaded 22pt from the focused window.
+- Windows open hidden (`"visible": false` in `tauri.conf.json`) and the page shows itself on mount, once styled, so a dark theme doesn't flash white first. The window-state plugin leaves visibility alone for the same reason. Settings does the same after sizing itself.
 - **Opening** (`open_path`): brings forward the window already showing the file; otherwise reads it in Rust and loads it into the asking window if that is an untouched Untitled document (`reuse`), or else into a new window. A new window collects its text on mount with `take_initial_document`. Rust notes/forgets Open Recent entries here; the frontend only notes Save As, and reports the new path with `set_document_path`.
 - **Closing the last window:** `RunEvent::ExitRequested` without a code is prevented on macOS, so the app stays in the Dock; `RunEvent::Reopen` (Dock click) opens a new window. On Windows the app exits.
 - **Quit** sets a `quitting` flag and closes windows one at a time (focused first). Each window's close handler may prompt; after each `Destroyed` event Rust closes the next, and exits when none are left. Cancel calls `cancel_quit`, which ends the sequence.

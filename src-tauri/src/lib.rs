@@ -11,6 +11,7 @@ mod spelling;
 mod terminate;
 
 use tauri::Manager;
+use tauri_plugin_window_state::StateFlags;
 
 #[tauri::command]
 fn write_document(path: String, contents: String) -> Result<(), String> {
@@ -76,6 +77,9 @@ pub fn run() {
             tauri_plugin_window_state::Builder::new()
                 // Later windows cascade from the focused one instead.
                 .with_filter(|label| label == documents::MAIN)
+                // Document windows open hidden and the page shows them once
+                // drawn, so restoring visibility would bring back the white flash.
+                .with_state_flags(StateFlags::all() & !StateFlags::VISIBLE)
                 .build(),
         )
         .manage(documents::Documents::default())
