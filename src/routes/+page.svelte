@@ -13,7 +13,8 @@
   import { createState, documentText, setReadOnly, setSpellcheck } from "$lib/editor/setup";
   import { systemSpellChecker } from "$lib/spellchecker";
   import { taskToggle } from "$lib/editor/tasks";
-  import { formatCommands } from "$lib/editor/format";
+  import { addTable, formatCommands } from "$lib/editor/format";
+  import TableSizeDialog from "$lib/ui/TableSizeDialog.svelte";
   import { exportHtml } from "$lib/export/html";
   import {
     baseName,
@@ -301,6 +302,25 @@
     view.focus();
   }
 
+  let sizingTable = $state(false);
+
+  /** Add Table asks for a size first (W-061), then adds it as one undo step. */
+  function chooseTableSize() {
+    if (previewing || locked || document.activeElement instanceof HTMLInputElement) return;
+    sizingTable = true;
+  }
+
+  async function addSizedTable(columns: number, rows: number) {
+    view.dispatch(addTable(view.state, columns, rows), {
+      annotations: isolateHistory.of("full"),
+      scrollIntoView: true,
+      userEvent: "input.format",
+    });
+    // Once the dialog is gone: it holds focus until then, so the caret wouldn't show.
+    await tick();
+    view.focus();
+  }
+
   /** Undo/redo also work in preview, which is re-rendered to show the result. */
   function runHistory(command: typeof undo) {
     // The menu shortcut also reaches us while typing in the find bar; undo there.
@@ -487,6 +507,7 @@
     text_smaller: () => changeView("text_smaller"),
     text_actual: () => changeView("text_actual"),
     ...Object.fromEntries(Object.keys(formatCommands).map((id) => [id, () => format(id)])),
+    format_table: chooseTableSize,
   };
 
   /** A View menu preference, applied here at once so key repeats build on it, then in every window. */
@@ -523,6 +544,7 @@
     "text_smaller",
     "text_actual",
     ...Object.keys(formatCommands),
+    "format_table",
   ]);
 
   /** Runs a file command unless another one is still in progress. */
@@ -654,6 +676,8 @@
     <WordCount text={formatCount(words, previewing ? null : selectedWords)} />
   {/if}
 </div>
+
+<TableSizeDialog bind:open={sizingTable} onsubmit={addSizedTable} onclose={() => view.focus()} />
 
 <div class="print-root" aria-hidden="true">
   <article class="preview paper" bind:this={printArticle}>{@html printHtml}</article>

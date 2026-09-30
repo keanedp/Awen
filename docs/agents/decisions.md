@@ -4,6 +4,7 @@ A dated log of design decisions and the reasons for them. Newest first. Add an e
 
 ## 2026-09-29: More Format menu items (W-061)
 - **Page breaks are `\newpage` on its own line** (Pandoc's, also `\pagebreak`), not raw HTML, because markdown-it stays `html: false`. It renders as `<div class="page-break">`, which `break-after: page` honors in print, PDF and HTML export.
+- **Add Table asks for a size** in an in-app dialog (Bits UI `Dialog`, styled with the per-OS tokens), the same on macOS and Windows, laid out like a native alert. A real `NSAlert` with an accessory view would be more native on macOS but needs separate Rust code for each OS; revisit if the dialog looks out of place.
 - **Footnotes** use `markdown-it-footnote` and Markdown's `[^n]` syntax. Add Footnote always appends the definition at the end of the document.
 - **Add Table of Contents is deferred to W-076. Structure ▸ and Add Content Block are not added.** They come from apps with their own document model (outline moves, transclusion blocks); plain Markdown has nothing to write for them. Add Wikilink and Add Hashtag wait for the library (W-030), tracked as W-075.
 

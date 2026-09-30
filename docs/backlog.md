@@ -348,10 +348,10 @@ As a writer, I want a Format menu that applies Markdown formatting to the select
 Status: Needs verification (built and tested; not yet run in the app) · Platforms: all
 As a writer, I want more Format menu items, once W-060's basic formatting is done.
 - [x] Add Footnote ⌃⌘K (Ctrl+Alt+K on Windows): puts `[^n]` after the selection and `[^n]: ` at the end of the document, numbered after the highest footnote, with the caret in the definition. Footnotes render in preview, print, PDF and HTML export
-- [x] Add Table (three columns, one empty row, first heading selected), Add Date (long date in the system's locale, replaces the selection) and Add Page Break (`\newpage`, starts a new page in print and PDF, a faint rule in the preview)
+- [x] Add Table (asks how many columns and rows, 1–20 by 1–100, default 3 by 3; the first row is the heading, and the caret starts in its first cell; headings are left empty), Add Date (long date in the system's locale, replaces the selection) and Add Page Break (`\newpage`, starts a new page in print and PDF, a faint rule in the preview)
 - [x] Decide whether Structure ▸ and Add Content Block fit Awen, and record the decision in `decisions.md`: they don't (no Markdown syntax behind them). Add Wikilink and Add Hashtag moved to W-075
 - [x] Unit tested: each command (empty documents, blank lines around blocks, CRLF) and the footnote and page break rendering (`format.test.ts`, `render.test.ts`)
-- [ ] Verified in the app on macOS and Windows: each item and ⌃⌘K, footnotes in preview, `\newpage` in PDF and print, HTML export
+- [ ] Verified in the app on macOS and Windows: each item and ⌃⌘K, the table size dialog (Enter, Esc, Cancel, undo), footnotes in preview, `\newpage` in PDF and print, HTML export
 
 ### W-076 Add Table of Contents
 Status: Todo · Platforms: all

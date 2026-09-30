@@ -1,7 +1,7 @@
 import { isolateHistory, undo } from "@codemirror/commands";
 import { EditorSelection, type EditorState, type SelectionRange } from "@codemirror/state";
 import { describe, expect, test } from "vitest";
-import { addDate, formatCommands, formatDate } from "./format";
+import { addDate, addTable, clampCount, formatCommands, formatDate, tableLimits } from "./format";
 import { createState, documentText } from "./setup";
 
 /**
@@ -300,7 +300,7 @@ describe("in the editor", () => {
     ids.push("format_bulleted", "format_numbered", "format_task", "format_quote", "format_body");
     ids.push("format_bold", "format_italic", "format_strikethrough", "format_highlight");
     ids.push("format_code", "format_code_block", "format_link", "format_rule", "format_clear");
-    ids.push("format_footnote", "format_table", "format_page_break", "format_date");
+    ids.push("format_footnote", "format_page_break", "format_date");
     expect(Object.keys(formatCommands).sort()).toEqual(ids.sort());
   });
 });
@@ -332,23 +332,38 @@ describe("Add Footnote", () => {
 });
 
 describe("Add Table", () => {
-  const table = "| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n|  |  |  |";
+  /** Adds a table to `text` (with the caret at the end unless it's marked) and returns the marked result. */
+  function table(text: string, columns?: number, rows?: number): string {
+    let state = createState(text.replace("‸", ""), () => {}, () => {});
+    const caret = text.includes("‸") ? text.indexOf("‸") : text.length;
+    state = state.update({ selection: EditorSelection.cursor(caret) }).state;
+    return marked(state.update(addTable(state, columns, rows)).state);
+  }
 
-  test("inserts after the line and selects the first heading", () => {
-    expect(format("format_table", "Intro‸")).toBe(`Intro\n\n| «Column 1» | Column 2 | Column 3 |\n| --- | --- | --- |\n|  |  |  |`);
+  test("makes the columns and rows asked for, the first row being the heading", () => {
+    expect(table("Intro", 2, 3)).toBe("Intro\n\n| ‸ |  |\n| --- | --- |\n|  |  |\n|  |  |");
+    expect(table("", 1, 1)).toBe("| ‸ |\n| --- |");
   });
 
-  test("fills a blank line and leaves a blank line before the next paragraph", () => {
-    expect(format("format_table", "Intro\n\n‸\nAfter")).toBe(
-      `Intro\n\n${table.replace("Column 1", "«Column 1»")}\n\nAfter`,
-    );
+  test("keeps sizes in range, and falls back to three by three for junk", () => {
+    expect(table("", 0, 0).split("\n")).toHaveLength(2);
+    expect(table("", 500, 500).split("\n")).toHaveLength(tableLimits.rows + 1);
+    expect(table("", Number.NaN, Number.NaN).split("\n")).toHaveLength(4);
+    expect(clampCount("7", 20, 3)).toBe(7);
+    expect(clampCount("", 20, 3)).toBe(3);
+    expect(clampCount(2.9, 20, 3)).toBe(2);
+    expect(clampCount(-4, 20, 3)).toBe(1);
+  });
+
+  test("goes in a block of its own, with a blank line before the next paragraph", () => {
+    expect(table("Intro\n\n‸\nAfter", 1, 2)).toBe("Intro\n\n| ‸ |\n| --- |\n|  |\n\nAfter");
   });
 
   test("uses the file's line endings", () => {
     let state = createState("Intro\r\nMore", () => {}, () => {});
     state = state.update({ selection: EditorSelection.cursor(5) }).state;
-    state = state.update(formatCommands.format_table(state)!).state;
-    expect(documentText({ state })).toBe(`Intro\r\n\r\n${table.replaceAll("\n", "\r\n")}\r\n\r\nMore`);
+    state = state.update(addTable(state, 1, 1)).state;
+    expect(documentText({ state })).toBe("Intro\r\n\r\n|  |\r\n| --- |\r\n\r\nMore");
   });
 });
 

@@ -374,13 +374,26 @@ function insertBlock(state: EditorState, text: string) {
   return { changes, start: from + lead.length };
 }
 
-/** A table of three columns and one empty row, with the first heading selected to type over. */
-export function addTable(state: EditorState): TransactionSpec {
-  const { lineBreak } = state;
-  const first = "Column 1";
-  const text = ["| Column 1 | Column 2 | Column 3 |", "| --- | --- | --- |", "|  |  |  |"].join(lineBreak);
-  const { changes, start } = insertBlock(state, text);
-  return { changes, selection: EditorSelection.range(start + 2, start + 2 + first.length) };
+/** The most columns and rows Add Table offers. */
+export const tableLimits = { columns: 20, rows: 100 };
+
+/** A whole number in 1..`max`, or `fallback` for anything else (an empty or non-numeric field). */
+export function clampCount(value: unknown, max: number, fallback: number): number {
+  const n = typeof value === "number" ? value : Number.parseInt(String(value), 10);
+  return Number.isFinite(n) ? Math.min(max, Math.max(1, Math.trunc(n))) : fallback;
+}
+
+/**
+ * An empty table of `columns` and `rows` (counting the heading row, so at
+ * least one), with the caret in the first heading cell.
+ */
+export function addTable(state: EditorState, columns = 3, rows = 3): TransactionSpec {
+  const cols = clampCount(columns, tableLimits.columns, 3);
+  const body = clampCount(rows, tableLimits.rows, 3) - 1;
+  const line = (cell: string) => "|" + `${cell}|`.repeat(cols);
+  const lines = [line("  "), line(" --- "), ...Array.from({ length: body }, () => line("  "))];
+  const { changes, start } = insertBlock(state, lines.join(state.lineBreak));
+  return { changes, selection: EditorSelection.cursor(start + 2) };
 }
 
 /** A page break, `\newpage` on its own line. Print and PDF start a new page there. */
@@ -512,7 +525,6 @@ export const formatCommands: Record<string, FormatCommand> = {
   format_link: addLink,
   format_rule: addRule,
   format_footnote: addFootnote,
-  format_table: addTable,
   format_page_break: addPageBreak,
   format_date: (s) => addDate(s),
   format_clear: clearStyles,
