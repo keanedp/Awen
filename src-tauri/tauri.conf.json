@@ -31,6 +31,14 @@
       }
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU3QjM1NDNCMEQ2QzcxMkUKUldRdWNXd05PMVN6VnkrUGtHUDc5UHdPQ0l6OUJVb3hyMkFXYk4wb3VVci9GOSs5ZlNoekJGVHMK",
+      "endpoints": [
+        "https://github.com/keanedp/Awen/releases/latest/download/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",

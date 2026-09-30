@@ -9,6 +9,7 @@ export const MENUS = [
   { title: "Format", key: "o" },
   { title: "View", key: "v" },
   { title: "Window", key: "w" },
+  { title: "Help", key: "h" },
 ] as const;
 
 type Key = Pick<KeyboardEvent, "key" | "altKey" | "ctrlKey" | "shiftKey" | "metaKey">;

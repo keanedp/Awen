@@ -14,6 +14,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - `src/settings.rs`: the Settings window (`show`, opened hidden; the page shows it once sized).
 - `src/spelling.rs`: the system spell checker for the editor's marks (`NSSpellChecker` / `ISpellChecker`): check, suggestions, learn, ignore. Synchronous commands, so they run on the main thread.
 - `src/accent.rs`: `accent_colors`, the system accent fill and text colors for light and dark (`NSColor.controlAccentColor` / `UISettings`), read by `applyAccent()` in `platform.ts`.
+- `src/updates.rs`: automatic updates (W-071): the launch check, Check for Updates…, and installing once Quit has closed every window.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
 - `capabilities/default.json`: permissions for plugin and core APIs used by document windows; `capabilities/settings.json` for the Settings window.
 - `tauri.conf.json`: window config (Overlay title bar on macOS), CSP, bundle settings.

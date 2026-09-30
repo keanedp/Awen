@@ -48,13 +48,13 @@ describe("barKey", () => {
   it("moves between titles with the arrows, wrapping around", () => {
     expect(barKey(1, key("ArrowRight"))).toEqual({ move: 2 });
     expect(barKey(1, key("ArrowLeft"))).toEqual({ move: 0 });
-    expect(barKey(0, key("ArrowLeft"))).toEqual({ move: 4 });
-    expect(barKey(4, key("ArrowRight"))).toEqual({ move: 0 });
+    expect(barKey(0, key("ArrowLeft"))).toEqual({ move: 5 });
+    expect(barKey(5, key("ArrowRight"))).toEqual({ move: 0 });
   });
 
   it("jumps to the ends with Home and End", () => {
     expect(barKey(2, key("Home"))).toEqual({ move: 0 });
-    expect(barKey(2, key("End"))).toEqual({ move: 4 });
+    expect(barKey(2, key("End"))).toEqual({ move: 5 });
   });
 
   it("opens the highlighted menu", () => {

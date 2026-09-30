@@ -342,6 +342,8 @@ fn close_next(app: &AppHandle) {
         Some(window) => {
             let _ = window.close();
         }
+        // An update is waiting for the windows to close: it installs and relaunches.
+        None if crate::updates::install(app) => {}
         // A system quit request (Dock, logout) is answered; AppKit then terminates.
         None if crate::terminate::pending() => crate::terminate::reply(true),
         None => app.exit(0),
@@ -358,9 +360,11 @@ pub fn window_destroyed(app: &AppHandle, label: &str) {
 /// Whether the app should stay running now that its last window has closed.
 /// Mac apps do (until Quit); on Windows closing the last window exits.
 pub fn keep_running(app: &AppHandle) -> bool {
+    // An update installs once the windows have closed, then relaunches.
     // While a system quit request waits, `close_next` answers it instead.
-    cfg!(target_os = "macos")
-        && (!documents(app).quitting.load(Ordering::SeqCst) || crate::terminate::pending())
+    crate::updates::installing(app)
+        || (cfg!(target_os = "macos")
+            && (!documents(app).quitting.load(Ordering::SeqCst) || crate::terminate::pending()))
 }
 
 /// Sends a menu command to the focused window only; every window listens.
@@ -455,9 +459,10 @@ pub fn set_document_path(
 
 /// A window kept its unsaved changes, so Quit stops there.
 #[tauri::command]
-pub fn cancel_quit(docs: tauri::State<'_, Documents>) {
+pub fn cancel_quit(app: AppHandle, docs: tauri::State<'_, Documents>) {
     docs.quitting.store(false, Ordering::SeqCst);
     crate::terminate::reply(false);
+    crate::updates::cancel(&app);
 }
 
 /// Shows unsaved changes as the dot in the macOS close button.

@@ -505,14 +505,14 @@ As a maintainer, I want pushing a version tag to build the installers, so releas
 `v0.1.0` built and uploaded all four installers. Provenance attestations are skipped until the repo is public (GitHub refuses them for a personal account's private repo).
 
 ### W-071 Automatic updates
-Status: Todo · Platforms: macOS, Windows
+Status: Needs verification (not yet run; needs two releases with the updater to test an update end to end) · Platforms: macOS, Windows
 As a user, I want Awen to tell me about a new version and install it, so I don't have to download it by hand.
-- [ ] `tauri-plugin-updater` checks `latest.json` from the latest GitHub release (`releases/latest/download/latest.json`)
-- [ ] Updates are signed with a Tauri updater key: public key in `tauri.conf.json`, private key and password only in GitHub secrets (never in git)
-- [ ] `release.yml` builds updater artifacts (`bundle.createUpdaterArtifacts`), uploads the `.sig` files and the `.app.tar.gz`, and publishes `latest.json` for all three targets
-- [ ] A Check for Updates… menu item (Awen menu on macOS, Help menu on Windows) and a quiet check at launch
-- [ ] A native dialog offers Install and Relaunch or Later. Installing goes through the same unsaved-changes prompts as Quit
-- [ ] A Settings toggle turns the launch check off
+- [x] `tauri-plugin-updater` checks `latest.json` from the latest GitHub release (`releases/latest/download/latest.json`)
+- [x] Updates are signed with a Tauri updater key: public key in `tauri.conf.json`, private key and password only in GitHub secrets (never in git)
+- [x] `release.yml` builds updater artifacts (`bundle.createUpdaterArtifacts`), uploads the `.sig` files and the `.app.tar.gz`, and publishes `latest.json` for all three targets (Windows entries return with the Windows builds)
+- [x] A Check for Updates… menu item (Awen menu on macOS, Help menu on Windows) and a quiet check at launch
+- [x] A native dialog offers Install and Relaunch or Later. Installing goes through the same unsaved-changes prompts as Quit
+- [x] A Settings toggle turns the launch check off
 - [ ] An update installed on macOS opens without the Gatekeeper prompt (check on a real Mac)
 
-Blocked until release downloads are public: assets of a private repo's releases need a GitHub login, so installed copies can't fetch `latest.json`. Either make the repo public or publish releases to a public repo or CDN.
+The repo is public now, so installed copies can fetch `latest.json`. Only copies from the first release with the updater onward can update themselves; 0.2.0 and earlier have to be replaced by hand once.

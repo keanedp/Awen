@@ -38,6 +38,13 @@ pub fn load<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     Ok(())
 }
 
+/// One saved preference, for the few that Rust acts on itself.
+pub fn value<R: Runtime>(app: &AppHandle<R>, key: &str) -> Option<Value> {
+    let prefs = app.state::<Preferences>();
+    let values = prefs.values.lock().ok()?;
+    values.get(key).cloned()
+}
+
 /// Every saved preference; the frontend fills in defaults for the rest.
 #[tauri::command]
 pub fn preferences(prefs: tauri::State<'_, Preferences>) -> Map<String, Value> {

@@ -45,6 +45,8 @@ export interface Preferences {
   spellcheck: boolean;
   /** Settings → Appearance. Rust applies it to the app (`preferences::apply_theme`). */
   theme: Theme;
+  /** Settings → Automatically check for updates, at launch. Rust reads it (`updates::check_at_launch`). */
+  checkForUpdates: boolean;
 }
 
 export const defaults: Preferences = {
@@ -59,6 +61,7 @@ export const defaults: Preferences = {
   lineSpacing: "normal",
   spellcheck: true,
   theme: "system",
+  checkForUpdates: true,
 };
 
 /** A check that a value is one of `choices`. */
@@ -80,6 +83,7 @@ const valid: { [K in keyof Preferences]: (value: unknown) => value is Preference
   lineSpacing: oneOf(Object.keys(lineSpacings) as LineSpacing[]),
   spellcheck: (value) => typeof value === "boolean",
   theme: oneOf(themes),
+  checkForUpdates: (value) => typeof value === "boolean",
 };
 
 function isKey(key: string): key is keyof Preferences {

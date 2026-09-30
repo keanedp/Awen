@@ -43,6 +43,7 @@ describe("parsePreferences", () => {
       lineSpacing: "loose",
       spellcheck: false,
       theme: "dark",
+      checkForUpdates: false,
     };
     expect(parsePreferences(saved)).toEqual(saved);
   });
@@ -57,6 +58,7 @@ describe("parsePreferences", () => {
       parsePreferences({ textSize: "18", columnWidth: "huge", lineSpacing: 1.6, spellcheck: "on", theme: "sepia" }),
     ).toEqual(defaults);
     expect(parsePreferences({ focusMode: "yes", focusUnit: "line" })).toEqual(defaults);
+    expect(parsePreferences({ checkForUpdates: "off" })).toEqual(defaults);
   });
 
   test("text sizes outside the slider's range fall back to the default", () => {

@@ -2,6 +2,15 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-29: Automatic updates (W-071)
+- **`tauri-plugin-updater`, driven from Rust** (`updates.rs`), not its JS API. The launch check has to work before any page loads and with only Settings open, and installing is part of the Quit sequence, which Rust owns. So no capability entry either.
+- **Install means Quit, then install, then relaunch.** Accepting downloads first, then runs `documents::quit`, so every window asks about unsaved changes as with Quit. Cancelling in any window drops the update (the next check offers it again). Installing only after the windows close matters on Windows, where the installer exits the app.
+- **Updater artifacts are turned on only in `release.yml`** (`--config '{"bundle":{"createUpdaterArtifacts":true}}'`). With it in `tauri.conf.json`, every local `make build` would need the private key.
+- **`latest.json` is built by `scripts/latest-json.mjs`** in a job after the builds, not by tauri-action (still not used, see W-070 below). It's uploaded to the draft, so installed copies only see a version once its release is published.
+- **No launch check in debug builds.** `make dev` runs a bare binary the updater can't replace. Check for Updates… still works there, to test the dialogs.
+- **No "Skip This Version" or release notes in the dialog** yet. Later just waits for the next launch.
+- **The repo is public** (since 2026-09-29), which the updater needs: a private repo's release assets need a GitHub login.
+
 ## 2026-09-29: Releases are macOS only for now
 The Windows build still feels janky, so `release.yml` no longer builds it and the README says Windows is coming soon. CI still compiles and tests Windows on every PR so it doesn't rot. To resume, uncomment the Windows matrix entry and restore the README's Windows install steps (see git history).
 

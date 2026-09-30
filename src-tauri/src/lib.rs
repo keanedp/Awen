@@ -9,6 +9,7 @@ mod rename;
 mod settings;
 mod spelling;
 mod terminate;
+mod updates;
 
 use tauri::Manager;
 use tauri_plugin_window_state::StateFlags;
@@ -73,6 +74,7 @@ pub fn run() {
     builder
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_window_state::Builder::new()
                 // Later windows cascade from the focused one instead.
@@ -84,6 +86,7 @@ pub fn run() {
         )
         .manage(documents::Documents::default())
         .manage(preferences::Preferences::default())
+        .manage(updates::Updates::default())
         .menu(menu::build)
         .setup(|app| {
             terminate::install(app.handle());
@@ -98,6 +101,7 @@ pub fn run() {
                 std::env::args().skip(1).collect()
             };
             documents::finish_launching(app.handle(), args);
+            updates::check_at_launch(app.handle());
             Ok(())
         })
         .on_menu_event(|app, event| {
@@ -108,6 +112,7 @@ pub fn run() {
                 }
                 "quit" => documents::quit(app),
                 "settings" => settings::show(app),
+                "check_updates" => updates::check_now(app),
                 // With no document to ask, Rust shows the Open dialog itself.
                 "open" if !documents::emit_to_focused_document(app, "menu", id) => {
                     documents::open_without_window(app, None)

@@ -328,6 +328,15 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         ],
     )?;
 
+    // In the app menu on macOS, and a Help menu elsewhere, as in most apps.
+    let check_updates = MenuItem::with_id(
+        app,
+        "check_updates",
+        "Check for Updates…",
+        true,
+        None::<&str>,
+    )?;
+
     #[cfg(target_os = "macos")]
     {
         let app_menu = Submenu::with_items(
@@ -336,6 +345,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             true,
             &[
                 &PredefinedMenuItem::about(app, Some("About Awen"), None)?,
+                &check_updates,
                 &PredefinedMenuItem::separator(app)?,
                 &item("settings", "Settings…", "CmdOrCtrl+,")?,
                 &PredefinedMenuItem::separator(app)?,
@@ -353,7 +363,10 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     }
 
     #[cfg(not(target_os = "macos"))]
-    Menu::with_items(app, &[&file, &edit, &format, &view, &window])
+    {
+        let help = Submenu::with_items(app, "Help", true, &[&check_updates])?;
+        Menu::with_items(app, &[&file, &edit, &format, &view, &window, &help])
+    }
 }
 
 /// Gives macOS menu items a shortcut that is a typed character rather than a

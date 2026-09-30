@@ -227,6 +227,20 @@
         </div>
       </div>
     </section>
+
+    <section>
+      <h2>Updates</h2>
+      <div class="group">
+        <div class="row">
+          <span>Automatically check for updates</span>
+          <Toggle
+            checked={prefs.checkForUpdates}
+            label="Automatically check for updates"
+            onchange={(v) => set("checkForUpdates", v)}
+          />
+        </div>
+      </div>
+    </section>
   </div>
 </div>
 

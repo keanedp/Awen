@@ -52,7 +52,7 @@ Details:
 
 ## Preferences (`src/lib/preferences.ts`, `src-tauri/src/preferences.rs`)
 
-- App-wide settings kept between launches (W-020): `wordCount`, `codeHighlighting`, `focusMode`, `focusUnit` (sentence, paragraph or typewriter) and `exportFormat`, plus the settings window's (W-021) `textSize`, `columnWidth`, `lineSpacing`, `spellcheck` and `theme`.
+- App-wide settings kept between launches (W-020): `wordCount`, `codeHighlighting`, `focusMode`, `focusUnit` (sentence, paragraph or typewriter) and `exportFormat`, plus the settings window's (W-021) `textSize`, `columnWidth`, `lineSpacing`, `spellcheck` and `theme`, and `checkForUpdates` (W-071, which `updates.rs` reads at launch).
 - Rust stores them as untyped JSON in `preferences.json` in the app data folder, beside `recent.json`, loaded in `setup`. The frontend owns names, types and defaults: `parsePreferences` checks every saved value and falls back to the default, so an old, newer or hand-edited file can't break the app.
 - `setPreference(key, value)` saves and emits `preference-changed` to every window. Each page listens with the global `listen` (deliberately, unlike menu events) and applies it to its `prefs` state, so all windows follow a change made in one.
 - A new window renders with defaults until `loadPreferences()` resolves. Anything a preference hides waits for `prefsLoaded`, so it doesn't flash up.
@@ -201,6 +201,8 @@ Details:
 - **Cutting a release:** `make release VERSION=x.y.z` bumps, runs the tests, commits and tags `vX.Y.Z` locally. Pushing the tag runs `release.yml`:
   - `prepare` checks the tag against every version copy, then creates a draft release (or reuses it on a re-run);
   - `build` runs `tauri build` per target (macOS arm64, macOS x64 cross-built on the arm runner; Windows x64 is commented out while Windows releases are paused), uploads only the installers (`.dmg`, `-setup.exe`, `.msi`) to that draft with `gh release upload --clobber`, and attests their provenance once the repo is public.
-  - Publishing the draft is manual.
+  - `manifest` collects the updater signatures from the draft and uploads `latest.json` (`scripts/latest-json.mjs`).
+  - Publishing the draft is manual. That is also what ships the update to installed copies, which read `releases/latest/download/latest.json`.
+- **Updates (W-071, `src-tauri/src/updates.rs`):** a quiet check at launch (release builds only, unless the `checkForUpdates` preference is off) and Check for Updates… (Awen menu on macOS, Help on Windows). Accepting downloads the update and starts Quit; `documents::close_next` installs it once the last window has closed, then relaunches. `keep_running` holds the app open meanwhile, and `cancel_quit` drops the update. The build signs the `.app.tar.gz` (and on Windows the installers) with the updater key from the `TAURI_SIGNING_PRIVATE_KEY` / `_PASSWORD` secrets; the app checks them against `plugins.updater.pubkey` in `tauri.conf.json`.
 - **CI:** `ci.yml` runs on PRs and `main`, on macOS and Windows: tests, svelte-check, frontend build, `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`. It's the only place the Windows code gets compiled.
 - Actions are pinned to commit SHAs; Dependabot (`.github/dependabot.yml`) bumps them weekly.

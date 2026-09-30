@@ -61,14 +61,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # arch names the files, as the README and latest-json.mjs expect.
           - os: macos-latest
             target: aarch64-apple-darwin
+            arch: aarch64
           - os: macos-latest
             target: x86_64-apple-darwin
+            arch: x64
           # Windows releases are paused until the Windows build is ready.
           # Uncomment to ship the setup .exe and .msi again (CI still builds it).
           # - os: windows-latest
           #   target: x86_64-pc-windows-msvc
+          #   arch: x64
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -103,21 +107,33 @@ jobs:
 
       # macOS builds are ad-hoc signed (bundle.macOS.signingIdentity "-").
       # Developer ID signing and notarization (W-035) will pass APPLE_* secrets here.
-      - run: npm run tauri build -- --target ${{ matrix.target }}
+      # Updater artifacts (W-071) are signed with the updater key. They're
+      # turned on only here, so local builds don't need the private key.
+      - run: npm run tauri build -- --target ${{ matrix.target }} --config '{"bundle":{"createUpdaterArtifacts":true}}'
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
-      # Only the installers. (tauri-action was dropped because it always adds
-      # a .app.tar.gz, which is only useful to the updater, W-071.)
+      # The installers, and the updater's archive and signatures. Both macOS
+      # builds make Awen.app.tar.gz, so it's renamed like the DMGs.
       # --clobber replaces them when a failed run is re-run.
       - name: Upload the installers
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           BUNDLE: src-tauri/target/${{ matrix.target }}/release/bundle
+          ARCH: ${{ matrix.arch }}
         run: |
           shopt -s nullglob
+          version="${TAG#v}"
+          for file in "$BUNDLE"/macos/Awen.app.tar.gz "$BUNDLE"/macos/Awen.app.tar.gz.sig; do
+            if [ -e "$file" ]; then mv "$file" "${file/Awen.app/Awen_${version}_${ARCH}.app}"; fi
+          done
           files=("$BUNDLE"/dmg/*.dmg "$BUNDLE"/nsis/*-setup.exe "$BUNDLE"/msi/*.msi)
           if [ ${#files[@]} -eq 0 ]; then echo "::error::No installers in $BUNDLE"; exit 1; fi
-          gh release upload "$TAG" "${files[@]}" --clobber
+          updater=("$BUNDLE"/macos/*.app.tar.gz "$BUNDLE"/macos/*.app.tar.gz.sig "$BUNDLE"/nsis/*-setup.exe.sig "$BUNDLE"/msi/*.msi.sig)
+          if [ ${#updater[@]} -eq 0 ]; then echo "::error::No updater artifacts in $BUNDLE"; exit 1; fi
+          gh release upload "$TAG" "${files[@]}" "${updater[@]}" --clobber
 
       # GitHub only stores attestations for public repos (or organization-owned
       # private ones), so this repo gets them once it's public.
@@ -132,3 +148,28 @@ jobs:
           subject-path: |
             src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
             src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi
+
+  # The updater's manifest, from every build's signatures. Installed copies
+  # read it from releases/latest/download/latest.json, so it goes live when
+  # the draft is published.
+  manifest:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+
+      - name: Upload latest.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          mkdir sigs
+          gh release download "$TAG" --pattern '*.sig' --dir sigs
+          node scripts/latest-json.mjs "$TAG" "$GITHUB_SERVER_URL/$GH_REPO/releases/download/$TAG" sigs > latest.json
+          cat latest.json
+          gh release upload "$TAG" latest.json --clobber
