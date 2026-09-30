@@ -9,11 +9,20 @@
 ## Why Awen
 
 - **Distraction-free by design.** Text sits in a centered column about 66 characters wide, set in GitHub's Monaspace Neon typeface (or Argon, Radon or the system monospace, in Settings). Markdown marks like `#` and `*` fade into the background, and headings hang into the margin, so the page reads like prose and not like code.
+- **Focus on the words you're writing.** Focus mode dims everything but the sentence or paragraph you're in, or keeps your line centered on screen like a typewriter. One keystroke turns it on and off.
 - **Plain files, no lock-in.** Awen opens and saves ordinary Markdown files. It even keeps each file's original line endings, so saving never rewrites a file you didn't change.
 - **Never lose your work.** Awen asks before closing a document with unsaved changes, including when you quit, log out or restart.
 - **Native on every platform.** Awen uses real system menus, your system accent color, light and dark mode, and your platform's keyboard shortcuts.
 
 ## Features
+
+### Focus
+Press **⌘D** / **Ctrl+D** to turn on Focus Mode, and choose what it focuses on in **View → Focus On**:
+- **Sentence.** Everything but the sentence you're writing fades back, so you work one thought at a time.
+- **Paragraph.** The paragraph you're in stays bright and the rest dims, which is good for shaping a whole idea.
+- **Typewriter.** The line you're typing stays in the middle of the window, so your eyes stay in one place while the text moves past. Nothing is dimmed.
+
+Awen remembers your choice between launches, and you can also set it in Settings.
 
 ### Writing
 - **Clean Markdown editing.** Syntax is dimmed rather than hidden, so you always know what you've typed.
@@ -34,6 +43,7 @@
 - **One document per window**, with Open Recent, the Dock menu (macOS) and Jump Lists (Windows).
 - **Opens `.md` files from Finder or Explorer.** Double-click a file, or use Open With.
 - **Rename, tag and move from the title bar** (macOS). Click the document's name, just like in Apple's own apps. You can also lock a document to protect it from accidental edits.
+- **Automatic updates.** Awen tells you when a new version is out and installs it for you, after asking about any unsaved changes. See [Staying up to date](#staying-up-to-date).
 - **Settings that follow you.** Change the text size, column width (Narrow, Medium or Wide), line spacing and theme (Match System, Light or Dark). Changes apply live in every window and are remembered between launches.
 
 ![Settings Screenshot](./screenshots/settings.png "Settings")
@@ -64,6 +74,19 @@ Download the latest version for your system from this repository's **Releases** 
 > If there's no **Open Anyway** button, or macOS says Awen "is damaged", run this in Terminal, then open Awen again:
 > `xattr -dr com.apple.quarantine /Applications/Awen.app`
 
+### Staying up to date
+
+Awen 0.3.0 and later update themselves. You only install from a `.dmg` once.
+
+1. When Awen starts, it quietly checks for a new version. To check yourself at any time, choose **Awen → Check for Updates…**.
+2. If there's a new version, Awen asks whether to install it. Choose **Install and Relaunch**, or **Later** to be asked again next time you open Awen.
+3. Awen downloads the update, then closes its windows. If a document has unsaved changes, you're asked to save it first, just as when you quit. Choose **Cancel** to keep working, and the update waits for another time.
+4. Awen installs the new version and opens again. There's no **Open Anyway** step this time.
+
+To stop the check at launch, turn off **Automatically check for updates** in **Settings → Updates**. **Check for Updates…** still works.
+
+> **On Awen 0.2.0 or earlier?** Those versions can't update themselves. Download the latest `.dmg` and install it over the old copy, following the steps above. Updates are automatic from then on.
+
 ### Windows
 
 Coming soon. Awen builds on Windows, but it doesn't feel native enough there yet, so there's no Windows download for now. If you'd like to help get it ready, see [Contributing](#contributing).
@@ -74,6 +97,7 @@ Coming soon. Awen builds on Windows, but it doesn't feel native enough there yet
 | --- | --- | --- |
 | New / Open / Save | ⌘N / ⌘O / ⌘S | Ctrl+N / Ctrl+O / Ctrl+S |
 | Toggle preview | ⌘R | Ctrl+R |
+| Focus mode | ⌘D | Ctrl+D |
 | Find / Replace | ⌘F / ⌥⌘F | Ctrl+F / Ctrl+H |
 | Find next / previous | ⌘G / ⇧⌘G | F3 / Shift+F3 |
 | Bold / Italic | ⌘B / ⌘I | Ctrl+B / Ctrl+I |
