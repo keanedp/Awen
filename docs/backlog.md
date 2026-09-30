@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-075**
+Next free ID: **W-077**
 
 ---
 
@@ -345,11 +345,26 @@ As a writer, I want a Format menu that applies Markdown formatting to the select
 - [x] Verified in the app on macOS: every item and shortcut, disabled in preview, on a locked document and in Settings, undo, highlight in preview, PDF and print
 
 ### W-061 More Format menu items
-Status: Todo · Platforms: all
+Status: Needs verification (built and tested; not yet run in the app) · Platforms: all
 As a writer, I want more Format menu items, once W-060's basic formatting is done.
-- [ ] Add Footnote ⌃⌘K, and footnotes render in preview and exports
-- [ ] Add Table, Add Date, Add Page Break (honored in print and PDF), Add Table of Contents
-- [ ] Decide whether Structure ▸, Add Wikilink, Add Content Block and Add Hashtag fit Awen (they depend on library features, see W-030), and record the decision in `decisions.md`
+- [x] Add Footnote ⌃⌘K (Ctrl+Alt+K on Windows): puts `[^n]` after the selection and `[^n]: ` at the end of the document, numbered after the highest footnote, with the caret in the definition. Footnotes render in preview, print, PDF and HTML export
+- [x] Add Table (three columns, one empty row, first heading selected), Add Date (long date in the system's locale, replaces the selection) and Add Page Break (`\newpage`, starts a new page in print and PDF, a faint rule in the preview)
+- [x] Decide whether Structure ▸ and Add Content Block fit Awen, and record the decision in `decisions.md`: they don't (no Markdown syntax behind them). Add Wikilink and Add Hashtag moved to W-075
+- [x] Unit tested: each command (empty documents, blank lines around blocks, CRLF) and the footnote and page break rendering (`format.test.ts`, `render.test.ts`)
+- [ ] Verified in the app on macOS and Windows: each item and ⌃⌘K, footnotes in preview, `\newpage` in PDF and print, HTML export
+
+### W-076 Add Table of Contents
+Status: Todo · Platforms: all
+As a writer, I want to insert a table of contents that lists my headings, and keeps up as I edit.
+- [ ] Format ▸ Add Table of Contents inserts a placeholder line, which the preview, print, PDF and HTML export replace with nested links to the headings
+- [ ] Decide the placeholder: `[TOC]` (Typora, Python-Markdown) or `{{TOC}}` (iA Writer, MultiMarkdown), or accept both; record it in `decisions.md`
+- [ ] Headings get ids for the links (lowercase words joined by dashes, `-1` on repeats)
+
+### W-075 Add Wikilink and Add Hashtag
+Status: Todo · Platforms: all · Depends on: W-030
+As a writer, I want Format menu items for wikilinks and hashtags, so I can link my notes and tag them.
+- [ ] Add Wikilink: `[[Note]]` links to another document in the library, and Add Hashtag inserts `#tag`. W-030 comes first, because both need the library to resolve links and list tags
+- [ ] Decide the syntax and how each renders (preview, print, export), and record it in `decisions.md`
 
 ### W-046 Find options
 Status: Todo · Platforms: all

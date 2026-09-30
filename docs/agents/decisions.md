@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-09-29: More Format menu items (W-061)
+- **Page breaks are `\newpage` on its own line** (Pandoc's, also `\pagebreak`), not raw HTML, because markdown-it stays `html: false`. It renders as `<div class="page-break">`, which `break-after: page` honors in print, PDF and HTML export.
+- **Footnotes** use `markdown-it-footnote` and Markdown's `[^n]` syntax. Add Footnote always appends the definition at the end of the document.
+- **Add Table of Contents is deferred to W-076. Structure ▸ and Add Content Block are not added.** They come from apps with their own document model (outline moves, transclusion blocks); plain Markdown has nothing to write for them. Add Wikilink and Add Hashtag wait for the library (W-030), tracked as W-075.
+
 ## 2026-09-29: Automatic updates (W-071)
 - **`tauri-plugin-updater`, driven from Rust** (`updates.rs`), not its JS API. The launch check has to work before any page loads and with only Settings open, and installing is part of the Quit sequence, which Rust owns. So no capability entry either.
 - **Install means Quit, then install, then relaunch.** Accepting downloads first, then runs `documents::quit`, so every window asks about unsaved changes as with Quit. Cancelling in any window drops the update (the next check offers it again). Installing only after the windows close matters on Windows, where the installer exits the app.

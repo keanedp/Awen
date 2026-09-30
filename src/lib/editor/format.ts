@@ -353,6 +353,78 @@ export function addRule(state: EditorState): TransactionSpec {
   return { changes, selection: EditorSelection.cursor(changes.mapPos(line.to, 1)) };
 }
 
+/**
+ * Puts `text` in a block of its own after the line with the caret (or in place
+ * of it, if it's blank), with a blank line on either side so it can't join the
+ * paragraphs around it. Returns the changes and where `text` starts.
+ */
+function insertBlock(state: EditorState, text: string) {
+  const { doc, lineBreak } = state;
+  const line = doc.lineAt(state.selection.main.to);
+  const empty = blank(line);
+  const separated = empty && (line.number === 1 || blank(doc.line(line.number - 1)));
+  const next = line.number < doc.lines ? doc.line(line.number + 1) : null;
+  const lead = empty ? (separated ? "" : lineBreak) : lineBreak + lineBreak;
+  const from = empty ? line.from : line.to;
+  const changes = state.changes({
+    from,
+    to: line.to,
+    insert: lead + text + (next && !blank(next) ? lineBreak : ""),
+  });
+  return { changes, start: from + lead.length };
+}
+
+/** A table of three columns and one empty row, with the first heading selected to type over. */
+export function addTable(state: EditorState): TransactionSpec {
+  const { lineBreak } = state;
+  const first = "Column 1";
+  const text = ["| Column 1 | Column 2 | Column 3 |", "| --- | --- | --- |", "|  |  |  |"].join(lineBreak);
+  const { changes, start } = insertBlock(state, text);
+  return { changes, selection: EditorSelection.range(start + 2, start + 2 + first.length) };
+}
+
+/** A page break, `\newpage` on its own line. Print and PDF start a new page there. */
+export function addPageBreak(state: EditorState): TransactionSpec {
+  const { changes, start } = insertBlock(state, "\\newpage");
+  return { changes, selection: EditorSelection.cursor(start + "\\newpage".length) };
+}
+
+/**
+ * Adds a footnote: a reference after the selection and its definition at the
+ * end of the document, numbered after the highest footnote there, with the
+ * caret in the definition ready to type.
+ */
+export function addFootnote(state: EditorState): TransactionSpec {
+  const { doc, lineBreak } = state;
+  let highest = 0;
+  for (const m of doc.sliceString(0, doc.length, "\n").matchAll(/\[\^(\d+)\]/g)) highest = Math.max(highest, Number(m[1]));
+  const label = `[^${highest + 1}]`;
+  const last = doc.line(doc.lines);
+  // Blank lines at the end of the document, one of which can be the gap before the definition.
+  const gap = blank(last) && state.selection.main.to < last.from;
+  const separated = gap && doc.lines > 1 && blank(doc.line(doc.lines - 1));
+  const before = gap ? (separated ? "" : lineBreak) : lineBreak + lineBreak;
+  const changes = state.changes([
+    { from: state.selection.main.to, insert: label },
+    { from: gap ? last.from : doc.length, to: doc.length, insert: before + `${label}: ` },
+  ]);
+  return { changes, selection: EditorSelection.cursor(changes.newLength), scrollIntoView: true };
+}
+
+/** `date` as a long date in `locale` (the system's, by default): "September 29, 2026". */
+export function formatDate(date: Date, locale?: string): string {
+  return date.toLocaleDateString(locale, { dateStyle: "long" });
+}
+
+/** Replaces each selection with today's date. */
+export function addDate(state: EditorState, date = new Date(), locale?: string): TransactionSpec {
+  const text = formatDate(date, locale);
+  return state.changeByRange((range) => ({
+    changes: { from: range.from, to: range.to, insert: text },
+    range: EditorSelection.cursor(range.from + text.length),
+  }));
+}
+
 // Clear Styles
 
 /** Syntax nodes whose marks Clear Styles removes. */
@@ -439,5 +511,9 @@ export const formatCommands: Record<string, FormatCommand> = {
   format_code_block: toggleCodeBlock,
   format_link: addLink,
   format_rule: addRule,
+  format_footnote: addFootnote,
+  format_table: addTable,
+  format_page_break: addPageBreak,
+  format_date: (s) => addDate(s),
   format_clear: clearStyles,
 };

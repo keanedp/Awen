@@ -1,7 +1,7 @@
 import { isolateHistory, undo } from "@codemirror/commands";
 import { EditorSelection, type EditorState, type SelectionRange } from "@codemirror/state";
 import { describe, expect, test } from "vitest";
-import { formatCommands } from "./format";
+import { addDate, formatCommands, formatDate } from "./format";
 import { createState, documentText } from "./setup";
 
 /**
@@ -300,6 +300,74 @@ describe("in the editor", () => {
     ids.push("format_bulleted", "format_numbered", "format_task", "format_quote", "format_body");
     ids.push("format_bold", "format_italic", "format_strikethrough", "format_highlight");
     ids.push("format_code", "format_code_block", "format_link", "format_rule", "format_clear");
+    ids.push("format_footnote", "format_table", "format_page_break", "format_date");
     expect(Object.keys(formatCommands).sort()).toEqual(ids.sort());
+  });
+});
+
+describe("Add Footnote", () => {
+  test("adds a reference after the selection and a definition at the end", () => {
+    expect(format("format_footnote", "A «claim» here.\n")).toBe("A claim[^1] here.\n\n[^1]: ‸");
+    expect(format("format_footnote", "Claim‸.")).toBe("Claim[^1].\n\n[^1]: ‸");
+  });
+
+  test("numbers after the highest footnote in the document", () => {
+    expect(format("format_footnote", "One[^1] and two[^4].\n\n[^1]: a\n[^4]: b\n\nThree‸")).toBe(
+      "One[^1] and two[^4].\n\n[^1]: a\n[^4]: b\n\nThree[^5]\n\n[^5]: ‸",
+    );
+  });
+
+  test("keeps one blank line before the definition however the document ends", () => {
+    expect(format("format_footnote", "Text‸\n\n")).toBe("Text[^1]\n\n[^1]: ‸");
+    expect(format("format_footnote", "Text‸\n")).toBe("Text[^1]\n\n[^1]: ‸");
+    expect(format("format_footnote", "‸")).toBe("[^1]\n\n[^1]: ‸");
+  });
+
+  test("keeps CRLF line endings", () => {
+    let state = createState("Text\r\n", () => {}, () => {});
+    state = state.update({ selection: EditorSelection.cursor(4) }).state;
+    state = state.update(formatCommands.format_footnote(state)!).state;
+    expect(documentText({ state })).toBe("Text[^1]\r\n\r\n[^1]: ");
+  });
+});
+
+describe("Add Table", () => {
+  const table = "| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n|  |  |  |";
+
+  test("inserts after the line and selects the first heading", () => {
+    expect(format("format_table", "Intro‸")).toBe(`Intro\n\n| «Column 1» | Column 2 | Column 3 |\n| --- | --- | --- |\n|  |  |  |`);
+  });
+
+  test("fills a blank line and leaves a blank line before the next paragraph", () => {
+    expect(format("format_table", "Intro\n\n‸\nAfter")).toBe(
+      `Intro\n\n${table.replace("Column 1", "«Column 1»")}\n\nAfter`,
+    );
+  });
+
+  test("uses the file's line endings", () => {
+    let state = createState("Intro\r\nMore", () => {}, () => {});
+    state = state.update({ selection: EditorSelection.cursor(5) }).state;
+    state = state.update(formatCommands.format_table(state)!).state;
+    expect(documentText({ state })).toBe(`Intro\r\n\r\n${table.replaceAll("\n", "\r\n")}\r\n\r\nMore`);
+  });
+});
+
+describe("Add Page Break", () => {
+  test("puts its line in a block of its own", () => {
+    expect(format("format_page_break", "End of page‸\nNext page")).toBe("End of page\n\n\\newpage‸\n\nNext page");
+  });
+});
+
+describe("Add Date", () => {
+  const date = new Date(2026, 8, 29);
+
+  test("writes a long date", () => {
+    expect(formatDate(date, "en-US")).toBe("September 29, 2026");
+    expect(formatDate(date, "de-DE")).toBe("29. September 2026");
+  });
+
+  test("replaces the selection, or goes at the caret", () => {
+    const state = createState("Today: x", () => {}, () => {}).update({ selection: { anchor: 7, head: 8 } }).state;
+    expect(state.update(addDate(state, date, "en-US")).state.doc.toString()).toBe("Today: September 29, 2026");
   });
 });

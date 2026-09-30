@@ -49,6 +49,10 @@ pub const FORWARDED: &[&str] = &[
     "format_code_block",
     "format_link",
     "format_rule",
+    "format_footnote",
+    "format_table",
+    "format_page_break",
+    "format_date",
     "format_clear",
 ];
 
@@ -208,6 +212,16 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let code_block = format_item("format_code_block", "Code Block", Some("CmdOrCtrl+Shift+J"))?;
     let link = format_item("format_link", "Add Link", Some("CmdOrCtrl+K"))?;
     let rule = format_item("format_rule", "Add Horizontal Rule", None)?;
+    // ⌃⌘K on macOS; Ctrl+Alt+K elsewhere, where Ctrl+Ctrl would be one key.
+    let footnote_accel = if cfg!(target_os = "macos") {
+        "Ctrl+Cmd+K"
+    } else {
+        "Ctrl+Alt+K"
+    };
+    let footnote = format_item("format_footnote", "Add Footnote", Some(footnote_accel))?;
+    let table = format_item("format_table", "Add Table", None)?;
+    let page_break = format_item("format_page_break", "Add Page Break", None)?;
+    let date = format_item("format_date", "Add Date", None)?;
     let clear = format_item(
         "format_clear",
         "Clear Styles",
@@ -232,8 +246,13 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
             &code_block,
             &PredefinedMenuItem::separator(app)?,
             &link,
+            &footnote,
             &PredefinedMenuItem::separator(app)?,
             &rule,
+            &page_break,
+            &PredefinedMenuItem::separator(app)?,
+            &date,
+            &table,
             &PredefinedMenuItem::separator(app)?,
             &clear,
         ],

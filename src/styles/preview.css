@@ -62,6 +62,22 @@
   background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
+/* \newpage: a faint rule on screen, a new page in print (see @media print). */
+.preview .page-break {
+  border-top: 1px dashed var(--markup);
+  margin: 2em 0;
+}
+.preview .footnotes {
+  font-size: 0.9em;
+}
+.preview .footnotes-sep {
+  border: 0;
+  border-top: 1px solid var(--markup);
+  margin-top: 2em;
+}
+.preview .footnote-backref {
+  text-decoration: none;
+}
 .preview mark {
   color: inherit;
   background: var(--highlight);
@@ -220,6 +236,11 @@
   }
   .preview :is(h1, h2, h3, h4, h5, h6) {
     break-after: avoid;
+  }
+  .preview .page-break {
+    break-after: page;
+    border: 0;
+    margin: 0;
   }
   .preview :is(pre, blockquote, table, img, li) {
     break-inside: avoid;

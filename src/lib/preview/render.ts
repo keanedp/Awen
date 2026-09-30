@@ -1,8 +1,10 @@
 import MarkdownIt from "markdown-it";
 import mark from "markdown-it-mark";
+import footnote from "markdown-it-footnote";
 import taskLists from "markdown-it-task-lists";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { highlight } from "./highlight";
+import structure from "./structure";
 
 // Raw HTML stays off: the preview runs in a webview with access to Tauri IPC,
 // so a document must never be able to inject scripts or elements. The code
@@ -10,7 +12,10 @@ import { highlight } from "./highlight";
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true, highlight })
   .use(taskLists)
   // ==Highlighted== text, as the Format menu writes it (W-060).
-  .use(mark);
+  .use(mark)
+  // Footnotes and page breaks, as the Format menu writes them (W-061).
+  .use(footnote)
+  .use(structure);
 
 /**
  * In the in-app preview: tag each rendered block with its source line, so editor

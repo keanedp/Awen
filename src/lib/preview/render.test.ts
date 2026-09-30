@@ -126,3 +126,24 @@ describe("highlight", () => {
     expect(renderMarkdown("`a ==b== c`")).toContain("<code>a ==b== c</code>");
   });
 });
+
+describe("footnotes and page breaks (W-061)", () => {
+  test("footnotes link to their definitions and back", () => {
+    const html = renderMarkdown("Claim[^1].\n\n[^1]: Source.");
+    expect(html).toContain('href="#fn1"');
+    expect(html).toContain('id="fn1"');
+    expect(html).toContain("Source.");
+    expect(html).toContain("footnote-backref");
+  });
+
+  test("\\newpage becomes a page break, in the preview with its source line", () => {
+    expect(renderMarkdown("One\n\n\\newpage\n\nTwo")).toContain('<div class="page-break"></div>');
+    expect(renderMarkdown("One\n\n\\newpage\n\nTwo", { preview: true })).toContain('<div class="page-break" data-line="2"></div>');
+    expect(renderMarkdown("\\pagebreak")).toContain("page-break");
+  });
+
+  test("\\newpage inside a paragraph or code stays text", () => {
+    expect(renderMarkdown("one \\newpage two")).not.toContain("page-break");
+    expect(renderMarkdown("```\n\\newpage\n```")).not.toContain("page-break");
+  });
+});
