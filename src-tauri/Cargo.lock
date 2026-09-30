@@ -227,6 +227,7 @@ name = "awen"
 version = "0.3.1"
 dependencies = [
  "block2",
+ "libc",
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",

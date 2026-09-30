@@ -76,7 +76,7 @@ Download the latest version for your system from this repository's **Releases** 
 
 ### Staying up to date
 
-Awen 0.3.0 and later update themselves. You only install from a `.dmg` once.
+Awen 0.3.0 and later update themselves. You only install from a `.dmg` once. Updates need Awen in your **Applications** folder: a copy opened straight from the disk image can't update itself.
 
 1. When Awen starts, it quietly checks for a new version. To check yourself at any time, choose **Awen → Check for Updates…**.
 2. If there's a new version, Awen asks whether to install it. Choose **Install and Relaunch**, or **Later** to be asked again next time you open Awen.

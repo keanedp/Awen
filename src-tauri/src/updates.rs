@@ -7,7 +7,12 @@
 //! way Quit does, so every window asks about unsaved changes. Once the last
 //! window has closed, `documents::close_next` calls `install`, which replaces
 //! the app and relaunches it. Keeping a window open cancels the update.
+//!
+//! A copy opened straight from the downloaded disk image can't replace
+//! itself: the image is read-only, and macOS runs it from a read-only
+//! "translocated" mount. `read_only_app` catches that before the download.
 
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 
@@ -64,6 +69,7 @@ async fn check(app: &AppHandle, manual: bool) {
     };
     updates(app).checking.store(false, Ordering::SeqCst);
     match result {
+        Ok(Some(update)) if read_only_app() => ask_to_move(app, &update.version),
         Ok(Some(update)) => offer(app, update),
         Ok(None) if manual => {
             app.dialog()
@@ -99,6 +105,58 @@ fn offer(app: &AppHandle, update: Update) {
 
 fn offer_message(version: &str, current: &str) -> String {
     format!("Awen {version} is available. You have {current}. Awen will close its windows, asking about unsaved changes, and relaunch.")
+}
+
+/// The update can't be installed where Awen is, so say how to fix that instead.
+fn ask_to_move(app: &AppHandle, version: &str) {
+    app.dialog()
+        .message(format!("Awen {version} is available, but Awen can't update itself while it runs from the disk image. Quit Awen, drag it into your Applications folder, eject the disk image, and open Awen from Applications."))
+        .title("Move Awen to Applications to update")
+        .kind(MessageDialogKind::Warning)
+        .show(|_| {});
+}
+
+/// Whether the running app is on a read-only volume (a disk image, or the
+/// mount macOS translocates a quarantined app to), where the updater can't
+/// replace it. A folder that only needs an administrator's password is fine.
+fn read_only_app() -> bool {
+    #[cfg(target_os = "macos")]
+    {
+        std::env::current_exe()
+            .ok()
+            .and_then(|exe| app_bundle(&exe))
+            .is_some_and(|bundle| macos::is_read_only(&bundle))
+    }
+    #[cfg(not(target_os = "macos"))]
+    false
+}
+
+/// The `.app` bundle an executable is in, as the updater replaces it.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+fn app_bundle(exe: &Path) -> Option<PathBuf> {
+    exe.ancestors()
+        .find(|dir| dir.extension().is_some_and(|ext| ext == "app"))
+        .map(Path::to_path_buf)
+}
+
+#[cfg(target_os = "macos")]
+mod macos {
+    use std::ffi::CString;
+    use std::os::unix::ffi::OsStrExt;
+    use std::path::Path;
+
+    pub fn is_read_only(path: &Path) -> bool {
+        let Ok(path) = CString::new(path.as_os_str().as_bytes()) else {
+            return false;
+        };
+        let mut stats = std::mem::MaybeUninit::<libc::statfs>::uninit();
+        // SAFETY: a valid C string, and `statfs` fills `stats` when it returns 0.
+        if unsafe { libc::statfs(path.as_ptr(), stats.as_mut_ptr()) } != 0 {
+            return false;
+        }
+        let flags = unsafe { stats.assume_init() }.f_flags;
+        flags & libc::MNT_RDONLY as u32 != 0
+    }
 }
 
 /// Downloads the update, then quits; `install` finishes once the windows have closed.
@@ -174,6 +232,23 @@ mod tests {
         assert!(checks_at_launch(Some(&json!(true))));
         assert!(!checks_at_launch(Some(&json!(false))));
         assert!(checks_at_launch(Some(&json!("no"))));
+    }
+
+    #[test]
+    fn the_bundle_is_the_nearest_app_folder() {
+        assert_eq!(
+            app_bundle(Path::new("/Applications/Awen.app/Contents/MacOS/awen")),
+            Some(PathBuf::from("/Applications/Awen.app"))
+        );
+        assert_eq!(app_bundle(Path::new("/usr/local/bin/awen")), None);
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn a_writable_folder_isnt_read_only_and_the_system_volume_is() {
+        assert!(!macos::is_read_only(&std::env::temp_dir()));
+        assert!(macos::is_read_only(Path::new("/System")));
+        assert!(!macos::is_read_only(Path::new("/no/such/path")));
     }
 
     #[test]

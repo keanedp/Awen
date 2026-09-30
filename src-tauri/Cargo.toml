@@ -66,6 +66,8 @@ objc2-app-kit = { version = "0.3", features = [
 ] }
 objc2-web-kit = { version = "0.3", features = ["objc2-app-kit", "WKWebView"] }
 objc2-uniform-type-identifiers = { version = "0.3", features = ["UTType", "UTCoreTypes"] }
+# statfs, to tell when the app runs from a read-only disk image (src/updates.rs).
+libc = "0.2"
 
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.38"
