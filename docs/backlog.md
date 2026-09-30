@@ -24,7 +24,7 @@ Record decisions in `docs/agents/decisions.md`, not here.
 
 **Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
 
-Next free ID: **W-072**
+Next free ID: **W-075**
 
 ---
 
@@ -505,7 +505,7 @@ As a maintainer, I want pushing a version tag to build the installers, so releas
 `v0.1.0` built and uploaded all four installers. Provenance attestations are skipped until the repo is public (GitHub refuses them for a personal account's private repo).
 
 ### W-071 Automatic updates
-Status: Needs verification (not yet run; needs two releases with the updater to test an update end to end) · Platforms: macOS, Windows
+Status: Done · Platforms: macOS, Windows
 As a user, I want Awen to tell me about a new version and install it, so I don't have to download it by hand.
 - [x] `tauri-plugin-updater` checks `latest.json` from the latest GitHub release (`releases/latest/download/latest.json`)
 - [x] Updates are signed with a Tauri updater key: public key in `tauri.conf.json`, private key and password only in GitHub secrets (never in git)
@@ -513,6 +513,13 @@ As a user, I want Awen to tell me about a new version and install it, so I don't
 - [x] A Check for Updates… menu item (Awen menu on macOS, Help menu on Windows) and a quiet check at launch
 - [x] A native dialog offers Install and Relaunch or Later. Installing goes through the same unsaved-changes prompts as Quit
 - [x] A Settings toggle turns the launch check off
-- [ ] An update installed on macOS opens without the Gatekeeper prompt (check on a real Mac)
+- [x] An update installed on macOS opens without the Gatekeeper prompt (check on a real Mac): 0.3.0 → 0.3.1 from Applications, 2026-09-29
+
+### W-074 Automatic updates on Windows
+Status: Todo · Platforms: Windows
+As a Windows user, I want Awen to update itself as it does on macOS. W-071 built the Windows paths, but Windows releases are paused, so none has run.
+- [ ] Windows releases resume (uncomment the matrix entry in `release.yml`) and `latest.json` gets the `windows-x86_64` entries
+- [ ] An NSIS install and an MSI install each update to the next release through Help → Check for Updates…, asking about unsaved changes first
+- [ ] Awen relaunches after the installer finishes
 
 The repo is public now, so installed copies can fetch `latest.json`. Only copies from the first release with the updater onward can update themselves; 0.2.0 and earlier have to be replaced by hand once.
