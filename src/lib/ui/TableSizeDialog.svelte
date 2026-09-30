@@ -25,7 +25,7 @@
 </script>
 
 <!-- A sheet-like alert, as in native Markdown editors: two number fields, Cancel and OK. -->
-<Dialog.Root bind:open onOpenChange={(o) => !o && onclose()}>
+<Dialog.Root bind:open>
   <Dialog.Portal>
     <Dialog.Overlay class="table-size-overlay" />
     <Dialog.Content
@@ -37,7 +37,11 @@
         field?.focus();
         field?.select();
       }}
-      onCloseAutoFocus={(e) => e.preventDefault()}
+      onCloseAutoFocus={(e) => {
+        e.preventDefault();
+        // The focus trap is removed now, for Cancel, Esc, outside clicks and OK.
+        onclose();
+      }}
     >
       <form onsubmit={submit}>
         <Dialog.Title class="title">Adjust table size. First row will contain table heading.</Dialog.Title>

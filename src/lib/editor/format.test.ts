@@ -359,17 +359,33 @@ describe("Add Table", () => {
     expect(table("Intro\n\n‸\nAfter", 1, 2)).toBe("Intro\n\n| ‸ |\n| --- |\n|  |\n\nAfter");
   });
 
-  test("uses the file's line endings", () => {
-    let state = createState("Intro\r\nMore", () => {}, () => {});
-    state = state.update({ selection: EditorSelection.cursor(5) }).state;
+  test.each([
+    ["Intro\nMore", 5, "Intro\n\n| ‸ |\n| --- |\n\nMore"],
+    ["Intro\n", 5, "Intro\n\n| ‸ |\n| --- |\n"],
+    ["Intro\n", 6, "Intro\n\n| ‸ |\n| --- |"],
+    ["Intro\n \nMore", 6, "Intro\n\n| ‸ |\n| --- |\n\nMore"],
+    ["Intro\n\n", 7, "Intro\n\n| ‸ |\n| --- |"],
+  ])("keeps CRLF endings and the caret in the first heading cell: %j at %i", (text, caret, expected) => {
+    let state = createState(text.replaceAll("\n", "\r\n"), () => {}, () => {});
+    state = state.update({ selection: EditorSelection.cursor(caret) }).state;
     state = state.update(addTable(state, 1, 1)).state;
-    expect(documentText({ state })).toBe("Intro\r\n\r\n|  |\r\n| --- |\r\n\r\nMore");
+    expect(marked(state)).toBe(expected);
+    expect(documentText({ state })).toBe(expected.replace("‸", "").replaceAll("\n", "\r\n"));
   });
 });
 
 describe("Add Page Break", () => {
   test("puts its line in a block of its own", () => {
     expect(format("format_page_break", "End of page‸\nNext page")).toBe("End of page\n\n\\newpage‸\n\nNext page");
+  });
+
+  test.each([
+    ["Intro‸\nMore", "Intro\n\n\\newpage‸\n\nMore"],
+    ["Intro‸\n", "Intro\n\n\\newpage‸\n"],
+    ["Intro\n‸", "Intro\n\n\\newpage‸"],
+    ["Intro\n\n‸", "Intro\n\n\\newpage‸"],
+  ])("places the caret after the page break in a CRLF file: %j", (before, after) => {
+    expect(format("format_page_break", before, "\r\n")).toBe(after);
   });
 });
 

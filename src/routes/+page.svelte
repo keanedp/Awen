@@ -310,15 +310,12 @@
     sizingTable = true;
   }
 
-  async function addSizedTable(columns: number, rows: number) {
+  function addSizedTable(columns: number, rows: number) {
     view.dispatch(addTable(view.state, columns, rows), {
       annotations: isolateHistory.of("full"),
       scrollIntoView: true,
       userEvent: "input.format",
     });
-    // Once the dialog is gone: it holds focus until then, so the caret wouldn't show.
-    await tick();
-    view.focus();
   }
 
   /** Undo/redo also work in preview, which is re-rendered to show the result. */

@@ -364,14 +364,16 @@ function insertBlock(state: EditorState, text: string) {
   const empty = blank(line);
   const separated = empty && (line.number === 1 || blank(doc.line(line.number - 1)));
   const next = line.number < doc.lines ? doc.line(line.number + 1) : null;
-  const lead = empty ? (separated ? "" : lineBreak) : lineBreak + lineBreak;
+  const leadLines = empty ? (separated ? 0 : 1) : 2;
+  const lead = lineBreak.repeat(leadLines);
   const from = empty ? line.from : line.to;
   const changes = state.changes({
     from,
     to: line.to,
     insert: lead + text + (next && !blank(next) ? lineBreak : ""),
   });
-  return { changes, start: from + lead.length };
+  // CodeMirror counts each line break as one position, including CRLF.
+  return { changes, start: from + leadLines };
 }
 
 /** The most columns and rows Add Table offers. */
