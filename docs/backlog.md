@@ -345,14 +345,15 @@ As a writer, I want a Format menu that applies Markdown formatting to the select
 - [x] Verified in the app on macOS: every item and shortcut, disabled in preview, on a locked document and in Settings, undo, highlight in preview, PDF and print
 
 ### W-061 More Format menu items
-Status: Needs verification (CRLF insertions and table dialog focus checked on macOS; remaining W-061 checks and Windows pending) · Platforms: all
+Status: Needs verification (verified on macOS; Windows pending) · Platforms: all
 As a writer, I want more Format menu items, once W-060's basic formatting is done.
 - [x] Add Footnote ⌃⌘K (Ctrl+Alt+K on Windows): puts `[^n]` after the selection and `[^n]: ` at the end of the document, numbered after the highest footnote, with the caret in the definition. Footnotes render in preview, print, PDF and HTML export
 - [x] Add Table (asks how many columns and rows, 1–20 by 1–100, default 3 by 3; the first row is the heading, and the caret starts in its first cell; headings are left empty), Add Date (long date in the system's locale, replaces the selection) and Add Page Break (`\newpage`, starts a new page in print and PDF, a faint rule in the preview)
 - [x] Decide whether Structure ▸ and Add Content Block fit Awen, and record the decision in `decisions.md`: they don't (no Markdown syntax behind them). Add Wikilink and Add Hashtag moved to W-075
 - [x] Unit tested: each command (empty documents, blank lines around blocks, CRLF) and the footnote and page break rendering (`format.test.ts`, `render.test.ts`)
 - [x] Regression fixes: CRLF table and page break caret positions tested, including trailing blank lines; Cancel, Esc, OK, Enter, table undo and CRLF insertions verified in the macOS app
-- [ ] Verified in the app on macOS and Windows: each item and ⌃⌘K, the table size dialog (Enter, Esc, Cancel, undo), footnotes in preview, `\newpage` in PDF and print, HTML export
+- [x] Verified in the app on macOS: each item and ⌃⌘K, the table size dialog (Enter, Esc, Cancel, undo), footnotes in preview, `\newpage` in PDF and print, HTML export
+- [ ] Verified in the app on Windows: the same checks, with Ctrl+Alt+K
 
 ### W-076 Add Table of Contents
 Status: Todo · Platforms: all
