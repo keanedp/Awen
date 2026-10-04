@@ -89,7 +89,7 @@ To stop the check at launch, turn off **Automatically check for updates** in **S
 
 ### Windows
 
-Coming soon. Awen builds on Windows, but it doesn't feel native enough there yet, so there's no Windows download for now. If you'd like to help get it ready, see [Contributing](#contributing).
+Download `Awen_<version>_x64-setup.exe` from the Releases page and run it to install Awen. An `.msi` installer is also available.
 
 ### Keyboard shortcuts
 
@@ -174,7 +174,7 @@ GitHub Actions runs the same checks on macOS and Windows for every pull request.
 
 ```sh
 make release VERSION=0.2.0         # bump the version, test, commit and tag v0.2.0
-git push origin HEAD v0.2.0        # builds the macOS installers into a draft GitHub release
+git push origin HEAD v0.2.0        # builds the macOS and Windows installers into a draft GitHub release
 ```
 
 Check the draft on the Releases page, then publish it.

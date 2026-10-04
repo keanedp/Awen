@@ -1,6 +1,6 @@
 # LF file
 
-This file uses LF (\n) line endings.
+This fixture uses LF (\n) line endings on every platform.
 
 ## Copy from here
 

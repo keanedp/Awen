@@ -2,6 +2,9 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-10-04: Windows releases resume with 0.3.4
+- Resume Windows x64 setup and MSI builds at the user's request so releases can be tested and installed on Windows. Keep their updater signatures and manifest entries in the same release as the macOS artifacts. This supersedes the earlier pause; verifying an installed Windows update remains a separate check.
+
 ## 2026-10-03: User stories move to a GitHub project board
 - **Stories are issues in `keanedp/Awen` on the [Awen Board](https://github.com/users/keanedp/projects/3)**, not entries in `docs/backlog.md`. Contributors can comment on, react to and link PRs to issues, and the board shows status at a glance. The repo is public, so the stories already were.
 - **Columns:** Backlog, Ready, In progress, In review, Done. The old `Needs verification` status maps to In review, and `Dropped` to closing as "not planned".
