@@ -181,17 +181,23 @@ Check the draft on the Releases page, then publish it.
 
 ### Contributing
 
-1. **Pick a story.** [`docs/backlog.md`](docs/backlog.md) lists user stories with their status and acceptance criteria. Find open work with:
-   `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`.
-   Mark the story as in progress, and tick its criteria as you go.
-2. **Keep logic testable.** Put new logic in plain TypeScript or Rust modules with unit tests next to them, not in `+page.svelte` or Svelte components.
-3. **Follow the house rules.** They're listed in [`AGENTS.md`](AGENTS.md). In particular:
+1. **Pick a story.** Planned work is tracked as user stories on the [Awen Board](https://github.com/users/keanedp/projects/3). Each story is an issue with the platforms it targets, a short "As a writer, I want…" description, and acceptance criteria as checkboxes. The columns are:
+   - **Backlog**: not started yet.
+   - **Ready**: planned and up next. A good place to start.
+   - **In progress**: someone is working on it.
+   - **In review**: built, and waiting to be checked in a real build or for its pull request to be reviewed.
+   - **Done**: built and verified.
+
+   To take a story, comment on its issue to say you're working on it, and it will be assigned to you and moved to In progress. Ask questions on the issue too. To suggest a feature or report a bug, [open an issue](https://github.com/keanedp/Awen/issues/new).
+2. **Reference the issue.** Tick the acceptance criteria as you meet them, and put `Fixes #123` in your pull request's description so the issue closes when it's merged. Older stories are also known by a `W-0xx` id from before they moved to GitHub. [`docs/backlog.md`](docs/backlog.md) keeps those as a read-only archive.
+3. **Keep logic testable.** Put new logic in plain TypeScript or Rust modules with unit tests next to them, not in `+page.svelte` or Svelte components.
+4. **Follow the house rules.** They're listed in [`AGENTS.md`](AGENTS.md). In particular:
    - A new menu item needs its id in `src-tauri/src/menu.rs` (`FORWARDED`) **and** a handler in the page's `actions` map.
    - Read document text with `documentText()`, never `doc.toString()`.
    - markdown-it stays `html: false`.
    - Style with CSS tokens, not hard-coded colors, so per-OS themes and dark mode keep working.
-4. **Update the knowledge base.** If you learn something non-obvious, record it in `docs/agents/` in the same change.
-5. **Help with Windows.** Many stories are waiting for verification on a real Windows build (`Needs verification`). Testing them there is one of the most useful contributions right now.
+5. **Update the knowledge base.** If you learn something non-obvious, record it in `docs/agents/` in the same change.
+6. **Help with Windows.** Many stories are waiting in In review for a check on a real Windows build. They're labeled [`help wanted`](https://github.com/keanedp/Awen/issues?q=is%3Aopen+label%3A%22help+wanted%22). Run the checks in a story's acceptance criteria and comment with what works and what doesn't. It's one of the most useful contributions right now, and needs no code.
 
 AI coding agents (Claude Code, Codex and others) are welcome. [`AGENTS.md`](AGENTS.md) is written for them as well as for people.
 

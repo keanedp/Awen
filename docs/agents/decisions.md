@@ -2,6 +2,12 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-10-03: User stories move to a GitHub project board
+- **Stories are issues in `keanedp/Awen` on the [Awen Board](https://github.com/users/keanedp/projects/3)**, not entries in `docs/backlog.md`. Contributors can comment on, react to and link PRs to issues, and the board shows status at a glance. The repo is public, so the stories already were.
+- **Columns:** Backlog, Ready, In progress, In review, Done. The old `Needs verification` status maps to In review, and `Dropped` to closing as "not planned".
+- **`docs/backlog.md` is kept as a frozen archive**, not deleted, because commits, code comments and this log refer to its `W-` ids. Migrated issues keep those ids in their titles; new stories are referred to by issue number only.
+- Stories waiting only on a Windows check get `help wanted`, since that's where outside help is most useful right now.
+
 ## 2026-09-29: More Format menu items (W-061)
 - **Page breaks are `\newpage` on its own line** (Pandoc's, also `\pagebreak`), not raw HTML, because markdown-it stays `html: false`. It renders as `<div class="page-break">`, which `break-after: page` honors in print, PDF and HTML export.
 - **Add Table asks for a size** in an in-app dialog (Bits UI `Dialog`, styled with the per-OS tokens), the same on macOS and Windows, laid out like a native alert. A real `NSAlert` with an accessory view would be more native on macOS but needs separate Rust code for each OS; revisit if the dialog looks out of place.
@@ -90,7 +96,7 @@ The Windows build still feels janky, so `release.yml` no longer builds it and th
 - The repo folder and the `W-` story ids keep their names.
 
 ## 2026-09-26: Format menu (W-060)
-- The groups and shortcuts are listed under W-060 in `backlog.md`. Headings take ⌘1–⌘6 (as in Bear and Typora; ⌘0 is Actual Size), lists have no shortcuts yet. Blockquote is ⌘> on macOS; on Windows, Ctrl+Shift+. .
+- The groups and shortcuts are listed in W-060 ([#43](https://github.com/keanedp/Awen/issues/43)). Headings take ⌘1–⌘6 (as in Bear and Typora; ⌘0 is Actual Size), lists have no shortcuts yet. Blockquote is ⌘> on macOS; on Windows, Ctrl+Shift+. .
 - Italic writes `*`, bold `**`, as the preview's markdown-it reads them anywhere, even inside a word (`_` doesn't work there). Both `*` and `_` are recognized when removing a style.
 - Every style is a toggle, and runs of `*` are read by count (three = bold and italic), so bold and italic can be added and removed independently.
 - Highlight writes `==text==`, rendered by `markdown-it-mark`. It isn't CommonMark, but it's what Obsidian and Bear write.
@@ -227,4 +233,4 @@ The native look comes from Bits UI (headless) + Tailwind, with `data-os` selecti
 - Signing keys are always ignored.
 
 ## Roadmap
-Planned work is tracked as user stories in `docs/backlog.md`.
+Planned work is tracked as user stories on the [Awen Board](https://github.com/users/keanedp/projects/3) (see `board.md`).

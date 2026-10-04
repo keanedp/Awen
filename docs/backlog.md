@@ -1,30 +1,8 @@
 # Backlog
 
-User stories for Awen, grouped by milestone. This file is the single place to track progress, for people and agents alike.
+> **Archived on 2026-10-03.** User stories now live as issues on the [Awen Board](https://github.com/users/keanedp/projects/3), which is the source of truth for their status. Each story below became an issue with the same `W-0xx` id in its title. This file is kept for reference and is no longer updated, so statuses here may be out of date. See `docs/agents/board.md` for how to work with the board.
 
-## How to use this file
-
-**Status values** (in each story's `Status:` line):
-- `Todo`: not started.
-- `In progress`: someone is working on it. Add who or what branch, e.g. `In progress (agent, branch feat/focus-mode)`.
-- `Needs verification`: built, but not yet checked by running the app on the stated platforms.
-- `Done`: built and verified.
-- `Dropped`: decided against. Keep the story and add one line saying why.
-
-**Acceptance criteria** are checkboxes. Tick them as they are met; a story is `Done` only when all are ticked.
-
-**Agents:** when you work on a story:
-- update its status when you start and finish;
-- tick the criteria you've met;
-- add unit tests for the story's logic (see "Tests" in `docs/agents/architecture.md`);
-- move it to `Needs verification` if you couldn't run it on every stated platform, and say what's unverified;
-- add a new story for any follow-up work you discover (use the next free ID; don't reuse IDs).
-
-Record decisions in `docs/agents/decisions.md`, not here.
-
-**Find open work:** `grep -n "Status: Todo\|Status: In progress\|Status: Needs" docs/backlog.md`
-
-Next free ID: **W-077**
+User stories for Awen, grouped by milestone, as they stood when moved to GitHub.
 
 ---
 

@@ -34,10 +34,11 @@ Verify with `npm test`, `npm run check`, `cargo clippy`, and by running the app.
 
 ## Backlog
 
-`docs/backlog.md` holds the user stories and their status. Check it before starting feature work. Update the story's status and acceptance checkboxes as you go, following the rules at the top of that file.
+User stories are GitHub issues on the [Awen Board](https://github.com/users/keanedp/projects/3), the source of truth for their status. Check it before starting feature work, and move the story's card and tick its acceptance checkboxes as you go, following `docs/agents/board.md`. `docs/backlog.md` is a frozen archive; don't update it.
 
 ## Knowledge base: read when relevant
 
+- `docs/agents/board.md`: story format, board columns and the `gh` commands to move cards. Read before starting or finishing a story.
 - `docs/agents/architecture.md`: how the pieces connect: menu → event → action, editor, preview, print/PDF/HTML export, theming. Read before changing any of those flows.
 - `docs/agents/decisions.md`: dated log of design decisions and why. Read before reversing or reworking a past choice.
 - `docs/agents/gotchas.md`: environment quirks and failures already hit. **Skim before running builds, installing packages, or touching platform code.**
