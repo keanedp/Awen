@@ -52,7 +52,7 @@ The updater downloads the archive itself, not through a browser, so the new app 
 
 ## Windows
 
-Windows releases are paused, but the pieces are in place for when they return. There's no separate archive: the updater downloads the `-setup.exe` (or `.msi`) itself, checks its `.sig`, and runs it. The installer closes Awen and relaunches it when done. `latest-json.mjs` already writes the `windows-x86_64` entries, and the upload step already looks for their `.sig` files.
+Windows releases include signed setup and MSI installers. There's no separate archive: the updater downloads the `-setup.exe` (or `.msi`) itself, checks its `.sig`, and runs it. The installer closes Awen and relaunches it when done. `latest-json.mjs` writes the `windows-x86_64` entries, and the upload step includes their `.sig` files.
 
 ## Releasing an update
 
