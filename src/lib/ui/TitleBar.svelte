@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import type { OS } from "$lib/platform";
   import MenuBar from "./MenuBar.svelte";
@@ -69,16 +68,31 @@
   }
 
   // Windows draws its own caption buttons, so it tracks maximize and focus state.
-  onMount(() => {
+  $effect(() => {
     if (os !== "windows") return;
     const sync = async () => (maximized = await appWindow.isMaximized());
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const afterResize = () => {
+      // Maximizing via the native title bar emits several resize events. Query
+      // after the final one so the custom caption follows OS double-clicks too.
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sync, 80);
+    };
     sync();
     const unlisten = [
-      appWindow.onResized(sync),
+      appWindow.onResized(afterResize),
       appWindow.onFocusChanged(({ payload }) => (focused = payload)),
     ];
-    return () => unlisten.forEach((p) => p.then((fn) => fn()));
+    return () => {
+      clearTimeout(resizeTimer);
+      unlisten.forEach((p) => p.then((fn) => fn()));
+    };
   });
+
+  async function toggleMaximize() {
+    await appWindow.toggleMaximize();
+    maximized = await appWindow.isMaximized();
+  }
 </script>
 
 {#snippet previewButton()}
@@ -117,7 +131,7 @@
       {@render previewButton()}
       <div class="captions">
         <button type="button" class="caption" aria-label="Minimize" tabindex="-1" onclick={() => appWindow.minimize()}>&#xE921;</button>
-        <button type="button" class="caption" aria-label={maximized ? "Restore" : "Maximize"} tabindex="-1" onclick={() => appWindow.toggleMaximize()}>
+        <button type="button" class="caption" aria-label={maximized ? "Restore" : "Maximize"} tabindex="-1" onclick={toggleMaximize}>
           {@html maximized ? "&#xE923;" : "&#xE922;"}
         </button>
         <button type="button" class="caption close" aria-label="Close" tabindex="-1" onclick={() => appWindow.close()}>&#xE8BB;</button>
