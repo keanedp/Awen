@@ -53,6 +53,7 @@
   --chrome: #f9f9f8;
   --text: #1a1a1a;
   --text-muted: #9a9a9a;
+  --text-on-accent: #ffffff;
   --markup: #b8b8b8;
   /* Fenced code blocks in the editor. */
   --code-bg: rgb(0 0 0 / 0.05);

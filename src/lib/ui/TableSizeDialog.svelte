@@ -147,7 +147,7 @@
   }
   button.primary {
     background: var(--accent);
-    color: white;
+    color: var(--text-on-accent);
   }
   button:focus-visible {
     outline: 3px solid var(--focus-ring, var(--accent));
