@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import { trackMenuBar } from "$lib/menu";
-  import { accessKeyParts, altTap, barKey, MENUS, menuForKey } from "$lib/menubar";
+  import { accessKeyParts, altTap, barKey, MENUS, menuForKey, showMenuAccessKeys, updateMenuCues, type MenuCueState } from "$lib/menubar";
 
   // The Windows menu bar (W-073): titles drawn here, menus opened as
   // native popups by Rust (`menubar.rs`), which also moves between them.
@@ -13,11 +13,12 @@
   let open = $state<number | null>(null);
   /** The title highlighted by the keyboard (after Alt, F10 or Esc), with no menu open. */
   let focus = $state<number | null>(null);
-  let altHeld = $state(false);
+  let cueState = $state<MenuCueState>({ altHeld: false, keyboardOpen: false });
   /** Access keys are underlined only while the keyboard is driving the bar, as in Windows. */
-  const cues = $derived(altHeld || focus !== null || open !== null);
+  const cues = $derived(showMenuAccessKeys(cueState, focus !== null, open !== null));
 
-  async function openMenu(index: number) {
+  async function openMenu(index: number, keyboard = false) {
+    cueState = updateMenuCues(cueState, keyboard ? "open-keyboard" : "open-pointer");
     focus = null;
     const titles = MENUS.map(({ title }, i) => {
       const { left, top, right, bottom } = buttons[i].getBoundingClientRect();
@@ -30,6 +31,7 @@
       console.error(e);
     } finally {
       open = null;
+      cueState = updateMenuCues(cueState, "closed");
     }
   }
 
@@ -39,7 +41,7 @@
     // Captured before the editor sees them: while the bar has focus, every key is the bar's.
     const keydown = (e: KeyboardEvent) => {
       tap.keydown(e);
-      if (e.key === "Alt") altHeld = true;
+      if (e.key === "Alt") cueState = updateMenuCues(cueState, "alt-down");
       if (open !== null) return;
       let action;
       if (focus !== null) action = barKey(focus, e);
@@ -53,11 +55,11 @@
       e.stopPropagation();
       if (action === "exit") focus = null;
       else if (action && "move" in action) focus = action.move;
-      else if (action) openMenu(action.open);
+      else if (action) openMenu(action.open, true);
     };
     const keyup = (e: KeyboardEvent) => {
       if (e.key !== "Alt") return tap.keyup(e);
-      altHeld = false;
+      cueState = updateMenuCues(cueState, "alt-up");
       if (tap.keyup(e) && open === null) {
         e.preventDefault();
         focus = focus === null ? 0 : null;
@@ -78,7 +80,7 @@
       appWindow.onFocusChanged(({ payload }) => {
         if (payload) return;
         reset();
-        altHeld = false;
+        cueState = updateMenuCues(cueState, "closed");
       }),
     ];
     return () => {

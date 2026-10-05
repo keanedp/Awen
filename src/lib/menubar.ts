@@ -31,6 +31,25 @@ export function accessKeyParts({ title, key }: (typeof MENUS)[number]): [string,
 
 export type BarAction = { move: number } | { open: number } | "exit";
 
+export type MenuCueState = { altHeld: boolean; keyboardOpen: boolean };
+type CueAction = "alt-down" | "alt-up" | "open-keyboard" | "open-pointer" | "closed";
+
+/** A native popup can consume Alt's keyup, so closing it must release our cue state too. */
+export function updateMenuCues(state: MenuCueState, action: CueAction): MenuCueState {
+  switch (action) {
+    case "alt-down": return { ...state, altHeld: true };
+    case "alt-up": return { ...state, altHeld: false };
+    case "open-keyboard": return { ...state, keyboardOpen: true };
+    case "open-pointer": return { ...state, keyboardOpen: false };
+    case "closed": return { altHeld: false, keyboardOpen: false };
+  }
+}
+
+/** Pointer-opened menus show no title access keys until keyboard navigation takes over. */
+export function showMenuAccessKeys(state: MenuCueState, focused: boolean, open: boolean): boolean {
+  return state.altHeld || focused || (open && state.keyboardOpen);
+}
+
 /**
  * A key pressed while the menu bar has keyboard focus (after Alt or F10) and
  * no menu is open: the arrows move between titles, Enter or Up/Down opens

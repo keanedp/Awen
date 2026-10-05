@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accessKeyParts, altTap, barKey, MENUS, menuForKey } from "./menubar";
+import { accessKeyParts, altTap, barKey, MENUS, menuForKey, showMenuAccessKeys, updateMenuCues } from "./menubar";
 
 const key = (key: string, mods: Partial<Record<"altKey" | "ctrlKey" | "shiftKey" | "metaKey", boolean>> = {}) => ({
   key,
@@ -106,5 +106,40 @@ describe("altTap", () => {
     tap.keydown(key("Alt", alt));
     tap.keydown(key("Alt", alt));
     expect(tap.keyup(key("Alt"))).toBe(true);
+  });
+});
+
+describe("menu access cues", () => {
+  const initial = { altHeld: false, keyboardOpen: false };
+
+  it("clears Alt cues after the native menu consumed its key release", () => {
+    let state = updateMenuCues(initial, "alt-down");
+    state = updateMenuCues(state, "open-keyboard");
+    expect(showMenuAccessKeys(state, false, true)).toBe(true);
+    // TrackPopupMenu ate the keyup: the next frontend event is closing the popup.
+    state = updateMenuCues(state, "closed");
+    expect(showMenuAccessKeys(state, false, false)).toBe(false);
+  });
+
+  it("keeps the title's cues after Escape until keyboard focus leaves the bar", () => {
+    let state = updateMenuCues(initial, "open-keyboard");
+    state = updateMenuCues(state, "closed");
+    expect(showMenuAccessKeys(state, true, false)).toBe(true);
+    expect(showMenuAccessKeys(state, false, false)).toBe(false);
+  });
+
+  it("shows no access cues when a pointer opens or switches menus", () => {
+    let state = updateMenuCues(initial, "open-pointer");
+    expect(showMenuAccessKeys(state, false, true)).toBe(false);
+    state = updateMenuCues(state, "closed");
+    state = updateMenuCues(state, "open-pointer");
+    expect(showMenuAccessKeys(state, false, true)).toBe(false);
+  });
+
+  it("keeps keyboard-origin cues after Alt is released while the popup is open", () => {
+    let state = updateMenuCues(initial, "alt-down");
+    state = updateMenuCues(state, "open-keyboard");
+    state = updateMenuCues(state, "alt-up");
+    expect(showMenuAccessKeys(state, false, true)).toBe(true);
   });
 });
