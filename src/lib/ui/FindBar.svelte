@@ -348,11 +348,11 @@
     background: color-mix(in srgb, var(--text) 12%, transparent);
   }
 
-  /* Windows 11: a Fluent flyout floating at the top right of the editor. */
+  /* Reserve the flyout's rows in CodeMirror's panel so even a first-line match
+     stays visible. An absolute overlay cannot scroll past the document's top. */
   .windows {
-    position: absolute;
-    top: 8px;
-    right: 20px;
+    position: relative;
+    margin: 8px 20px 8px auto;
     display: flex;
     align-items: flex-start;
     gap: 4px;
