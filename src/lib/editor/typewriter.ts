@@ -19,9 +19,13 @@ import { EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view";
 
 const center = (head: number) => EditorView.scrollIntoView(head, { y: "center" });
 
+/** Search commands use their own scroll effects instead of `scrollIntoView`. */
+const movesToMatch = (tr: Transaction) =>
+  tr.selection && (tr.isUserEvent("select.search") || tr.isUserEvent("input.replace"));
+
 /** Centers the caret, rather than just bringing it into view. */
 const centerCaret = EditorState.transactionExtender.of((tr: Transaction) =>
-  tr.scrollIntoView ? { effects: center(tr.newSelection.main.head) } : null,
+  tr.scrollIntoView || movesToMatch(tr) ? { effects: center(tr.newSelection.main.head) } : null,
 );
 
 /**
@@ -69,18 +73,25 @@ const inset = ViewPlugin.fromClass(
     }
 
     update(update: ViewUpdate) {
-      if (update.geometryChanged) this.measure();
+      if (update.geometryChanged || update.docChanged) this.measure(update.docChanged);
     }
 
-    measure() {
+    measure(afterEdit = false) {
       this.view.requestMeasure({
         read: (view) => Math.round(Math.max(0, (view.scrollDOM.clientHeight - view.defaultLineHeight) / 2)),
         write: (px, view) => {
-          if (px === view.state.field(insetField, false)) return;
+          const changed = px !== view.state.field(insetField, false);
+          if (!changed && !afterEdit) return;
           // The editor can't be updated while it's measuring.
           queueMicrotask(() => {
             if (this.destroyed) return;
-            view.dispatch({ effects: [setInset.of(px), center(view.state.selection.main.head)] });
+            // A new final line can outgrow the scroll height used by the
+            // transaction's initial centering. Center again after layout.
+            view.dispatch({
+              effects: changed
+                ? [setInset.of(px), center(view.state.selection.main.head)]
+                : center(view.state.selection.main.head),
+            });
           });
         },
       });

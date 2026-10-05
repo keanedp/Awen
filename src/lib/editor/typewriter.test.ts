@@ -1,11 +1,27 @@
 import {
+  cursorDocEnd,
+  cursorDocStart,
+  insertNewline,
+  redo,
+  selectDocEnd,
+  undo,
+} from "@codemirror/commands";
+import {
   EditorSelection,
   type EditorState,
+  type StateCommand,
   type SelectionRange,
   type Transaction,
   type TransactionSpec,
 } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import {
+  findNext,
+  findPrevious,
+  replaceNext,
+  SearchQuery,
+  setSearchQuery,
+} from "@codemirror/search";
 import { describe, expect, test } from "vitest";
 import { createState } from "./setup";
 import { setInset, toggleTypewriter } from "./typewriter";
@@ -32,6 +48,63 @@ function scrolls(tr: Transaction): { head: number; y: string }[] {
 }
 
 describe("typewriter scrolling", () => {
+  test.each([true, false])("find and replace navigation respects typewriter mode (%s)", (typewriter) => {
+    let state = createState(text, () => {}, () => {}, undefined, { typewriter });
+    state = state.update({
+      effects: setSearchQuery.of(new SearchQuery({ search: "line", replace: "paragraph" })),
+    }).state;
+    let dispatched: Transaction | undefined;
+    const view = {
+      get state() {
+        return state;
+      },
+      plugin: () => null,
+      dispatch: (spec: TransactionSpec) => {
+        dispatched = state.update(spec);
+        state = dispatched.state;
+      },
+    } as unknown as EditorView;
+    for (const command of [findNext, findPrevious, replaceNext]) {
+      expect(command(view)).toBe(true);
+      expect(dispatched!.scrollIntoView).toBe(false);
+      expect(scrolls(dispatched!).at(-1)).toEqual({
+        head: state.selection.main.head,
+        y: typewriter ? "center" : "nearest",
+      });
+    }
+  });
+
+  test("real editing, history, and document-navigation commands center their final caret", () => {
+    let state = createState(text, () => {}, () => {}, undefined, { typewriter: true });
+    const run = (command: StateCommand) => {
+      let dispatched: Transaction | undefined;
+      expect(
+        command({
+          state,
+          dispatch: (tr) => {
+            dispatched = tr;
+            state = tr.state;
+          },
+        }),
+      ).toBe(true);
+      expect(scrolls(dispatched!)).toContainEqual({ head: state.selection.main.head, y: "center" });
+    };
+
+    run(cursorDocEnd);
+    expect(state.selection.main.head).toBe(state.doc.length);
+    run(insertNewline);
+    expect(state.doc.lines).toBe(4);
+    run(undo);
+    expect(state.doc.lines).toBe(3);
+    run(redo);
+    expect(state.doc.lines).toBe(4);
+    run(cursorDocStart);
+    expect(state.selection.main.head).toBe(0);
+    run(selectDocEnd);
+    expect(state.selection.main.anchor).toBe(0);
+    expect(state.selection.main.head).toBe(state.doc.length);
+  });
+
   test("centers the caret after typing", () => {
     const tr = apply({
       changes: { from: 5, insert: "!" },
