@@ -38,6 +38,7 @@ Traps already hit in this repo. Add new ones as you find them, and remove any th
 
 ## Tauri / native
 - `tauri.<platform>.conf.json` is merged with JSON Merge Patch, so **arrays are replaced, not merged**. `tauri.windows.conf.json` must repeat the whole `app.windows[0]` object, not just the changed key. Keep both files' window settings in step.
+- **Windows document windows must also start with `visible: false`.** The platform override replaces the base window array, so omitting it exposes the unstyled white web view and menu during dark-mode startup. The page shows the window after applying platform styles; later document windows clone the same configuration.
 - `data-tauri-drag-region` only starts a drag when the clicked element itself carries the attribute. Buttons inside the title bar are therefore not drag handles, but any text or icon *wrappers* that should drag need the attribute too, or `pointer-events: none`, as the title text has.
 - The `.menu(...)` builder runs before Tauri manages its `PathResolver`, so calling `app.path()` there panics with `state() called before manage()`. Do path-dependent work in `.setup(...)`, as `recent::load` does.
 - `Menu::get(id)` only searches top-level items. To reach a nested item later (e.g. the View → Preview checkmark), keep its handle in managed state (`menu::CheckItems`).
