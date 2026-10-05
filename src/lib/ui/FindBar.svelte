@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    SearchQuery,
     closeSearchPanel,
     findNext,
     findPrevious,
@@ -12,6 +11,9 @@
   import type { EditorState } from "@codemirror/state";
   import { EditorView, type ViewUpdate } from "@codemirror/view";
   import { detectOS } from "$lib/platform";
+  import { showFindOptions } from "$lib/findoptions";
+  import { setPreferences } from "$lib/preferences";
+  import { applyFindOptions, editFindQuery, type FindOptions } from "$lib/editor/findQuery";
 
   let { view, onLockedEdit }: { view: EditorView; onLockedEdit: () => void } = $props();
 
@@ -25,6 +27,7 @@
   let total = $state(0);
   /** 1-based index of the match that is selected, or 0. */
   let current = $state(0);
+  let options = $state<FindOptions>({ findMatchCase: false, findWholeWord: false });
   let field = $state<HTMLInputElement>();
   /** Marks the find field, which CodeMirror focuses when Find is chosen again. */
   const mainField = { "main-field": "true" };
@@ -51,6 +54,7 @@
   /** Shows the query (which Use Selection for Find may have set) and counts its matches. */
   function sync(state: EditorState) {
     const query = getSearchQuery(state);
+    options = { findMatchCase: query.caseSensitive, findWholeWord: query.wholeWord };
     findText = query.search;
     replaceText = query.replace;
     total = current = 0;
@@ -64,7 +68,7 @@
   }
 
   function setQuery() {
-    const query = new SearchQuery({ search: findText, replace: replaceText, literal: true });
+    const query = editFindQuery(getSearchQuery(view.state), findText, replaceText);
     view.dispatch({ effects: setSearchQuery.of(query) });
     return query;
   }
@@ -87,6 +91,16 @@
   function replace(command: typeof replaceNext) {
     if (view.state.readOnly) return onLockedEdit();
     command(view);
+  }
+
+  async function openOptions(event: MouseEvent) {
+    const anchor = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    await showFindOptions(os, options, anchor, (change) => {
+      view.dispatch({ effects: setSearchQuery.of(applyFindOptions(getSearchQuery(view.state), change)) });
+      findAsYouType();
+      void setPreferences(change);
+    });
+    field?.focus();
   }
 
   function close() {
@@ -151,6 +165,7 @@
           />
           <span class="status chrome" aria-live="polite">{status}</span>
         </div>
+        <button type="button" class="icon chrome" aria-label="Find options" aria-haspopup="menu" title="Find options" onmousedown={keepFocus} onclick={openOptions}>&#xE713;</button>
         <button type="button" class="icon chrome" aria-label="Find next" title="Find next (F3)" onmousedown={keepFocus} onclick={() => findNext(view)}>&#xE74B;</button>
         <button type="button" class="icon chrome" aria-label="Find previous" title="Find previous (Shift+F3)" onmousedown={keepFocus} onclick={() => findPrevious(view)}>&#xE74A;</button>
         <button type="button" class="icon chrome" aria-label="Close" title="Close (Esc)" onmousedown={keepFocus} onclick={close}>&#xE711;</button>
@@ -178,9 +193,11 @@
   <div class="find mac" role="search">
     <div class="field">
       <!-- Lucide "search" (MIT) -->
+      <button type="button" class="glass-button chrome" aria-label="Find options" aria-haspopup="menu" title="Find options" onmousedown={keepFocus} onclick={openOptions}>
       <svg class="glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
       </svg>
+      </button>
       <input
         bind:this={field}
         value={findText}
@@ -284,6 +301,14 @@
     width: 12px;
     height: 12px;
     color: var(--text-muted);
+  }
+  .mac .glass-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    width: 16px;
+    height: 100%;
   }
   .mac .status {
     font-size: 11px;

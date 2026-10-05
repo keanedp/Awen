@@ -27,6 +27,9 @@ export interface Preferences {
   wordCount: boolean;
   /** View → Code Highlighting: muted colors in the editor's fenced code blocks. */
   codeHighlighting: boolean;
+  /** Find options, shared by every document window. */
+  findMatchCase: boolean;
+  findWholeWord: boolean;
   /** View → Focus Mode: dims all but the sentence or paragraph being written. */
   focusMode: boolean;
   /** View → Focus On: what focus mode keeps undimmed. */
@@ -52,6 +55,8 @@ export interface Preferences {
 export const defaults: Preferences = {
   wordCount: true,
   codeHighlighting: false,
+  findMatchCase: false,
+  findWholeWord: false,
   focusMode: false,
   focusUnit: "sentence",
   exportFormat: "html",
@@ -74,6 +79,8 @@ const oneOf =
 const valid: { [K in keyof Preferences]: (value: unknown) => value is Preferences[K] } = {
   wordCount: (value) => typeof value === "boolean",
   codeHighlighting: (value) => typeof value === "boolean",
+  findMatchCase: (value) => typeof value === "boolean",
+  findWholeWord: (value) => typeof value === "boolean",
   focusMode: (value) => typeof value === "boolean",
   focusUnit: oneOf(focusUnits),
   exportFormat: (value) => value === "html" || value === "pdf",

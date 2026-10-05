@@ -34,6 +34,8 @@ describe("parsePreferences", () => {
     const saved = {
       wordCount: false,
       codeHighlighting: true,
+      findMatchCase: true,
+      findWholeWord: true,
       focusMode: true,
       focusUnit: "typewriter",
       exportFormat: "pdf",
@@ -59,6 +61,7 @@ describe("parsePreferences", () => {
     ).toEqual(defaults);
     expect(parsePreferences({ focusMode: "yes", focusUnit: "line" })).toEqual(defaults);
     expect(parsePreferences({ checkForUpdates: "off" })).toEqual(defaults);
+    expect(parsePreferences({ findMatchCase: "yes", findWholeWord: 1 })).toEqual(defaults);
   });
 
   test("text sizes outside the slider's range fall back to the default", () => {
