@@ -5,6 +5,7 @@ import {
   biggerText,
   defaultTextSize,
   isTextSize,
+  settingsContentHeight,
   smallerText,
   textSizes,
   viewChange,
@@ -68,6 +69,17 @@ describe("writingStyle", () => {
 
   test("every stack ends in a generic monospace", () => {
     for (const stack of Object.values(writingFonts)) expect(stack).toMatch(/, monospace$/);
+  });
+});
+
+describe("settingsContentHeight", () => {
+  test("fits the page in the monitor work area with title bar room", () => {
+    expect(settingsContentHeight(912, 883)).toBe(835);
+    expect(settingsContentHeight(500, 883)).toBe(500);
+  });
+
+  test("keeps a usable scroll area on short displays", () => {
+    expect(settingsContentHeight(912, 260)).toBe(240);
   });
 });
 

@@ -9,6 +9,11 @@ import type { Preferences } from "./preferences";
 export const textSizes = [12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 26, 28];
 export const defaultTextSize = 18;
 
+/** Keep the Windows Settings window inside the monitor's work area, leaving room for its title bar. */
+export function settingsContentHeight(contentHeight: number, workAreaHeight: number): number {
+  return Math.min(contentHeight, Math.max(240, workAreaHeight - 48));
+}
+
 /** Column widths in characters. */
 export const columnWidths = { narrow: 58, medium: 66, wide: 80 };
 export type ColumnWidth = keyof typeof columnWidths;

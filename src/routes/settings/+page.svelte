@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { LogicalSize } from "@tauri-apps/api/dpi";
+  import { currentMonitor } from "@tauri-apps/api/window";
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
   import { setFocusChecked, setFormatEnabled, setMenuChecked } from "$lib/menu";
   import { applyAccent, applyPlatform, type OS } from "$lib/platform";
@@ -14,6 +15,7 @@
   } from "$lib/preferences";
   import {
     textSizes,
+    settingsContentHeight,
     viewChange,
     type ColumnWidth,
     type FocusUnit,
@@ -88,9 +90,18 @@
   }
 
   /** Sets the window's height to the page's (on macOS that includes the title bar). */
-  function fit() {
-    const height = Math.ceil(content.getBoundingClientRect().height);
-    if (height !== window.innerHeight) return appWindow.setSize(new LogicalSize(window.innerWidth, height));
+  async function fit() {
+    let height = Math.ceil(content.getBoundingClientRect().height);
+    if (os === "windows") {
+      const monitor = await currentMonitor();
+      if (monitor) {
+        const workAreaHeight = monitor.workArea.size.height / window.devicePixelRatio;
+        height = settingsContentHeight(height, workAreaHeight);
+        content.style.maxHeight = `${Math.max(240, workAreaHeight - 48)}px`;
+        content.style.overflowY = "auto";
+      }
+    }
+    if (height !== window.innerHeight) await appWindow.setSize(new LogicalSize(window.innerWidth, height));
   }
 
   /**
@@ -102,7 +113,7 @@
     await tick();
     await document.fonts.ready;
     await fit();
-    new ResizeObserver(() => fit()).observe(content);
+    new ResizeObserver(() => void fit()).observe(content);
     await appWindow.show();
     await appWindow.setFocus();
   }
