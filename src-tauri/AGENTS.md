@@ -5,6 +5,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 ## Layout
 - `src/lib.rs`: app builder (plugins, menu, menu-event forwarding) and the small file/print commands.
 - `src/menu.rs`: native menus. `FORWARDED` lists the ids that are emitted to the focused window as `menu` events.
+- `src/accelerators.rs`: Windows WebView2 app shortcuts, registered from the menu's accelerator definitions and sent through the same dispatch as menu clicks.
 - `src/menubar.rs`: Windows only: runs the title bar's menu bar (`track_menu_bar`): native popups, plus a message filter hook to move between them.
 - `src/documents.rs`: document windows: creating and cascading them, the label → path map, opening files (including from Finder/Explorer: `open_external`), Quit sequencing.
 - `src/terminate.rs`: macOS only: adds `applicationShouldTerminate:` to tao's app delegate so system quit requests prompt about unsaved changes.
@@ -47,4 +48,4 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
   `magick in.png -resize 824x824 \( -size 824x824 xc:black -fill white -draw "roundrectangle 0,0 823,823 185,185" \) -alpha off -compose CopyOpacity -composite -compose Over -background none -gravity center -extent 1024x1024 out_rounded.png`
 
 ## Windows
-- This code cannot be compiled on the dev Mac (see `docs/agents/gotchas.md`), but CI's Windows job compiles and lints it on every PR. After touching `#[cfg(windows)]` code, check that job and say the code is still unverified on a real machine. Fixes from a real Windows build should be recorded in gotchas.md.
+- Windows code can be compiled and verified on the Windows development machine. The dev Mac cannot cross-compile it (see `docs/agents/gotchas.md`); use Windows CI when working there. Report actual runtime checks separately from compiling and linting.

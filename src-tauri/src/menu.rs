@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::{documents, recent, settings, updates};
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu, WINDOW_SUBMENU_ID};
 use tauri::{AppHandle, Manager, Runtime};
 
@@ -76,8 +77,18 @@ impl<R: Runtime> CheckItems<R> {
 pub struct FormatItems<R: Runtime>(pub Vec<MenuItem<R>>);
 
 pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
-    let item =
-        |id: &str, text: &str, accel: &str| MenuItem::with_id(app, id, text, true, Some(accel));
+    #[cfg(windows)]
+    app.manage(crate::accelerators::Shortcuts::<R>::default());
+    let item = |id: &str, text: &str, accel: &str| {
+        let item = MenuItem::with_id(app, id, text, true, Some(accel))?;
+        #[cfg(windows)]
+        crate::accelerators::record(
+            app,
+            tauri::menu::MenuItemKind::MenuItem(item.clone()),
+            accel,
+        )?;
+        tauri::Result::Ok(item)
+    };
 
     let file = Submenu::with_items(
         app,
@@ -167,6 +178,14 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let mut format_items = Vec::new();
     let mut format_item = |id: &str, text: &str, accel: Option<&str>| {
         let item = MenuItem::with_id(app, id, text, true, accel)?;
+        #[cfg(windows)]
+        if let Some(accel) = accel {
+            crate::accelerators::record(
+                app,
+                tauri::menu::MenuItemKind::MenuItem(item.clone()),
+                accel,
+            )?;
+        }
         format_items.push(item.clone());
         tauri::Result::Ok(item)
     };
@@ -269,6 +288,19 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         false,
         Some("CmdOrCtrl+D"),
     )?;
+    #[cfg(windows)]
+    {
+        crate::accelerators::record(
+            app,
+            tauri::menu::MenuItemKind::Check(preview.clone()),
+            "CmdOrCtrl+R",
+        )?;
+        crate::accelerators::record(
+            app,
+            tauri::menu::MenuItemKind::Check(focus_mode.clone()),
+            "CmdOrCtrl+D",
+        )?;
+    }
     let focus_sentence =
         CheckMenuItem::with_id(app, "focus_sentence", "Sentence", true, false, None::<&str>)?;
     let focus_paragraph = CheckMenuItem::with_id(
@@ -419,5 +451,38 @@ pub fn use_character_shortcuts() {
     if let Some(item) = find(&menu, &["Format", "Blockquote"]) {
         item.setKeyEquivalent(&NSString::from_str(">"));
         item.setKeyEquivalentModifierMask(NSEventModifierFlags::Command);
+    }
+}
+pub fn dispatch(app: &AppHandle, id: &str) {
+    match id {
+        "new" => {
+            let _ = documents::new_window(app, None);
+        }
+        "quit" => documents::quit(app),
+        "settings" => settings::show(app),
+        "check_updates" => updates::check_now(app),
+        // With no document to ask, Rust shows the Open dialog itself.
+        "open" if !documents::emit_to_focused_document(app, "menu", id) => {
+            documents::open_without_window(app, None)
+        }
+        // Sent by the guard above; don't fall through to FORWARDED and send it twice.
+        "open" => {}
+        // Preview belongs to a document; Settings can't restate it.
+        "preview" if settings::is_focused(app) => {
+            app.state::<CheckItems<tauri::Wry>>().untoggle(id)
+        }
+        recent::CLEAR_ID => {
+            let _ = app.state::<recent::Recent<tauri::Wry>>().clear(app);
+        }
+        _ if FORWARDED.contains(&id) => {
+            documents::emit_to_focused(app, "menu", id);
+        }
+        _ => {
+            if let Some(path) = id.strip_prefix(recent::OPEN_PREFIX) {
+                if !documents::emit_to_focused_document(app, "open-recent", path) {
+                    documents::open_without_window(app, Some(path.to_string()));
+                }
+            }
+        }
     }
 }

@@ -1,3 +1,4 @@
+mod accelerators;
 mod accent;
 mod documents;
 mod export;
@@ -94,6 +95,10 @@ pub fn run() {
             menu::use_character_shortcuts();
             recent::load(app.handle())?;
             preferences::load(app.handle())?;
+            #[cfg(windows)]
+            for window in app.webview_windows().into_values() {
+                accelerators::install(&window)?;
+            }
             // macOS passes files as `Opened` events instead of arguments.
             let args = if cfg!(target_os = "macos") {
                 Vec::new()
@@ -104,40 +109,7 @@ pub fn run() {
             updates::check_at_launch(app.handle());
             Ok(())
         })
-        .on_menu_event(|app, event| {
-            let id = event.id().as_ref();
-            match id {
-                "new" => {
-                    let _ = documents::new_window(app, None);
-                }
-                "quit" => documents::quit(app),
-                "settings" => settings::show(app),
-                "check_updates" => updates::check_now(app),
-                // With no document to ask, Rust shows the Open dialog itself.
-                "open" if !documents::emit_to_focused_document(app, "menu", id) => {
-                    documents::open_without_window(app, None)
-                }
-                // Sent by the guard above; don't fall through to FORWARDED and send it twice.
-                "open" => {}
-                // Preview belongs to a document; Settings can't restate it.
-                "preview" if settings::is_focused(app) => {
-                    app.state::<menu::CheckItems<tauri::Wry>>().untoggle(id)
-                }
-                recent::CLEAR_ID => {
-                    let _ = app.state::<recent::Recent<tauri::Wry>>().clear(app);
-                }
-                _ if menu::FORWARDED.contains(&id) => {
-                    documents::emit_to_focused(app, "menu", id);
-                }
-                _ => {
-                    if let Some(path) = id.strip_prefix(recent::OPEN_PREFIX) {
-                        if !documents::emit_to_focused_document(app, "open-recent", path) {
-                            documents::open_without_window(app, Some(path.to_string()));
-                        }
-                    }
-                }
-            }
-        })
+        .on_menu_event(|app, event| menu::dispatch(app, event.id().as_ref()))
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::Destroyed = event {
                 documents::window_destroyed(window.app_handle(), window.label());

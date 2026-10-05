@@ -131,7 +131,10 @@ fn open_window(app: &AppHandle, path: Option<String>, text: Option<String>) -> R
     // the window, which has no frame to show it in, so Alt doesn't put an
     // invisible menu bar in menu mode. Its shortcuts and commands still work.
     #[cfg(windows)]
-    let _ = _window.hide_menu();
+    {
+        let _ = _window.hide_menu();
+        crate::accelerators::install(&_window).map_err(|error| error.to_string())?;
+    }
     Ok(())
 }
 

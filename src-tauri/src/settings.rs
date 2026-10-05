@@ -30,6 +30,12 @@ pub fn show(app: &AppHandle) {
     #[cfg(target_os = "macos")]
     let builder = builder.title_bar_style(tauri::TitleBarStyle::Overlay);
     let built = builder.build();
+    #[cfg(windows)]
+    if let Ok(window) = &built {
+        if let Err(error) = crate::accelerators::install(window) {
+            eprintln!("Could not install Settings shortcuts: {error}");
+        }
+    }
     if let Err(e) = built {
         eprintln!("Could not open Settings: {e}");
     }
