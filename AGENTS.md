@@ -6,14 +6,14 @@ Awen is a focused Markdown editor, built with Tauri 2 (Rust) + SvelteKit (Svelte
 
 ## Commands
 
-- `make dev` (`npm run tauri dev`): run the app with hot reload.
+- `make dev` (`npm run app:dev`; Windows has no `make`): run the app with hot reload. Agents can then drive it over MCP; see `docs/agents/app-testing.md`.
 - `make build` (`npm run tauri build`): release bundle (`.app` + `.dmg` on macOS, in `src-tauri/target/release/bundle/`).
 - `npm run check`: svelte-check. Must report 0 errors/warnings.
 - `npm test` (`make test`): Vitest unit tests (`src/**/*.test.ts`). Must pass.
 - `npm run build`: frontend-only static build (fast sanity check).
 - `cd src-tauri && cargo clippy` / `cargo fmt`: keep clippy warning-free. `cargo test` for Rust unit tests.
 
-Verify with `npm test`, `npm run check`, `cargo clippy`, and by running the app.
+Verify with `npm test`, `npm run check`, `cargo clippy`, and by running the app (agents: `docs/agents/app-testing.md`).
 
 ## Map
 
@@ -41,6 +41,7 @@ User stories are GitHub issues on the [Awen Board](https://github.com/users/kean
 - `docs/agents/board.md`: story format, board columns and the `gh` commands to move cards. Read before starting or finishing a story.
 - `docs/agents/architecture.md`: how the pieces connect: menu → event → action, editor, preview, print/PDF/HTML export, theming. Read before changing any of those flows.
 - `docs/agents/decisions.md`: dated log of design decisions and why. Read before reversing or reworking a past choice.
+- `docs/agents/app-testing.md`: how an agent launches the dev build and drives it (MCP bridge). Read before checking a change in the running app.
 - `docs/agents/gotchas.md`: environment quirks and failures already hit. **Skim before running builds, installing packages, or touching platform code.**
 - `src-tauri/AGENTS.md`: Rust/native specifics.
 

@@ -2,6 +2,11 @@
 
 A dated log of design decisions and the reasons for them. Newest first. Add an entry when you make a choice a future agent might otherwise reverse. If a decision is superseded, mark it rather than deleting it.
 
+## 2026-10-10: Agents drive the dev build with mcp-server-tauri
+- **[hypothesi/mcp-server-tauri](https://github.com/hypothesi/mcp-server-tauri) over [tauri-pilot](https://github.com/mpiton/tauri-pilot).** Both inject a debug-only plugin and drive the webview. On Windows, tauri-pilot's screenshots redraw the DOM with `html-to-image`, while this plugin captures the real WebView2 pixels, which matters for an app whose goal is native look. It's also the more widely used and more active of the two, and it can emit events and monitor IPC.
+- **The plugin is registered only under `debug_assertions`, bound to `127.0.0.1`, and `withGlobalTauri` is on only in `tauri.dev.conf.json`.** Release builds don't start it or change. The crate is still a normal dependency, since Cargo can't pick dependencies by profile, so release builds compile it but never register it.
+- **Versions are pinned (`=0.13.0` crate, `0.13.0` npm).** 0.13.1 requires Tauri 2.12 and `windows` 0.62; 0.13.0 uses the same `windows`/`webview2-com` as Awen. Upgrade both together when Tauri moves to 2.12.
+
 ## 2026-10-04: Windows releases resume with 0.3.4
 - Resume Windows x64 setup and MSI builds at the user's request so releases can be tested and installed on Windows. Keep their updater signatures and manifest entries in the same release as the macOS artifacts. This supersedes the earlier pause; verifying an installed Windows update remains a separate check.
 

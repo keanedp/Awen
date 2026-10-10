@@ -64,6 +64,14 @@ fn note_recent_document(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
+    // AI agents drive the dev build through this (docs/agents/app-testing.md).
+    // Localhost only: it runs arbitrary JS in the webview.
+    #[cfg(debug_assertions)]
+    let builder = builder.plugin(
+        tauri_plugin_mcp_bridge::Builder::new()
+            .bind_address("127.0.0.1")
+            .build(),
+    );
     // Windows starts a new process for each file opened from Explorer; this
     // hands its arguments to the running app and exits. Registered first, so
     // the second process stops before doing anything else.
