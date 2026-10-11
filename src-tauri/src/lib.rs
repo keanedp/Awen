@@ -105,6 +105,7 @@ pub fn run() {
             preferences::load(app.handle())?;
             #[cfg(windows)]
             for window in app.webview_windows().into_values() {
+                documents::remove_native_menu(&window);
                 accelerators::install(&window)?;
             }
             // macOS passes files as `Opened` events instead of arguments.
