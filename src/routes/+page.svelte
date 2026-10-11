@@ -158,6 +158,16 @@
     setFocusMode(view, dim);
     setTypewriterScrolling(view, typewriter);
   });
+  // The writing tokens are set on `.app-root`, outside the editor, so it doesn't
+  // notice its lines changing height. Without a re-measure, clicks land on the
+  // wrong line after a text size, spacing, width or font change. A newly chosen
+  // font may still be loading, and changes the lines again when it arrives.
+  $effect(() => {
+    writingStyle(prefs);
+    if (!view) return;
+    view.requestMeasure();
+    document.fonts.ready.then(() => view.requestMeasure());
+  });
 
   function onChange(v: EditorView) {
     dirty = documentText(v) !== savedText;
