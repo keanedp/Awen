@@ -1,7 +1,8 @@
 .PHONY: dev build test release
 
+# The dev config turns on withGlobalTauri for the MCP bridge (docs/agents/app-testing.md).
 dev:
-	npm run tauri dev
+	npm run tauri dev -- --config src-tauri/tauri.dev.conf.json
 
 build:
 	npm run tauri build
