@@ -127,15 +127,32 @@ fn open_window(app: &AppHandle, path: Option<String>, text: Option<String>) -> R
         forget_window(app, &label);
         format!("Could not open a window: {e}")
     })?;
-    // The title bar draws the menu bar (menubar.rs). Take the native one off
-    // the window, which has no frame to show it in, so Alt doesn't put an
-    // invisible menu bar in menu mode. Its shortcuts and commands still work.
     #[cfg(windows)]
     {
-        let _ = _window.hide_menu();
+        remove_native_menu(&_window);
         crate::accelerators::install(&_window).map_err(|error| error.to_string())?;
     }
     Ok(())
+}
+
+/// The title bar draws the menu bar (menubar.rs). Takes the native one off a
+/// document window, which has no frame to show it in, so Alt doesn't put an
+/// invisible menu bar in menu mode. Its shortcuts and commands still work.
+///
+/// While the menu is attached, setting the window's size counts a menu bar the
+/// frameless window never draws, so window-state's restore made the main
+/// window one menu bar taller on every launch. Restore it again without one.
+#[cfg(windows)]
+pub fn remove_native_menu(window: &WebviewWindow) {
+    use tauri_plugin_window_state::{StateFlags, WindowExt};
+    let _ = window.hide_menu();
+    if window.label() == MAIN {
+        // `hide_menu` runs on the main thread later; restore after it.
+        let window = window.clone();
+        let _ = window.clone().run_on_main_thread(move || {
+            let _ = window.restore_state(StateFlags::SIZE | StateFlags::MAXIMIZED);
+        });
+    }
 }
 
 /// Just below and right of the focused window, in logical coordinates.
