@@ -95,6 +95,7 @@ mod imp {
 #[cfg(windows)]
 mod imp {
     use std::cell::RefCell;
+    use std::mem::ManuallyDrop;
     use windows::core::{Result, HSTRING, PWSTR};
     use windows::Win32::Globalization::{
         GetUserDefaultLocaleName, ISpellChecker, ISpellCheckerFactory, SpellCheckerFactory,
@@ -108,7 +109,13 @@ mod imp {
     thread_local! {
         /// Kept for the app's lifetime: `Ignore` only lasts as long as the
         /// checker, and making one per check would be slow. Always the main thread.
-        static CHECKER: RefCell<Option<ISpellChecker>> = const { RefCell::new(None) };
+        ///
+        /// Never dropped (#69): the main thread's thread-locals are dropped
+        /// inside `ExitProcess`, after Windows has stopped the other threads,
+        /// and the checker's `Release` is an RPC call that then waits forever,
+        /// leaving the process running. Exiting frees it anyway.
+        static CHECKER: ManuallyDrop<RefCell<Option<ISpellChecker>>> =
+            const { ManuallyDrop::new(RefCell::new(None)) };
     }
 
     /// A checker for the user's language, or US English if Windows has no dictionary for it.
