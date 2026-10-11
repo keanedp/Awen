@@ -26,6 +26,9 @@ tauri-plugin-dialog = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-updater = "2"
+# Lets AI agents drive the dev build over MCP (registered in debug builds only,
+# src/lib.rs). Pinned: 0.13.1 needs Tauri 2.12 and windows 0.62.
+tauri-plugin-mcp-bridge = "=0.13.0"
 
 # Native export panel and PDF output (src/export.rs), title popover (src/rename.rs), accent color (src/accent.rs).
 [target.'cfg(target_os = "macos")'.dependencies]
