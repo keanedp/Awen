@@ -18,7 +18,7 @@ Notes for working in the Tauri backend. The root `AGENTS.md` and `docs/agents/` 
 - `src/updates.rs`: automatic updates (W-071): the launch check, Check for Updates…, and installing once Quit has closed every window.
 - `src/export.rs`: `choose_export` (macOS native export sheet) and `export_pdf` (macOS WKWebView / Windows WebView2).
 - `capabilities/default.json`: permissions for plugin and core APIs used by document windows; `capabilities/settings.json` for the Settings window. Both grant `mcp-bridge:default` for agent testing (`docs/agents/app-testing.md`).
-- `tauri.dev.conf.json`: merged in by `make dev`; turns on `withGlobalTauri` for the MCP bridge only in development.
+- `tauri.dev.conf.json`: merged in by `npm run app:dev` / `make dev`; turns on `withGlobalTauri` for the MCP bridge only in development.
 - `tauri.conf.json`: window config (Overlay title bar on macOS), CSP, bundle settings.
 
 ## Conventions

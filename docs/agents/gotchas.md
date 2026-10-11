@@ -3,12 +3,13 @@
 Traps already hit in this repo. Add new ones as you find them, and remove any that stop being true.
 
 ## Machine / shell
+- **The Windows machine has no `make`.** Use the npm script a target runs (`make dev` is `npm run app:dev`).
 - `sed` is GNU sed: use `sed -i`, not `sed -i ''`.
 - `grep` is ugrep, so some regex syntax differs from GNU grep. For example, `(\.|--|...)` alternations failed.
 - **Line-ending fixtures need explicit Git attributes.** Windows with `core.autocrlf=true` otherwise checks `test_docs/lf.md` out as CRLF, making W-052's manual LF/CRLF verification meaningless. Keep the `eol=lf` / `eol=crlf` rules in `.gitattributes`.
 - **Compile on the host platform.** The original Mac development machine uses Homebrew Rust without cross targets. The Windows development machine can compile and run Windows code; macOS-only code still needs the Mac or CI. State which platform was actually checked.
 - **macOS-only helpers fail Windows CI as dead code.** CI runs clippy with `-D warnings`, so a function, type or field used only from `#[cfg(target_os = "macos")]` code breaks the Windows job. Put the same `cfg` on a function that only macOS calls. For a type that the cross-platform stubs still name, add `#[cfg_attr(not(target_os = "macos"), allow(dead_code))]` (see `export::Format`, `rename::Anchor`).
-- **Smart App Control can block `rustc.exe`** ("An Application Control policy has blocked this file", os error 4551) on the Windows machine. `cargo` itself still runs, so it shows up as every crate failing to compile. rustup's binaries are unsigned; it started on 2026-10-10 with the toolchain installed 2026-10-04, after earlier builds had worked. Building needs the block lifted on the machine (Windows Security → App & browser control); an agent can't work around it.
+- **Smart App Control can block `rustc.exe`** ("An Application Control policy has blocked this file", os error 4551) on the Windows machine. `cargo` itself still runs, so it shows up as every crate failing to compile. rustup's binaries are unsigned; it started on 2026-10-10 with the toolchain installed 2026-10-04, after earlier builds had worked. Reinstalling Rust fixed it. An agent can't work around it; ask the user.
 - **Never run a bare `cargo fetch`.** It downloads and unpacks dependencies for every platform, including the huge `windows` crates, and once filled the disk (every command then fails with ENOSPC). To read one crate's source, download just that `.crate` from `https://static.crates.io/crates/<name>/<name>-<ver>.crate` into a scratch directory.
 
 ## Build / bundle
