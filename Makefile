@@ -2,7 +2,7 @@
 
 # The dev config turns on withGlobalTauri for the MCP bridge (docs/agents/app-testing.md).
 dev:
-	npm run tauri dev -- --config src-tauri/tauri.dev.conf.json
+	npm run app:dev
 
 build:
 	npm run tauri build

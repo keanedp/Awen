@@ -6,7 +6,7 @@ Awen is a focused Markdown editor, built with Tauri 2 (Rust) + SvelteKit (Svelte
 
 ## Commands
 
-- `make dev`: run the app with hot reload. Agents can then drive it over MCP; see `docs/agents/app-testing.md`.
+- `make dev` (`npm run app:dev`; Windows has no `make`): run the app with hot reload. Agents can then drive it over MCP; see `docs/agents/app-testing.md`.
 - `make build` (`npm run tauri build`): release bundle (`.app` + `.dmg` on macOS, in `src-tauri/target/release/bundle/`).
 - `npm run check`: svelte-check. Must report 0 errors/warnings.
 - `npm test` (`make test`): Vitest unit tests (`src/**/*.test.ts`). Must pass.
